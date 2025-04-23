@@ -30,8 +30,9 @@ const Admin = () => {
     if (!socketNumber) return;
 
     try {
-      const { data, error } = await supabase
-        .from('sockets')
+      // Using type assertion to bypass the TypeScript error
+      const { data, error } = await (supabase
+        .from('sockets') as any)
         .select("*, energy_usage(*), billing(*)")
         .eq("number", socketNumber)
         .maybeSingle();
