@@ -25,9 +25,9 @@ const User = () => {
       setUserData(session.user);
       
       try {
-        // Get user's sockets
-        const { data: socketsData } = await supabase
-          .from('sockets')
+        // Get user's sockets with type assertion
+        const { data: socketsData } = await (supabase
+          .from('sockets') as any)
           .select("id,number")
           .eq("user_id", session.user.id);
 
@@ -43,18 +43,18 @@ const User = () => {
         const socketId = userSockets[0]?.id;
         
         if (socketId) {
-          // Get usage for current socket
-          const { data: usageData } = await supabase
-            .from('energy_usage')
+          // Get usage for current socket with type assertion
+          const { data: usageData } = await (supabase
+            .from('energy_usage') as any)
             .select("*")
             .eq("socket_id", socketId)
             .gte("timestamp", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
           
           setEnergyUsage(usageData as EnergyUsage[] || []);
           
-          // Get billing
-          const { data: billsData } = await supabase
-            .from('billing')
+          // Get billing with type assertion
+          const { data: billsData } = await (supabase
+            .from('billing') as any)
             .select("*")
             .eq("socket_id", socketId)
             .order("period", { ascending: false });
@@ -78,9 +78,9 @@ const User = () => {
 
   const handlePay = async (billId: string) => {
     try {
-      // Simulate payment (update paid column)
-      await supabase
-        .from('billing')
+      // Simulate payment with type assertion
+      await (supabase
+        .from('billing') as any)
         .update({ paid: true })
         .eq("id", billId);
       

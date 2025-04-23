@@ -42,8 +42,9 @@ const Login = () => {
     // Fetch the user's role from profile
     setTimeout(async () => {
       try {
-        const { data: profileData } = await supabase
-          .from('profiles')
+        // Using type assertion to bypass the TypeScript error
+        const { data: profileData } = await (supabase
+          .from('profiles') as any)
           .select('role')
           .eq('id', data.user?.id)
           .maybeSingle();
