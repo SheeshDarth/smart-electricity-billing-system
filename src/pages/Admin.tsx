@@ -6,10 +6,16 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { Socket, EnergyUsage, Billing } from "@/types/database";
+
+interface SocketWithDetails extends Socket {
+  energy_usage?: EnergyUsage[];
+  billing?: Billing[];
+}
 
 const Admin = () => {
   const [socketNumber, setSocketNumber] = useState("");
-  const [socketInfo, setSocketInfo] = useState<any | null>(null);
+  const [socketInfo, setSocketInfo] = useState<SocketWithDetails | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,22 +29,32 @@ const Admin = () => {
   const handleFetchSocket = async () => {
     if (!socketNumber) return;
 
-    const { data, error } = await supabase
-      .from("sockets")
-      .select("*, energy_usage(*), billing(*)")
-      .eq("number", socketNumber)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from('sockets')
+        .select("*, energy_usage(*), billing(*)")
+        .eq("number", socketNumber)
+        .maybeSingle();
 
-    if (error || !data) {
+      if (error || !data) {
+        toast({
+          title: "Socket Not Found",
+          description: "Check the socket number and try again.",
+          variant: "destructive",
+        });
+        setSocketInfo(null);
+        return;
+      }
+      
+      setSocketInfo(data as SocketWithDetails);
+    } catch (error) {
+      console.error("Error fetching socket:", error);
       toast({
-        title: "Socket Not Found",
-        description: "Check the socket number and try again.",
+        title: "Error",
+        description: "An error occurred while fetching socket data.",
         variant: "destructive",
       });
-      setSocketInfo(null);
-      return;
     }
-    setSocketInfo(data);
   };
 
   return (

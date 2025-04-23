@@ -5,12 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { Socket, EnergyUsage, Billing } from "@/types/database";
 
 const User = () => {
   const [userData, setUserData] = useState<any | null>(null);
-  const [energyUsage, setEnergyUsage] = useState<any[]>([]);
-  const [billing, setBilling] = useState<any[]>([]);
+  const [energyUsage, setEnergyUsage] = useState<EnergyUsage[]>([]);
+  const [billing, setBilling] = useState<Billing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userSockets, setUserSockets] = useState<Socket[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,44 +21,86 @@ const User = () => {
         navigate("/login");
         return;
       }
-      // Get user's usage and billing
-      const { data: userSockets } = await supabase
-        .from("sockets")
-        .select("id,number")
-        .eq("user_id", session.user.id);
-
-      if (!userSockets || userSockets.length === 0) {
-        setLoading(false);
-        setUserData({});
-        return;
-      }
+      
       setUserData(session.user);
-      // Get usage for current socket (assume one for demo)
-      const { data: usage } = await supabase
-        .from("energy_usage")
-        .select("*")
-        .eq("socket_id", userSockets[0].id)
-        .gte("timestamp", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
-      setEnergyUsage(usage || []);
-      // Get billing
-      const { data: bills } = await supabase
-        .from("billing")
-        .select("*")
-        .eq("socket_id", userSockets[0].id)
-        .order("period", { ascending: false });
-      setBilling(bills || []);
-      setLoading(false);
+      
+      try {
+        // Get user's sockets
+        const { data: socketsData } = await supabase
+          .from('sockets')
+          .select("id,number")
+          .eq("user_id", session.user.id);
+
+        const userSockets = socketsData as Socket[] || [];
+        setUserSockets(userSockets);
+
+        if (userSockets.length === 0) {
+          setLoading(false);
+          return;
+        }
+        
+        // Get socket ID for the first socket (for demo)
+        const socketId = userSockets[0]?.id;
+        
+        if (socketId) {
+          // Get usage for current socket
+          const { data: usageData } = await supabase
+            .from('energy_usage')
+            .select("*")
+            .eq("socket_id", socketId)
+            .gte("timestamp", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
+          
+          setEnergyUsage(usageData as EnergyUsage[] || []);
+          
+          // Get billing
+          const { data: billsData } = await supabase
+            .from('billing')
+            .select("*")
+            .eq("socket_id", socketId)
+            .order("period", { ascending: false });
+          
+          setBilling(billsData as Billing[] || []);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load your data. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
     });
   }, [navigate]);
 
   const totalUsage = energyUsage.reduce((acc, u) => acc + u.amount, 0);
 
-  const latestBill = billing?.[0];
-
   const handlePay = async (billId: string) => {
-    // Simulate payment (update paid column)
-    await supabase.from("billing").update({ paid: true }).eq("id", billId);
-    toast({ title: "Payment Successful", description: "Thank you for your payment." });
+    try {
+      // Simulate payment (update paid column)
+      await supabase
+        .from('billing')
+        .update({ paid: true })
+        .eq("id", billId);
+      
+      toast({ 
+        title: "Payment Successful", 
+        description: "Thank you for your payment." 
+      });
+      
+      // Update local state
+      setBilling(billing.map(bill => 
+        bill.id === billId ? {...bill, paid: true} : bill
+      ));
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast({
+        title: "Payment Failed",
+        description: "There was a problem processing your payment.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
