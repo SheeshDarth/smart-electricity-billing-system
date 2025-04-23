@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { Socket, EnergyUsage, Billing } from "@/types/database";
+
+const UNIT_COST = 7.5; // INR per kWh as in dashboard
 
 const User = () => {
   const [userData, setUserData] = useState<any | null>(null);
@@ -48,7 +49,8 @@ const User = () => {
             .from('energy_usage')
             .select("*")
             .eq("socket_id", socketId)
-            .gte("timestamp", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
+            .gte("timestamp", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString())
+            .order("timestamp", { ascending: true }); // ascending for cumulative
 
           setEnergyUsage(usageData as EnergyUsage[] || []);
 
@@ -75,6 +77,19 @@ const User = () => {
   }, [navigate]);
 
   const totalUsage = energyUsage.reduce((acc, u) => acc + u.amount, 0);
+  const currentBill = totalUsage * UNIT_COST;
+
+  // generate cumulative sums for each log
+  const cumulative = [];
+  let cumSum = 0;
+  for (const usage of energyUsage) {
+    cumSum += usage.amount;
+    cumulative.push({
+      ...usage,
+      cumulativeEnergy: cumSum,
+      bill: cumSum * UNIT_COST,
+    });
+  }
 
   const handlePay = async (billId: string) => {
     try {
@@ -115,8 +130,43 @@ const User = () => {
           <div className="mb-4">
             <div>Email: {userData?.email}</div>
             <div>Total Usage this month: <strong>{totalUsage.toFixed(2)} kWh</strong></div>
-            <div className="text-muted-foreground text-sm">Data updates every hour.</div>
+            <div className="text-muted-foreground text-sm">Data updates every hour. <br />Unit Price: ₹{UNIT_COST}/kWh</div>
           </div>
+
+          {/* ----- Cumulative Table ----- */}
+          <div className="mb-4 overflow-x-auto">
+            <h3 className="font-semibold mb-2">Energy Consumption & Cumulative Bill</h3>
+            {cumulative.length === 0 ? (
+              <div className="text-sm text-muted-foreground">No energy usage logs for this month.</div>
+            ) : (
+              <table className="min-w-full text-xs border bg-white rounded shadow">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="px-2 py-1 text-left">Timestamp</th>
+                    <th className="px-2 py-1 text-right">Usage (kWh)</th>
+                    <th className="px-2 py-1 text-right">Cumulative (kWh)</th>
+                    <th className="px-2 py-1 text-right">Bill (₹)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cumulative.map(row => (
+                    <tr key={row.id} className="border-t">
+                      <td className="px-2 py-1">{row.timestamp.slice(0, 19).replace("T", " ")}</td>
+                      <td className="px-2 py-1 text-right">{row.amount.toFixed(2)}</td>
+                      <td className="px-2 py-1 text-right">{row.cumulativeEnergy.toFixed(2)}</td>
+                      <td className="px-2 py-1 text-right">₹{row.bill.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {/* total bill at bottom */}
+            <div className="mt-2 text-sm font-bold">
+              Total Bill for this Month: <span className="text-emerald-600">₹{currentBill.toFixed(2)}</span>
+            </div>
+          </div>
+          {/* ----- End Cumulative Table ----- */}
+
           <div className="mb-4">
             <h3 className="font-semibold">Recent Bills</h3>
             {billing.length === 0 && <div>No billing records yet.</div>}
@@ -133,6 +183,7 @@ const User = () => {
               </div>
             ))}
           </div>
+          {/* keep simple logs below for reference */}
           <div>
             <h3 className="font-semibold mb-2">Energy Usage Logs</h3>
             <ul className="text-xs max-h-44 overflow-y-auto">
@@ -147,4 +198,3 @@ const User = () => {
   );
 };
 export default User;
-
