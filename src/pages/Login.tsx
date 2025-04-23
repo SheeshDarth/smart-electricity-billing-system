@@ -38,17 +38,16 @@ const Login = () => {
       description: "Redirecting to your dashboard...",
       duration: 2000,
     });
-    
+
     // Fetch the user's role from profile
     setTimeout(async () => {
       try {
-        // Using type assertion to bypass the TypeScript error
-        const { data: profileData } = await (supabase
-          .from('profiles') as any)
+        const { data: profileData } = await (supabase as any)
+          .from('profiles')
           .select('role')
           .eq('id', data.user?.id)
           .maybeSingle();
-          
+
         const profile = profileData as Profile | null;
 
         if (profile?.role === "admin") {
@@ -99,3 +98,4 @@ const Login = () => {
   );
 };
 export default Login;
+
