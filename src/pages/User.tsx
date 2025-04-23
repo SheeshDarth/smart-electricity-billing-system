@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { Socket, EnergyUsage, Billing } from "@/types/database";
+import { generateBillPDF } from "@/utils/pdfUtils";
 
 const UNIT_COST = 7.5; // INR per kWh as in dashboard
 
@@ -118,6 +119,25 @@ const User = () => {
     }
   };
 
+  const handleDownloadPDF = () => {
+    // Use the current month as the period label
+    const periodLabel = (() => {
+      const now = new Date();
+      const month = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+      return month;
+    })();
+
+    // Generate a fake PDF url
+    const pdfUrl = generateBillPDF(periodLabel, totalUsage, currentBill);
+    const fileName = `Bill-${periodLabel.replace(/\s/g, "-")}.pdf`;
+    const link = document.createElement("a");
+    link.href = pdfUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
   if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
 
   return (
@@ -160,9 +180,19 @@ const User = () => {
                 </tbody>
               </table>
             )}
-            {/* total bill at bottom */}
-            <div className="mt-2 text-sm font-bold">
-              Total Bill for this Month: <span className="text-emerald-600">₹{currentBill.toFixed(2)}</span>
+            {/* total bill at bottom and download button */}
+            <div className="mt-2 flex flex-col gap-2">
+              <div className="text-sm font-bold">
+                Total Bill for this Month: <span className="text-emerald-600">₹{currentBill.toFixed(2)}</span>
+              </div>
+              {cumulative.length > 0 && (
+                <button
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition w-fit"
+                  onClick={handleDownloadPDF}
+                >
+                  Download PDF Bill
+                </button>
+              )}
             </div>
           </div>
           {/* ----- End Cumulative Table ----- */}
@@ -197,4 +227,5 @@ const User = () => {
     </div>
   );
 };
+
 export default User;
