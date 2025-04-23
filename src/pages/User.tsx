@@ -21,13 +21,13 @@ const User = () => {
         navigate("/login");
         return;
       }
-      
+
       setUserData(session.user);
-      
+
       try {
-        // Get user's sockets with type assertion
-        const { data: socketsData } = await (supabase
-          .from('sockets') as any)
+        // Get user's sockets
+        const { data: socketsData } = await (supabase as any)
+          .from('sockets')
           .select("id,number")
           .eq("user_id", session.user.id);
 
@@ -38,27 +38,27 @@ const User = () => {
           setLoading(false);
           return;
         }
-        
+
         // Get socket ID for the first socket (for demo)
         const socketId = userSockets[0]?.id;
-        
+
         if (socketId) {
-          // Get usage for current socket with type assertion
-          const { data: usageData } = await (supabase
-            .from('energy_usage') as any)
+          // Get usage for current socket
+          const { data: usageData } = await (supabase as any)
+            .from('energy_usage')
             .select("*")
             .eq("socket_id", socketId)
             .gte("timestamp", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
-          
+
           setEnergyUsage(usageData as EnergyUsage[] || []);
-          
-          // Get billing with type assertion
-          const { data: billsData } = await (supabase
-            .from('billing') as any)
+
+          // Get billing
+          const { data: billsData } = await (supabase as any)
+            .from('billing')
             .select("*")
             .eq("socket_id", socketId)
             .order("period", { ascending: false });
-          
+
           setBilling(billsData as Billing[] || []);
         }
       } catch (error) {
@@ -78,17 +78,17 @@ const User = () => {
 
   const handlePay = async (billId: string) => {
     try {
-      // Simulate payment with type assertion
-      await (supabase
-        .from('billing') as any)
+      // Simulate payment (update paid column)
+      await (supabase as any)
+        .from('billing')
         .update({ paid: true })
         .eq("id", billId);
-      
+
       toast({ 
         title: "Payment Successful", 
         description: "Thank you for your payment." 
       });
-      
+
       // Update local state
       setBilling(billing.map(bill => 
         bill.id === billId ? {...bill, paid: true} : bill
@@ -147,3 +147,4 @@ const User = () => {
   );
 };
 export default User;
+

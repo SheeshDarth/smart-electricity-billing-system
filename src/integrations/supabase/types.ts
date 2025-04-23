@@ -9,7 +9,100 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      billing: {
+        Row: {
+          amount: number
+          id: string
+          paid: boolean
+          period: string
+          socket_id: string
+        }
+        Insert: {
+          amount: number
+          id?: string
+          paid?: boolean
+          period: string
+          socket_id: string
+        }
+        Update: {
+          amount?: number
+          id?: string
+          paid?: boolean
+          period?: string
+          socket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_socket_id_fkey"
+            columns: ["socket_id"]
+            isOneToOne: false
+            referencedRelation: "sockets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      energy_usage: {
+        Row: {
+          amount: number
+          id: string
+          socket_id: string
+          timestamp: string
+        }
+        Insert: {
+          amount: number
+          id?: string
+          socket_id: string
+          timestamp?: string
+        }
+        Update: {
+          amount?: number
+          id?: string
+          socket_id?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "energy_usage_socket_id_fkey"
+            columns: ["socket_id"]
+            isOneToOne: false
+            referencedRelation: "sockets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          id: string
+          role: string | null
+        }
+        Insert: {
+          id: string
+          role?: string | null
+        }
+        Update: {
+          id?: string
+          role?: string | null
+        }
+        Relationships: []
+      }
+      sockets: {
+        Row: {
+          id: string
+          number: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          number: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          number?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
