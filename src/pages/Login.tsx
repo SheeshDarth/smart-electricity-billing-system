@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Profile } from "@/types/database";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -37,19 +38,26 @@ const Login = () => {
       description: "Redirecting to your dashboard...",
       duration: 2000,
     });
+    
     // Fetch the user's role from profile
     setTimeout(async () => {
-      const {
-        data: profile,
-      } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", data.user?.id)
-        .maybeSingle();
+      try {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user?.id)
+          .maybeSingle();
+          
+        const profile = profileData as Profile | null;
 
-      if (profile?.role === "admin") {
-        navigate("/admin");
-      } else {
+        if (profile?.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/user");
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        // Default to user route if profile fetch fails
         navigate("/user");
       }
     }, 1000);
