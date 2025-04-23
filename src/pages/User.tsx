@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { Socket, EnergyUsage, Billing } from "@/types/database";
-import { generateBillPDF } from "@/utils/pdfUtils";
+import CumulativeBillTable from "@/components/user/CumulativeBillTable";
+import DownloadBillButton from "@/components/user/DownloadBillButton";
 
 const UNIT_COST = 7.5; // INR per kWh as in dashboard
 
@@ -119,25 +120,6 @@ const User = () => {
     }
   };
 
-  const handleDownloadPDF = () => {
-    // Use the current month as the period label
-    const periodLabel = (() => {
-      const now = new Date();
-      const month = now.toLocaleString('default', { month: 'long', year: 'numeric' });
-      return month;
-    })();
-
-    // Generate a fake PDF url
-    const pdfUrl = generateBillPDF(periodLabel, totalUsage, currentBill);
-    const fileName = `Bill-${periodLabel.replace(/\s/g, "-")}.pdf`;
-    const link = document.createElement("a");
-    link.href = pdfUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  };
-
   if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
 
   return (
@@ -153,49 +135,19 @@ const User = () => {
             <div className="text-muted-foreground text-sm">Data updates every hour. <br />Unit Price: ₹{UNIT_COST}/kWh</div>
           </div>
 
-          {/* ----- Cumulative Table ----- */}
-          <div className="mb-4 overflow-x-auto">
-            <h3 className="font-semibold mb-2">Energy Consumption & Cumulative Bill</h3>
-            {cumulative.length === 0 ? (
-              <div className="text-sm text-muted-foreground">No energy usage logs for this month.</div>
-            ) : (
-              <table className="min-w-full text-xs border bg-white rounded shadow">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="px-2 py-1 text-left">Timestamp</th>
-                    <th className="px-2 py-1 text-right">Usage (kWh)</th>
-                    <th className="px-2 py-1 text-right">Cumulative (kWh)</th>
-                    <th className="px-2 py-1 text-right">Bill (₹)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cumulative.map(row => (
-                    <tr key={row.id} className="border-t">
-                      <td className="px-2 py-1">{row.timestamp.slice(0, 19).replace("T", " ")}</td>
-                      <td className="px-2 py-1 text-right">{row.amount.toFixed(2)}</td>
-                      <td className="px-2 py-1 text-right">{row.cumulativeEnergy.toFixed(2)}</td>
-                      <td className="px-2 py-1 text-right">₹{row.bill.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-            {/* total bill at bottom and download button */}
-            <div className="mt-2 flex flex-col gap-2">
-              <div className="text-sm font-bold">
-                Total Bill for this Month: <span className="text-emerald-600">₹{currentBill.toFixed(2)}</span>
-              </div>
-              {cumulative.length > 0 && (
-                <button
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition w-fit"
-                  onClick={handleDownloadPDF}
-                >
-                  Download PDF Bill
-                </button>
-              )}
+          {/* ----- Cumulative Table Component ----- */}
+          <CumulativeBillTable
+            cumulative={cumulative}
+            currentBill={currentBill}
+            onDownloadPDF={() => {}}
+          />
+          {/* Render DownloadBillButton just below the table, with no duplicated button */}
+          {cumulative.length > 0 && (
+            <div className="mb-4">
+              <DownloadBillButton totalUsage={totalUsage} currentBill={currentBill} />
             </div>
-          </div>
-          {/* ----- End Cumulative Table ----- */}
+          )}
+          {/* ----- End Cumulative Table Component ----- */}
 
           <div className="mb-4">
             <h3 className="font-semibold">Recent Bills</h3>
