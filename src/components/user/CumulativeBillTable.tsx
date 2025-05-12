@@ -1,5 +1,6 @@
 
 import React from "react";
+import { DownloadIcon } from "lucide-react";
 
 interface BillRow {
   id: string;
@@ -28,16 +29,16 @@ const CumulativeBillTable: React.FC<CumulativeBillTableProps> = ({
       <table className="min-w-full text-xs border bg-white rounded shadow">
         <thead>
           <tr className="bg-gray-100">
-            <th className="px-2 py-1 text-left">Timestamp</th>
-            <th className="px-2 py-1 text-right">Usage (kWh)</th>
+            <th className="px-2 py-1 text-left">Date</th>
+            <th className="px-2 py-1 text-right">Daily Usage (kWh)</th>
             <th className="px-2 py-1 text-right">Cumulative (kWh)</th>
-            <th className="px-2 py-1 text-right">Bill (₹)</th>
+            <th className="px-2 py-1 text-right">Cumulative Bill (₹)</th>
           </tr>
         </thead>
         <tbody>
           {cumulative.map((row) => (
             <tr key={row.id} className="border-t">
-              <td className="px-2 py-1">{row.timestamp.slice(0, 19).replace("T", " ")}</td>
+              <td className="px-2 py-1">{new Date(row.timestamp).toLocaleDateString()}</td>
               <td className="px-2 py-1 text-right">{row.amount.toFixed(2)}</td>
               <td className="px-2 py-1 text-right">{row.cumulativeEnergy.toFixed(2)}</td>
               <td className="px-2 py-1 text-right">₹{row.bill.toFixed(2)}</td>
@@ -55,6 +56,7 @@ const CumulativeBillTable: React.FC<CumulativeBillTableProps> = ({
           className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition w-fit"
           onClick={onDownloadPDF}
         >
+          <DownloadIcon className="h-4 w-4" />
           Download PDF Bill
         </button>
       )}
