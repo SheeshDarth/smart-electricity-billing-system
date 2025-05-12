@@ -4,7 +4,6 @@ import { toast } from "@/components/ui/use-toast";
 import { generateBillPDF } from "@/utils/pdfUtils";
 import BillingCard from "@/components/dashboard/BillingCard";
 import CumulativeBillTable from "@/components/user/CumulativeBillTable";
-import DownloadBillButton from "@/components/user/DownloadBillButton";
 
 interface BillHandlerProps {
   latestDailyUsage: number;
@@ -87,18 +86,8 @@ const BillHandler: React.FC<BillHandlerProps> = ({
       <CumulativeBillTable
         cumulative={cumulative}
         currentBill={currentBill}
+        onDownloadPDF={handleBillDownload}
       />
-      
-      {/* Render DownloadBillButton just below the table */}
-      {cumulative.length > 0 && (
-        <div className="mb-4">
-          <DownloadBillButton 
-            totalUsage={totalUsage} 
-            currentBill={currentBill}
-            cumulativeData={cumulative}
-          />
-        </div>
-      )}
     </>
   );
 };
