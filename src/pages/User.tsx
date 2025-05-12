@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { Socket, EnergyUsage, Billing } from "@/types/database";
 import CumulativeBillTable from "@/components/user/CumulativeBillTable";
 import DownloadBillButton from "@/components/user/DownloadBillButton";
 import BillingCard from "@/components/dashboard/BillingCard";
+import { generateBillPDF } from "@/utils/pdfUtils";
 
 const UNIT_COST = 7.5; // INR per kWh as in dashboard
 
@@ -139,14 +139,19 @@ const User = () => {
   const latestDailyUsage = energyUsage.length > 0 ? energyUsage[energyUsage.length - 1].amount : 0;
 
   const handleBillDownload = () => {
-    // Use the same PDF generation logic that DownloadBillButton component uses
+    // Direct implementation of bill download logic
     if (cumulative.length > 0) {
       const periodLabel = getCurrentBillingPeriod();
-      DownloadBillButton({
-        totalUsage,
-        currentBill,
-        cumulativeData: cumulative
-      }).props.onClick();
+      const pdfUrl = generateBillPDF(periodLabel, totalUsage, currentBill, cumulative);
+      const fileName = `Energy-Bill-${periodLabel.replace(/\s/g, "-")}.pdf`;
+      
+      // Create download link
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } else {
       toast({
         title: "No data available",
