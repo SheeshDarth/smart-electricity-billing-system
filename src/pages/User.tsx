@@ -139,19 +139,34 @@ const User = () => {
   const latestDailyUsage = energyUsage.length > 0 ? energyUsage[energyUsage.length - 1].amount : 0;
 
   const handleBillDownload = () => {
-    // Direct implementation of bill download logic
+    // Enhanced bill download logic with better error handling
     if (cumulative.length > 0) {
-      const periodLabel = getCurrentBillingPeriod();
-      const pdfUrl = generateBillPDF(periodLabel, totalUsage, currentBill, cumulative);
-      const fileName = `Energy-Bill-${periodLabel.replace(/\s/g, "-")}.pdf`;
-      
-      // Create download link
-      const link = document.createElement("a");
-      link.href = pdfUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      try {
+        const periodLabel = getCurrentBillingPeriod();
+        const pdfUrl = generateBillPDF(periodLabel, totalUsage, currentBill, cumulative);
+        const fileName = `Energy-Bill-${periodLabel.replace(/\s/g, "-")}.pdf`;
+        
+        // Create download link
+        const link = document.createElement("a");
+        link.href = pdfUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          link.remove();
+          toast({
+            title: "Bill downloaded",
+            description: "Your energy bill has been downloaded successfully.",
+          });
+        }, 100);
+      } catch (error) {
+        console.error("PDF download error:", error);
+        toast({
+          title: "Download failed",
+          description: "There was a problem generating your bill. Please try again.",
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: "No data available",
