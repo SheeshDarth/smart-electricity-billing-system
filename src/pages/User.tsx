@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -137,6 +138,24 @@ const User = () => {
   // Calculate daily usage for latest entry
   const latestDailyUsage = energyUsage.length > 0 ? energyUsage[energyUsage.length - 1].amount : 0;
 
+  const handleBillDownload = () => {
+    // Use the same PDF generation logic that DownloadBillButton component uses
+    if (cumulative.length > 0) {
+      const periodLabel = getCurrentBillingPeriod();
+      DownloadBillButton({
+        totalUsage,
+        currentBill,
+        cumulativeData: cumulative
+      }).props.onClick();
+    } else {
+      toast({
+        title: "No data available",
+        description: "There is no usage data available to generate a bill.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
 
   return (
@@ -152,14 +171,14 @@ const User = () => {
             <div className="text-muted-foreground text-sm">Data updates every hour. <br />Unit Price: ₹{UNIT_COST}/kWh</div>
           </div>
 
-          {/* Add Billing Card here */}
+          {/* Billing Card with proper cumulative billing information */}
           <div className="mb-6">
             <BillingCard
               currentUsage={latestDailyUsage}
               unitCost={UNIT_COST}
               billingPeriod={getCurrentBillingPeriod()}
-              onDownloadBill={() => {}}  // This will be unused as we have a separate download button
-              cumulativeCost={currentBill}  // Pass the cumulative bill amount here
+              onDownloadBill={handleBillDownload}
+              cumulativeCost={currentBill}
             />
           </div>
 
