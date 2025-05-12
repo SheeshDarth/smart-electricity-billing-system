@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Socket, EnergyUsage, Billing } from "@/types/database";
 import CumulativeBillTable from "@/components/user/CumulativeBillTable";
 import DownloadBillButton from "@/components/user/DownloadBillButton";
+import BillingCard from "@/components/dashboard/BillingCard";
 
 const UNIT_COST = 7.5; // INR per kWh as in dashboard
 
@@ -129,6 +129,14 @@ const User = () => {
     }
   };
 
+  const getCurrentBillingPeriod = () => {
+    const now = new Date();
+    return now.toLocaleString('default', { month: 'long', year: 'numeric' });
+  };
+
+  // Calculate daily usage for latest entry
+  const latestDailyUsage = energyUsage.length > 0 ? energyUsage[energyUsage.length - 1].amount : 0;
+
   if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
 
   return (
@@ -142,6 +150,17 @@ const User = () => {
             <div>Email: {userData?.email}</div>
             <div>Total Usage this month: <strong>{totalUsage.toFixed(2)} kWh</strong></div>
             <div className="text-muted-foreground text-sm">Data updates every hour. <br />Unit Price: ₹{UNIT_COST}/kWh</div>
+          </div>
+
+          {/* Add Billing Card here */}
+          <div className="mb-6">
+            <BillingCard
+              currentUsage={latestDailyUsage}
+              unitCost={UNIT_COST}
+              billingPeriod={getCurrentBillingPeriod()}
+              onDownloadBill={() => {}}  // This will be unused as we have a separate download button
+              cumulativeCost={currentBill}  // Pass the cumulative bill amount here
+            />
           </div>
 
           {/* ----- Cumulative Table Component ----- */}

@@ -43,9 +43,10 @@ const DownloadBillButton: React.FC<DownloadBillButtonProps> = ({
     <button
       className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition w-fit"
       onClick={handleDownloadPDF}
+      title={`Download your complete bill with all daily usage and cumulative totals (₹${currentBill.toFixed(2)})`}
     >
       <DownloadIcon className="h-4 w-4" />
-      Download PDF Bill
+      Download Cumulative Bill (₹{currentBill.toFixed(2)})
     </button>
   );
 };

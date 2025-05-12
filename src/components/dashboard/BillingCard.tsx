@@ -9,11 +9,22 @@ interface BillingCardProps {
   unitCost: number;
   billingPeriod: string;
   onDownloadBill: () => void;
+  // Add cumulative cost to props
+  cumulativeCost?: number;
 }
 
-const BillingCard = ({ currentUsage, unitCost, billingPeriod, onDownloadBill }: BillingCardProps) => {
-  // Calculate the total cost
-  const totalCost = currentUsage * unitCost;
+const BillingCard = ({ 
+  currentUsage, 
+  unitCost, 
+  billingPeriod, 
+  onDownloadBill,
+  cumulativeCost
+}: BillingCardProps) => {
+  // Calculate the daily cost (not cumulative)
+  const dailyCost = currentUsage * unitCost;
+  
+  // Use cumulative cost if provided, otherwise fall back to daily cost
+  const totalCost = cumulativeCost !== undefined ? cumulativeCost : dailyCost;
   
   return (
     <Card>
@@ -36,8 +47,14 @@ const BillingCard = ({ currentUsage, unitCost, billingPeriod, onDownloadBill }: 
             <span>Unit Cost:</span>
             <span>₹{unitCost.toFixed(2)}/kWh</span>
           </div>
+          {cumulativeCost !== undefined && (
+            <div className="flex justify-between items-center text-sm">
+              <span>Cumulative Usage:</span>
+              <span>{(cumulativeCost / unitCost).toFixed(2)} kWh</span>
+            </div>
+          )}
           <div className="flex justify-between items-center font-medium">
-            <span>Total Cost:</span>
+            <span>{cumulativeCost !== undefined ? 'Total Cumulative Cost:' : 'Daily Cost:'}</span>
             <span>₹{totalCost.toFixed(2)}</span>
           </div>
         </div>

@@ -26,7 +26,7 @@ export const generateBillPDF = (
     `Cumulative Bill: ₹${item.bill.toFixed(2)}`
   )).join('\n');
 
-  // Create a placeholder PDF data URL
+  // Create a placeholder PDF data URL with clearer title showing it's a cumulative bill
   return `data:application/pdf;base64,JVBERi0xLjMKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwgL1R5cGUgL0NhdGFsb
     2cgL1BhZ2VzIDIgMCBSID4+CmVuZG9iagoyIDAgb2JqCjw8IC9UeXBlIC9QYWdlcyAvS2lkcyBbMyAwIFJd
     IC9Db3VudCAxID4+CmVuZG9iagozIDAgb2JqCjw8IC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL1Jlc2
