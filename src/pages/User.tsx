@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,13 +47,13 @@ const User = () => {
         const socketId = userSockets[0]?.id;
 
         if (socketId) {
-          // Get usage for current socket
+          // Get usage for current socket, order by timestamp to ensure cumulative calculation is correct
           const { data: usageData } = await (supabase as any)
             .from('energy_usage')
             .select("*")
             .eq("socket_id", socketId)
             .gte("timestamp", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString())
-            .order("timestamp", { ascending: true }); // ascending for cumulative
+            .order("timestamp", { ascending: true });
 
           setEnergyUsage(usageData as EnergyUsage[] || []);
 
@@ -78,20 +79,28 @@ const User = () => {
     });
   }, [navigate]);
 
-  const totalUsage = energyUsage.reduce((acc, u) => acc + u.amount, 0);
-  const currentBill = totalUsage * UNIT_COST;
-
-  // generate cumulative sums for each log
-  const cumulative = [];
-  let cumSum = 0;
-  for (const usage of energyUsage) {
-    cumSum += usage.amount;
-    cumulative.push({
-      ...usage,
-      cumulativeEnergy: cumSum,
-      bill: cumSum * UNIT_COST,
+  // Generate cumulative data with proper bill accumulation
+  const { cumulative, totalUsage, currentBill } = React.useMemo(() => {
+    let cumSum = 0;
+    let billSum = 0;
+    
+    const cumulativeData = energyUsage.map((usage) => {
+      cumSum += usage.amount;
+      billSum = cumSum * UNIT_COST; // Calculate bill based on cumulative energy
+      
+      return {
+        ...usage,
+        cumulativeEnergy: cumSum,
+        bill: billSum,
+      };
     });
-  }
+    
+    return {
+      cumulative: cumulativeData,
+      totalUsage: cumSum,
+      currentBill: billSum,
+    };
+  }, [energyUsage]);
 
   const handlePay = async (billId: string) => {
     try {
@@ -139,12 +148,16 @@ const User = () => {
           <CumulativeBillTable
             cumulative={cumulative}
             currentBill={currentBill}
-            onDownloadPDF={() => {}}
           />
-          {/* Render DownloadBillButton just below the table, with no duplicated button */}
+          
+          {/* Render DownloadBillButton just below the table */}
           {cumulative.length > 0 && (
             <div className="mb-4">
-              <DownloadBillButton totalUsage={totalUsage} currentBill={currentBill} />
+              <DownloadBillButton 
+                totalUsage={totalUsage} 
+                currentBill={currentBill}
+                cumulativeData={cumulative}
+              />
             </div>
           )}
           {/* ----- End Cumulative Table Component ----- */}
@@ -170,7 +183,7 @@ const User = () => {
             <h3 className="font-semibold mb-2">Energy Usage Logs</h3>
             <ul className="text-xs max-h-44 overflow-y-auto">
               {energyUsage.map(u => (
-                <li key={u.id}>• {u.timestamp.slice(0, 10)}: {u.amount.toFixed(2)} kWh</li>
+                <li key={u.id}>• {new Date(u.timestamp).toLocaleDateString()}: {u.amount.toFixed(2)} kWh</li>
               ))}
             </ul>
           </div>

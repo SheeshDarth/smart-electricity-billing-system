@@ -1,15 +1,23 @@
 
 import React from "react";
+import { DownloadIcon } from "lucide-react";
 import { generateBillPDF } from "@/utils/pdfUtils";
 
 interface DownloadBillButtonProps {
   totalUsage: number;
   currentBill: number;
+  cumulativeData?: Array<{
+    timestamp: string;
+    amount: number;
+    cumulativeEnergy: number;
+    bill: number;
+  }>;
 }
 
 const DownloadBillButton: React.FC<DownloadBillButtonProps> = ({
   totalUsage,
   currentBill,
+  cumulativeData = [],
 }) => {
   const handleDownloadPDF = () => {
     const periodLabel = (() => {
@@ -18,8 +26,11 @@ const DownloadBillButton: React.FC<DownloadBillButtonProps> = ({
       return month;
     })();
 
-    const pdfUrl = generateBillPDF(periodLabel, totalUsage, currentBill);
-    const fileName = `Bill-${periodLabel.replace(/\s/g, "-")}.pdf`;
+    // Pass the cumulative data to the PDF generator
+    const pdfUrl = generateBillPDF(periodLabel, totalUsage, currentBill, cumulativeData);
+    const fileName = `Energy-Bill-${periodLabel.replace(/\s/g, "-")}.pdf`;
+    
+    // Create download link
     const link = document.createElement("a");
     link.href = pdfUrl;
     link.download = fileName;
@@ -33,6 +44,7 @@ const DownloadBillButton: React.FC<DownloadBillButtonProps> = ({
       className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition w-fit"
       onClick={handleDownloadPDF}
     >
+      <DownloadIcon className="h-4 w-4" />
       Download PDF Bill
     </button>
   );
