@@ -102,7 +102,7 @@ create table if not exists public.assets (
   created_at timestamptz not null default now(),
   unique (id, site_id, organization_id),
   foreign key (site_id, organization_id) references public.sites(id, organization_id) on delete cascade,
-  foreign key (area_id, site_id, organization_id) references public.areas(id, site_id, organization_id) on delete set null
+  foreign key (area_id, site_id, organization_id) references public.areas(id, site_id, organization_id) on delete restrict
 );
 
 create table if not exists public.meters (
@@ -118,7 +118,7 @@ create table if not exists public.meters (
   created_at timestamptz not null default now(),
   unique (id, site_id, organization_id),
   foreign key (site_id, organization_id) references public.sites(id, organization_id) on delete cascade,
-  foreign key (asset_id, site_id, organization_id) references public.assets(id, site_id, organization_id) on delete set null
+  foreign key (asset_id, site_id, organization_id) references public.assets(id, site_id, organization_id) on delete restrict
 );
 
 create table if not exists public.source_adapters (
@@ -133,7 +133,7 @@ create table if not exists public.source_adapters (
   created_at timestamptz not null default now(),
   unique (id, organization_id),
   foreign key (site_id, organization_id) references public.sites(id, organization_id) on delete cascade,
-  foreign key (meter_id, site_id, organization_id) references public.meters(id, site_id, organization_id) on delete set null
+  foreign key (meter_id, site_id, organization_id) references public.meters(id, site_id, organization_id) on delete restrict
 );
 
 create table if not exists public.measurements (
@@ -159,7 +159,7 @@ create table if not exists public.measurements (
   unique (organization_id, event_id),
   foreign key (site_id, organization_id) references public.sites(id, organization_id) on delete cascade,
   foreign key (meter_id, site_id, organization_id) references public.meters(id, site_id, organization_id) on delete cascade,
-  foreign key (adapter_id, organization_id) references public.source_adapters(id, organization_id) on delete set null,
+  foreign key (adapter_id, organization_id) references public.source_adapters(id, organization_id) on delete restrict,
   check ((kind = 'interval_energy' and interval_start is not null and interval_end > interval_start) or kind <> 'interval_energy'),
   check (kind <> 'cumulative_energy' or value >= 0)
 );
@@ -222,7 +222,7 @@ create table if not exists public.insights (
   evidence jsonb not null check (jsonb_typeof(evidence) = 'object'),
   created_at timestamptz not null default now(),
   foreign key (site_id, organization_id) references public.sites(id, organization_id) on delete cascade,
-  foreign key (asset_id, site_id, organization_id) references public.assets(id, site_id, organization_id) on delete set null,
+  foreign key (asset_id, site_id, organization_id) references public.assets(id, site_id, organization_id) on delete restrict,
   check (window_end > window_start)
 );
 
@@ -299,6 +299,9 @@ create policy insights_update_operator on public.insights for update to authenti
 create policy interventions_select_org on public.interventions for select to authenticated using (public.is_org_member(organization_id));
 create policy interventions_insert_operator on public.interventions for insert to authenticated with check (public.has_org_role(organization_id, array['owner', 'admin', 'operator']));
 create policy interventions_update_operator on public.interventions for update to authenticated using (public.has_org_role(organization_id, array['owner', 'admin', 'operator'])) with check (public.has_org_role(organization_id, array['owner', 'admin', 'operator']));
+
+grant select, insert, update, delete on public.organizations, public.organization_members, public.sites, public.areas, public.assets, public.meters, public.source_adapters, public.measurements, public.tariffs, public.billing_runs, public.insights, public.interventions to authenticated;
+revoke all on public.organizations, public.organization_members, public.sites, public.areas, public.assets, public.meters, public.source_adapters, public.measurements, public.tariffs, public.billing_runs, public.insights, public.interventions from anon;
 
 -- Measurements are append-only for authenticated users. Corrections should be represented by
 -- new events with provenance and quality flags; service-role access remains server-side only.
