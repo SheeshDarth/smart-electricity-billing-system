@@ -85,7 +85,6 @@ export default function Index() {
     return estimateEnergyCost(readings, tariff, { expectedIntervalCount: 96 });
   }, [scenario, site.id, site.meter, usage]);
   const estimatedCost = costEstimate.status === "estimated" ? costEstimate.total : null;
-  const unavailable = stale || scenario === "reset" || scenario === "invalid-unit";
   const portfolioEnergyKwh = SITES.reduce((sum, item) => {
     if (item.id !== site.id) return sum + item.usage;
     return sum + (unavailable ? 0 : usage);
