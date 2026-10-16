@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import type { User as AuthUser } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +14,7 @@ import BillHandler from "@/components/user/BillHandler";
 const UNIT_COST = 7.5; // INR per kWh as in dashboard
 
 const User = () => {
-  const [userData, setUserData] = useState<any | null>(null);
+  const [userData, setUserData] = useState<AuthUser | null>(null);
   const [energyUsage, setEnergyUsage] = useState<EnergyUsage[]>([]);
   const [billing, setBilling] = useState<Billing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +57,7 @@ const User = () => {
 
         if (socketId) {
           // Get usage for current socket, order by timestamp to ensure cumulative calculation is correct
-          const { data: usageData, error: usageError } = await (supabase as any)
+          const { data: usageData, error: usageError } = await supabase
             .from('energy_usage')
             .select("*")
             .eq("socket_id", socketId)
@@ -67,7 +68,7 @@ const User = () => {
           setEnergyUsage(usageData as EnergyUsage[] || []);
 
           // Get billing
-          const { data: billsData, error: billsError } = await (supabase as any)
+          const { data: billsData, error: billsError } = await supabase
             .from('billing')
             .select("*")
             .eq("socket_id", socketId)
