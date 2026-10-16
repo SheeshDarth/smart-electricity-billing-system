@@ -52,9 +52,9 @@ export function cumulativeDelta(previous, current, maxRegister = null) {
   return { status: "quarantined", reason: "register decreased; reset or rollover is unverified" };
 }
 
-function getRate(interval, tariff) {
+function getRate(interval, tariff, hourFormatter) {
   if (!Array.isArray(tariff.timeOfUse) || tariff.timeOfUse.length === 0) return tariff.ratePerKwh;
-  const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: tariff.timezone, hour: "2-digit", hourCycle: "h23" }).format(new Date(interval.intervalStart)));
+  const hour = Number(hourFormatter.format(new Date(interval.intervalStart)));
   const period = tariff.timeOfUse.find((item) => item.startHour < item.endHour ? hour >= item.startHour && hour < item.endHour : hour >= item.startHour || hour < item.endHour);
   return period ? period.ratePerKwh : null;
 }
@@ -66,6 +66,17 @@ export function estimateEnergyCost(readings, tariff, options = {}) {
   const normalized = deduped.accepted.map(normalizeMeasurement);
   if (normalized.some((item) => item.status !== "valid" || item.value.kind !== "interval_energy")) return { status: "incomplete", reason: "one or more readings are invalid, quarantined, or not interval energy", duplicatesIgnored: deduped.duplicates.length };
   const intervals = normalized.map((item) => item.value).sort((a, b) => Date.parse(a.intervalStart) - Date.parse(b.intervalStart));
+  const effectiveFrom = tariff.effectiveFrom ? Date.parse(tariff.effectiveFrom) : -Infinity;
+  const effectiveTo = tariff.effectiveTo ? Date.parse(tariff.effectiveTo) : Infinity;
+  const usesTimeOfUse = Array.isArray(tariff.timeOfUse) && tariff.timeOfUse.length > 0;
+  let hourFormatter = null;
+  if (usesTimeOfUse) {
+    try {
+      hourFormatter = new Intl.DateTimeFormat("en-GB", { timeZone: tariff.timezone, hour: "2-digit", hourCycle: "h23" });
+    } catch {
+      return { status: "incomplete", reason: "tariff timezone is invalid", duplicatesIgnored: deduped.duplicates.length };
+    }
+  }
   for (let index = 0; index < intervals.length; index += 1) {
     const item = intervals[index];
     const start = Date.parse(item.intervalStart);
@@ -75,16 +86,14 @@ export function estimateEnergyCost(readings, tariff, options = {}) {
       if (start > previousEnd) return { status: "incomplete", reason: "a gap exists between readings; missing energy is not treated as zero", duplicatesIgnored: deduped.duplicates.length };
       if (start < previousEnd) return { status: "incomplete", reason: "reading intervals overlap", duplicatesIgnored: deduped.duplicates.length };
     }
-    const effectiveFrom = tariff.effectiveFrom ? Date.parse(tariff.effectiveFrom) : -Infinity;
-    const effectiveTo = tariff.effectiveTo ? Date.parse(tariff.effectiveTo) : Infinity;
     if (start < effectiveFrom || end > effectiveTo) return { status: "incomplete", reason: "reading interval is outside the tariff effective window", duplicatesIgnored: deduped.duplicates.length };
   }
   if (Number.isFinite(options.expectedIntervalCount) && intervals.length !== options.expectedIntervalCount) return { status: "incomplete", reason: "expected interval count was not received", duplicatesIgnored: deduped.duplicates.length };
-  if (!Number.isFinite(tariff.ratePerKwh) && (!Array.isArray(tariff.timeOfUse) || tariff.timeOfUse.length === 0)) return { status: "incomplete", reason: "tariff rate is missing" };
+  if (!Number.isFinite(tariff.ratePerKwh) && !usesTimeOfUse) return { status: "incomplete", reason: "tariff rate is missing" };
   let total = 0;
   let energyKwh = 0;
   for (const interval of intervals) {
-    const rate = getRate(interval, tariff);
+    const rate = getRate(interval, tariff, hourFormatter);
     if (!Number.isFinite(rate)) return { status: "incomplete", reason: "no tariff component covers an interval", duplicatesIgnored: deduped.duplicates.length };
     energyKwh += interval.value;
     total += interval.value * rate;
