@@ -13,7 +13,7 @@ import BillHandler from "@/components/user/BillHandler";
 const UNIT_COST = 7.5; // INR per kWh as in dashboard
 
 const User = () => {
-  const [userData, setUserData] = useState<AuthUser | null>(null);
+  const [userData, setUserData] = useState<any | null>(null);
   const [energyUsage, setEnergyUsage] = useState<EnergyUsage[]>([]);
   const [billing, setBilling] = useState<Billing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +56,7 @@ const User = () => {
 
         if (socketId) {
           // Get usage for current socket, order by timestamp to ensure cumulative calculation is correct
-          const { data: usageData, error: usageError } = await supabase
+          const { data: usageData, error: usageError } = await (supabase as any)
             .from('energy_usage')
             .select("*")
             .eq("socket_id", socketId)
