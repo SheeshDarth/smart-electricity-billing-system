@@ -34,7 +34,7 @@ npm test
 npm run build
 ```
 
-GitHub Actions runs these checks for pull requests and pushes to [main. Tests use Node's built-in test runner and do not require a hosted database or credentials.
+GitHub Actions runs these checks for pull requests and pushes to [main](https://github.com/SheeshDarth/smart-electricity-billing-system/tree/main). Tests use Node's built-in test runner and do not require a hosted database or credentials.
 
 ## Optional Supabase configuration
 
@@ -46,6 +46,8 @@ The new migration creates the cross-sector schema only. It does not create or co
 
 - [Architecture and data contract](docs/architecture.md)
 - [Implementation gates and validation plan](docs/roadmap.md)
+- [Feature and readiness matrix](docs/feature-status.md)
+- [Source adapter contract](docs/adapter-contract.md)
 - [Market landscape and differentiation hypothesis](docs/market-landscape.md)
 - [Buyer due-diligence checklist](docs/buyer-readiness.md)
 
