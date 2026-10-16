@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import type { User as AuthUser } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +14,7 @@ import BillHandler from "@/components/user/BillHandler";
 const UNIT_COST = 7.5; // INR per kWh as in dashboard
 
 const User = () => {
-  const [userData, setUserData] = useState<any | null>(null);
+  const [userData, setUserData] = useState<AuthUser | null>(null);
   const [energyUsage, setEnergyUsage] = useState<EnergyUsage[]>([]);
   const [billing, setBilling] = useState<Billing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +22,13 @@ const User = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session }, error: sessionError }) => {
+      if (sessionError) {
+        toast({ title: "Session Error", description: "Unable to verify your session. Please sign in again.", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
       if (!session) {
         navigate("/login");
         return;
@@ -31,10 +38,11 @@ const User = () => {
 
       try {
         // Get user's sockets
-        const { data: socketsData } = await (supabase as any)
+        const { data: socketsData, error: socketsError } = await supabase
           .from('sockets')
           .select("id,number")
           .eq("user_id", session.user.id);
+        if (socketsError) throw socketsError;
 
         const userSockets = socketsData as Socket[] || [];
         setUserSockets(userSockets);
@@ -49,21 +57,23 @@ const User = () => {
 
         if (socketId) {
           // Get usage for current socket, order by timestamp to ensure cumulative calculation is correct
-          const { data: usageData } = await (supabase as any)
+          const { data: usageData, error: usageError } = await supabase
             .from('energy_usage')
             .select("*")
             .eq("socket_id", socketId)
             .gte("timestamp", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString())
             .order("timestamp", { ascending: true });
+          if (usageError) throw usageError;
 
           setEnergyUsage(usageData as EnergyUsage[] || []);
 
           // Get billing
-          const { data: billsData } = await (supabase as any)
+          const { data: billsData, error: billsError } = await supabase
             .from('billing')
             .select("*")
             .eq("socket_id", socketId)
             .order("period", { ascending: false });
+          if (billsError) throw billsError;
 
           setBilling(billsData as Billing[] || []);
         }
@@ -115,6 +125,7 @@ const User = () => {
           <CardTitle>User Dashboard</CardTitle>
         </CardHeader>
         <CardContent>
+          <p role="note" className="mb-4 rounded-md border border-amber-500/40 bg-amber-50 p-3 text-sm text-amber-900">Legacy billing demo. Costs use a flat demo rate; the bill is an estimate, and payment status changes do not process money.</p>
           <UserProfile 
             email={userData?.email} 
             totalUsage={totalUsage} 

@@ -42,7 +42,7 @@ const Login = () => {
     // Fetch the user's role from profile
     setTimeout(async () => {
       try {
-        const { data: profileData } = await (supabase as any)
+        const { data: profileData } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', data.user?.id)
