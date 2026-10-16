@@ -105,7 +105,7 @@ export default function Index() {
     ...point,
     actual: unavailable ? null : Math.round(point.actual / averageActual * actualDailyAverageW),
     expected: Math.round(point.expected / averageExpected * expectedDailyAverageW),
-  })), [unavailable, usage, referenceUsage]);
+  })), [unavailable, averageActual, averageExpected, actualDailyAverageW, expectedDailyAverageW]);
   const activeScenario = SCENARIOS.find((item) => item.id === scenario) ?? SCENARIOS[0];
   const Icon = sectorIcon(site.sector);
 
