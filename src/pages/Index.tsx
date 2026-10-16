@@ -1,415 +1,149 @@
+import { useMemo, useState } from "react";
+import {
+  Activity, ArrowDownRight, ArrowRight, ArrowUpRight, Building2, Check,
+  ChevronDown, ChevronRight, CircleAlert, CircleCheck, Clock3, Database, Factory,
+  Gauge, Home, Layers3, Radio, RefreshCw, Search, ShieldCheck, Sparkles,
+  WifiOff, Zap,
+} from "lucide-react";
+import {
+  Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from "recharts";
 
-import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { Zap, AlertCircle, Clock } from "lucide-react";
-
-// Dashboard components
-import EnergyMeter from "@/components/dashboard/EnergyMeter";
-import SocketControl from "@/components/dashboard/SocketControl";
-import EnergyChart from "@/components/dashboard/EnergyChart";
-import BillingCard from "@/components/dashboard/BillingCard";
-import SettingsPanel from "@/components/dashboard/SettingsPanel";
-import AlertBanner from "@/components/dashboard/AlertBanner";
-import PaymentModal from "@/components/dashboard/PaymentModal";
-
-// Utilities for mock data
-import { 
-  generateMockHistoryData, 
-  generateRealTimeData, 
-  findPeakUsage,
-  generateBillPDF,
-  getBillingPeriod,
-  type PowerHistory,
-  type EnergyData
-} from "@/utils/mockData";
-
-const Index = () => {
-  // System state
-  const [socketOn, setSocketOn] = useState(true);
-  const [realTimeData, setRealTimeData] = useState<EnergyData>({
-    voltage: 220,
-    current: 1.2,
-    power: 264,
-    energy: 10.5,
-    timestamp: Date.now()
-  });
-  const [historicalData, setHistoricalData] = useState<PowerHistory[]>(generateMockHistoryData());
-  const [alerts, setAlerts] = useState<{ id: string; message: string; title: string; variant: 'default' | 'high' | 'critical' }[]>([]);
-  
-  // Settings state
-  const [settings, setSettings] = useState({
-    unitCost: 7.5,
-    powerThreshold: 2.0,
-    monthlyLimit: 30.0
-  });
-  
-  // Payment related state
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  
-  // Toast notifications
-  const { toast } = useToast();
-  
-  // Update real-time data at regular intervals
-  useEffect(() => {
-    if (!socketOn) return; // Don't update if socket is off
-    
-    const interval = setInterval(() => {
-      const newData = generateRealTimeData();
-      setRealTimeData(newData);
-      
-      // Check for thresholds and trigger alerts
-      if (newData.power / 1000 > settings.powerThreshold) {
-        const alertId = `power-${Date.now()}`;
-        const newAlert = {
-          id: alertId,
-          title: "High Power Consumption",
-          message: `Current power usage (${(newData.power / 1000).toFixed(2)} kW) exceeds the threshold of ${settings.powerThreshold} kW`,
-          variant: newData.power / 1000 > settings.powerThreshold * 1.5 ? 'critical' : 'high'
-        } as const;
-        
-        setAlerts(prev => [...prev, newAlert]);
-      }
-      
-      if (newData.energy > settings.monthlyLimit) {
-        const alertId = `energy-${Date.now()}`;
-        setAlerts(prev => [
-          ...prev, 
-          {
-            id: alertId,
-            title: "Monthly Energy Limit Exceeded",
-            message: `Energy usage (${newData.energy.toFixed(2)} kWh) has exceeded your monthly limit of ${settings.monthlyLimit} kWh`,
-            variant: 'critical'
-          }
-        ]);
-      }
-      
-    }, 2000); // Update every 2 seconds
-    
-    return () => clearInterval(interval);
-  }, [socketOn, settings]);
-  
-  // Update historical data less frequently
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Only update if socket is on
-      if (socketOn) {
-        const newHistData = [...historicalData];
-        
-        // Remove oldest entry and add newest
-        newHistData.shift();
-        newHistData.push({
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          power: realTimeData.power
-        });
-        
-        setHistoricalData(newHistData);
-      }
-    }, 60000); // Update every minute
-    
-    return () => clearInterval(interval);
-  }, [historicalData, socketOn, realTimeData]);
-  
-  // Handle socket toggle
-  const handleSocketToggle = () => {
-    setSocketOn(!socketOn);
-    
-    toast({
-      title: socketOn ? "Socket Turned Off" : "Socket Turned On",
-      description: socketOn 
-        ? "The smart socket has been turned off." 
-        : "The smart socket has been turned on.",
-      duration: 3000
-    });
-  };
-  
-  // Handle settings update
-  const handleSettingsUpdate = (newSettings: typeof settings) => {
-    setSettings(newSettings);
-    
-    toast({
-      title: "Settings Updated",
-      description: "Your smart socket settings have been updated.",
-      duration: 3000
-    });
-  };
-  
-  // Handle monthly reset
-  const handleMonthlyReset = () => {
-    // In a real app, this would call an API to reset energy values
-    toast({
-      title: "Monthly Usage Reset",
-      description: "Your monthly energy usage has been reset to zero.",
-      duration: 3000
-    });
-  };
-  
-  // Handle bill download
-  const handleDownloadBill = () => {
-    // In a real app, this would generate a PDF via a server call
-    const pdfUrl = generateBillPDF(
-      new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      realTimeData.energy,
-      realTimeData.energy * settings.unitCost
-    );
-    
-    // Create a temporary link element and trigger download
-    const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = `Energy-Bill-${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: "Bill Downloaded",
-      description: "Your energy bill PDF has been downloaded.",
-      duration: 3000
-    });
-  };
-  
-  // Handle payment completion
-  const handlePaymentComplete = () => {
-    toast({
-      title: "Payment Successful",
-      description: "Thank you! Your payment has been processed.",
-      duration: 5000
-    });
-  };
-  
-  // Handle alert dismissal
-  const dismissAlert = (id: string) => {
-    setAlerts(alerts.filter(alert => alert.id !== id));
-  };
-  
-  // Find peak usage from historical data
-  const peakPower = findPeakUsage(historicalData);
-  
-  return (
-    <div className="min-h-screen bg-gray-50 pb-10">
-      {/* Header section */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <Zap className="h-8 w-8 text-energy-low mr-2" />
-              <h1 className="text-2xl font-bold">Smart Socket Dashboard</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="hidden md:flex items-center text-sm text-muted-foreground">
-                <Clock className="h-4 w-4 mr-1" />
-                <span>Last updated: {new Date().toLocaleTimeString()}</span>
-              </div>
-              <Button 
-                variant={socketOn ? "default" : "outline"}
-                onClick={handleSocketToggle}
-                className={socketOn ? "bg-energy-low hover:bg-energy-low/90" : ""}
-              >
-                {socketOn ? "Socket On" : "Socket Off"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-      
-      {/* Main content */}
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Alert banners */}
-        {alerts.map((alert) => (
-          <AlertBanner
-            key={alert.id}
-            title={alert.title}
-            message={alert.message}
-            variant={alert.variant}
-            onClose={() => dismissAlert(alert.id)}
-          />
-        ))}
-        
-        {/* Tabs */}
-        <Tabs defaultValue="monitor" className="space-y-8">
-          <div className="flex justify-between items-center">
-            <TabsList>
-              <TabsTrigger value="monitor">Monitor</TabsTrigger>
-              <TabsTrigger value="billing">Billing</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
-            {socketOn && (
-              <div className="flex items-center">
-                <div className="h-2 w-2 rounded-full bg-energy-low animate-pulse mr-2"></div>
-                <span className="text-sm text-muted-foreground">Live</span>
-              </div>
-            )}
-          </div>
-          
-          {/* Monitor Tab */}
-          <TabsContent value="monitor" className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <EnergyMeter 
-                title="Voltage" 
-                value={realTimeData.voltage} 
-                unit="V" 
-                icon="voltage" 
-                max={250} 
-              />
-              <EnergyMeter 
-                title="Current" 
-                value={realTimeData.current} 
-                unit="A" 
-                icon="current" 
-                max={10} 
-              />
-              <EnergyMeter 
-                title="Power" 
-                value={realTimeData.power} 
-                unit="W" 
-                icon="power" 
-                max={2500} 
-                thresholdPercent={80}
-              />
-              <SocketControl 
-                isOn={socketOn} 
-                onToggle={handleSocketToggle} 
-              />
-            </div>
-            
-            <EnergyChart 
-              title="Power Consumption (Last 24 hours)" 
-              data={historicalData} 
-            />
-            
-            <div className="bg-white p-4 rounded-lg shadow-sm border">
-              <div className="text-sm text-muted-foreground">
-                <p className="flex items-center mb-2">
-                  <AlertCircle className="h-4 w-4 mr-2 text-energy-high" />
-                  Peak power usage: <strong className="ml-1">{peakPower?.power || 0} W</strong> at {peakPower?.time || "N/A"}
-                </p>
-                <p className="flex items-center">
-                  <Zap className="h-4 w-4 mr-2 text-energy-low" />
-                  Current energy consumption: <strong className="ml-1">{realTimeData.energy.toFixed(2)} kWh</strong> this month
-                </p>
-              </div>
-            </div>
-          </TabsContent>
-          
-          {/* Billing Tab */}
-          <TabsContent value="billing" className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2">
-                <EnergyChart 
-                  title="Energy Usage History" 
-                  data={historicalData.map(item => ({ ...item, power: item.power / 50 }))} // Convert to kWh for display
-                  height={280}
-                />
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-white p-4 rounded-lg shadow-sm border">
-                    <h3 className="text-lg font-medium mb-2">Energy Summary</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Current Period:</span>
-                        <span>{getBillingPeriod()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Current Usage:</span>
-                        <span>{realTimeData.energy.toFixed(2)} kWh</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Estimated Monthly:</span>
-                        <span>{(realTimeData.energy * 2).toFixed(2)} kWh</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg shadow-sm border">
-                    <h3 className="text-lg font-medium mb-2">Payment Methods</h3>
-                    <div className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        You can pay your bill using credit card or bank transfer.
-                      </p>
-                      <Button onClick={() => setShowPaymentModal(true)}>
-                        Make Payment
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <BillingCard 
-                  currentUsage={realTimeData.energy} 
-                  unitCost={settings.unitCost}
-                  billingPeriod={getBillingPeriod()}
-                  onDownloadBill={handleDownloadBill}
-                />
-              </div>
-            </div>
-          </TabsContent>
-          
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <SettingsPanel 
-                unitCost={settings.unitCost}
-                powerThreshold={settings.powerThreshold}
-                monthlyLimit={settings.monthlyLimit}
-                onUpdate={handleSettingsUpdate}
-                onReset={handleMonthlyReset}
-              />
-              
-              <div className="space-y-4">
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h3 className="text-lg font-medium mb-4">System Information</h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between border-b pb-2">
-                      <span className="text-muted-foreground">Device ID:</span>
-                      <span>SMARTSOCKET_001</span>
-                    </div>
-                    <div className="flex justify-between border-b pb-2">
-                      <span className="text-muted-foreground">Firmware Version:</span>
-                      <span>v1.2.5</span>
-                    </div>
-                    <div className="flex justify-between border-b pb-2">
-                      <span className="text-muted-foreground">Connection Status:</span>
-                      <span className={socketOn ? "text-energy-low" : "text-muted-foreground"}>
-                        {socketOn ? "Connected" : "Disconnected"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-b pb-2">
-                      <span className="text-muted-foreground">Last Sync:</span>
-                      <span>{new Date().toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Firebase Path:</span>
-                      <span className="font-mono">/smart_socket_1/</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h3 className="text-lg font-medium mb-4">About</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    This dashboard displays the simulated data from a Smart Socket IoT device. 
-                    The actual implementation would connect to Arduino Uno R3 through TinkerCAD, 
-                    Blynk Cloud, and a Firebase Realtime Database.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Project developed for academic purposes to demonstrate IoT-based 
-                    energy monitoring and billing systems.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </main>
-      
-      {/* Payment Modal */}
-      <PaymentModal 
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        amount={realTimeData.energy * settings.unitCost}
-        onPaymentComplete={handlePaymentComplete}
-      />
-    </div>
-  );
+type Site = {
+  id: string; name: string; sector: "Home" | "Office" | "Industrial"; location: string;
+  meter: string; freshness: string; usage: number; cost: number; quality: number;
+  baseline: number; area?: number; goodUnits?: number; rejectRate?: number;
 };
+type Scenario = "normal" | "spike" | "stale" | "duplicate" | "reset" | "tariff";
+type Decision = "accepted" | "investigate" | "deferred" | null;
 
-export default Index;
+const SITES: Site[] = [
+  { id: "home", name: "Maple Residence", sector: "Home", location: "Bengaluru · India", meter: "MTR-H-014", freshness: "1 min ago", usage: 18.6, cost: 148, quality: 99.2, baseline: 16.9 },
+  { id: "office", name: "North Tower", sector: "Office", location: "Bengaluru · India", meter: "MTR-B-208", freshness: "2 min ago", usage: 1284, cost: 10272, quality: 98.7, baseline: 1210, area: 4800 },
+  { id: "plant", name: "Line 04 · Assembly", sector: "Industrial", location: "Pune · India", meter: "MTR-I-033", freshness: "38 sec ago", usage: 3420, cost: 27360, quality: 98.4, baseline: 2898, goodUnits: 7990, rejectRate: 2.1 },
+];
+const SCENARIOS: { id: Scenario; label: string; hint: string }[] = [
+  { id: "normal", label: "Normal run", hint: "Nominal readings" },
+  { id: "spike", label: "Usage spike", hint: "Inject a +22% deviation" },
+  { id: "stale", label: "Stale meter", hint: "Stop the source heartbeat" },
+  { id: "duplicate", label: "Duplicate event", hint: "Replay an event ID" },
+  { id: "reset", label: "Counter reset", hint: "Simulate meter rollover" },
+  { id: "tariff", label: "Tariff change", hint: "Apply a new tariff version" },
+];
+const SERIES = [
+  { time: "00:00", actual: 264, expected: 248 }, { time: "02:00", actual: 238, expected: 236 },
+  { time: "04:00", actual: 251, expected: 244 }, { time: "06:00", actual: 318, expected: 302 },
+  { time: "08:00", actual: 396, expected: 372 }, { time: "10:00", actual: 422, expected: 390 },
+  { time: "12:00", actual: 408, expected: 384 }, { time: "14:00", actual: 437, expected: 402 },
+  { time: "16:00", actual: 468, expected: 416 }, { time: "18:00", actual: 492, expected: 438 },
+  { time: "20:00", actual: 451, expected: 421 }, { time: "22:00", actual: 336, expected: 320 },
+];
+const PROCESS = ["Source adapter", "Ingestion API", "Quality gate", "Site view", "Insight", "Human action", "Verification"];
+const money = (value: number) => "₹" + Math.round(value).toLocaleString("en-IN");
+const energy = (value: number, sector: Site["sector"]) => sector === "Home" ? value.toFixed(1) + " kWh" : Math.round(value).toLocaleString("en-IN") + " kWh";
+const sectorIcon = (sector: Site["sector"]) => sector === "Home" ? Home : sector === "Office" ? Building2 : Factory;
+
+function MetricCard({ label, value, detail, icon: Icon, tone = "blue" }: { label: string; value: string; detail: string; icon: typeof Zap; tone?: "blue" | "green" | "amber" | "violet" }) {
+  const tones = { blue: "bg-sky-400/10 text-sky-300", green: "bg-emerald-400/10 text-emerald-300", amber: "bg-amber-400/10 text-amber-300", violet: "bg-violet-400/10 text-violet-300" };
+  return <div className="rounded-2xl border border-white/[0.08] bg-[#111b20] p-5 shadow-[0_12px_40px_rgba(0,0,0,.12)]">
+    <div className="flex items-center justify-between"><span className="text-sm text-slate-400">{label}</span><span className={"grid h-9 w-9 place-items-center rounded-xl " + tones[tone]}><Icon size={17} /></span></div>
+    <div className="mt-4 text-2xl font-semibold tracking-tight text-white">{value}</div><div className="mt-1 text-xs text-slate-500">{detail}</div>
+  </div>;
+}
+
+export default function Index() {
+  const [siteId, setSiteId] = useState("plant");
+  const [scenario, setScenario] = useState<Scenario>("normal");
+  const [decision, setDecision] = useState<Decision>(null);
+  const [view, setView] = useState<"overview" | "workflow">("overview");
+  const [scenarioOpen, setScenarioOpen] = useState(false);
+  const [showLineage, setShowLineage] = useState(false);
+  const site = SITES.find((item) => item.id === siteId) ?? SITES[2];
+  const isIndustrial = site.sector === "Industrial";
+  const usage = scenario === "spike" ? site.usage * 1.22 : site.usage;
+  const estimatedCost = scenario === "tariff" ? site.cost * 1.12 : site.cost;
+  const deviation = Math.round(((usage - site.baseline) / site.baseline) * 100);
+  const stale = scenario === "stale";
+  const held = scenario === "duplicate" || scenario === "reset";
+  const series = useMemo(() => SERIES.map((point, i) => ({
+    ...point,
+    actual: scenario === "spike" && i > 7 ? Math.round(point.actual * 1.22) : point.actual,
+  })), [scenario]);
+  const activeScenario = SCENARIOS.find((item) => item.id === scenario) ?? SCENARIOS[0];
+  const Icon = sectorIcon(site.sector);
+
+  const changeSite = (id: string) => { setSiteId(id); setDecision(null); };
+  const changeScenario = (value: Scenario) => { setScenario(value); setDecision(null); setScenarioOpen(false); };
+
+  return <div className="min-h-screen bg-[#0a1115] text-slate-100">
+    <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-[#0a1115]/95 backdrop-blur">
+      <div className="mx-auto flex max-w-[1500px] items-center justify-between px-5 py-3.5 lg:px-8">
+        <div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-cyan-300 to-emerald-400 text-slate-950 shadow-lg shadow-cyan-950/40"><Zap size={21} fill="currentColor" /></div><div><div className="text-[15px] font-semibold tracking-tight">Wattwise <span className="text-slate-500">/ Energy intelligence</span></div><div className="text-[11px] text-slate-500">CROSS-SECTOR DIGITAL TWIN</div></div></div>
+        <div className="hidden items-center gap-1 rounded-xl border border-white/[0.08] bg-white/[0.03] p-1 sm:flex">
+          <button onClick={() => setView("overview")} className={"rounded-lg px-4 py-2 text-sm transition " + (view === "overview" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white")}>Portfolio</button>
+          <button onClick={() => setView("workflow")} className={"rounded-lg px-4 py-2 text-sm transition " + (view === "workflow" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white")}>Workflow</button>
+        </div>
+        <div className="flex items-center gap-2"><span className="rounded-full border border-amber-400/25 bg-amber-300/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] text-amber-200"><span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-300" />Simulation</span><button aria-label="Search" className="hidden rounded-xl border border-white/[0.08] p-2.5 text-slate-400 hover:text-white sm:block"><Search size={17} /></button></div>
+      </div>
+      <div className="mx-auto flex max-w-[1500px] gap-1 px-5 pb-3 sm:hidden"><button onClick={() => setView("overview")} className={"rounded-lg px-3 py-2 text-xs " + (view === "overview" ? "bg-white/10" : "text-slate-400")}>Portfolio</button><button onClick={() => setView("workflow")} className={"rounded-lg px-3 py-2 text-xs " + (view === "workflow" ? "bg-white/10" : "text-slate-400")}>Workflow</button></div>
+    </header>
+
+    <div className="mx-auto grid max-w-[1500px] gap-6 px-5 py-6 lg:grid-cols-[245px_minmax(0,1fr)] lg:px-8 lg:py-8">
+      <aside className="space-y-5">
+        <div className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-4">
+          <div className="mb-3 flex items-center justify-between"><span className="text-xs font-semibold uppercase tracking-[.14em] text-slate-500">Portfolio</span><button className="text-xs text-sky-300">3 sites</button></div>
+          <div className="space-y-1">{SITES.map((item) => { const SiteIcon = sectorIcon(item.sector); return <button key={item.id} onClick={() => changeSite(item.id)} className={"group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition " + (site.id === item.id ? "bg-white/[0.08] ring-1 ring-white/10" : "hover:bg-white/[0.04]")}><span className={"grid h-9 w-9 place-items-center rounded-lg " + (item.id === "plant" ? "bg-violet-400/10 text-violet-300" : item.id === "office" ? "bg-sky-400/10 text-sky-300" : "bg-emerald-400/10 text-emerald-300")}><SiteIcon size={16} /></span><span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-slate-200">{item.name}</span><span className="mt-0.5 block text-[11px] text-slate-500">{item.sector} · {item.freshness}</span></span>{site.id === item.id && <ChevronRight size={15} className="text-slate-500" />}</button>; })}</div>
+        </div>
+        <div className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-4">
+          <div className="mb-3 flex items-center gap-2"><Layers3 size={15} className="text-slate-500" /><span className="text-xs font-semibold uppercase tracking-[.14em] text-slate-500">Twin controls</span></div>
+          <div className="relative"><button onClick={() => setScenarioOpen(!scenarioOpen)} className="flex w-full items-center justify-between rounded-xl border border-white/[0.1] bg-[#0a1115] px-3 py-3 text-left"><span><span className="block text-sm font-medium">{activeScenario.label}</span><span className="mt-1 block text-[11px] text-slate-500">{activeScenario.hint}</span></span><ChevronDown size={15} className="text-slate-500" /></button>{scenarioOpen && <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-xl border border-white/10 bg-[#172228] p-1 shadow-2xl">{SCENARIOS.map((item) => <button key={item.id} onClick={() => changeScenario(item.id)} className="w-full rounded-lg px-3 py-2 text-left hover:bg-white/[0.06]"><span className="block text-sm">{item.label}</span><span className="text-[10px] text-slate-500">{item.hint}</span></button>)}</div>}</div>
+          <div className="mt-3 rounded-xl bg-white/[0.03] px-3 py-3 text-[11px] leading-relaxed text-slate-500"><span className="font-medium text-slate-300">Virtual source</span><br />No board, relay, or physical device is represented. Scenarios exercise the same visible data-quality workflow.</div>
+        </div>
+        <div className="rounded-2xl border border-emerald-300/10 bg-emerald-300/[0.04] p-4"><div className="flex items-center gap-2 text-xs font-semibold text-emerald-200"><ShieldCheck size={15} />Read-only by design</div><p className="mt-2 text-[11px] leading-relaxed text-slate-500">Recommendations are recorded for review. No physical controls, payment rail, or automatic action is connected.</p></div>
+      </aside>
+
+      <main className="min-w-0 space-y-6">
+        <section className="flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><div className="mb-2 flex items-center gap-2 text-xs text-slate-500"><span>Portfolio</span><ChevronRight size={13} /><span className="text-slate-300">{view === "workflow" ? "Evidence workflow" : site.name}</span></div><h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{view === "workflow" ? "From reading to verified action" : "Energy, with its context."}</h1><p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">{view === "workflow" ? "Follow one simulated event through ingestion, quality checks, a human decision, and a labelled before/after comparison." : "One portfolio view for homes, buildings, and production sites. Every value is traceable to its source and assumptions."}</p></div><div className="flex items-center gap-2 self-start rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-400 md:self-auto"><Clock3 size={14} />Today · 16 Oct 2026 <span className="mx-1 text-slate-700">|</span><span className="text-emerald-300">UTC stored</span></div></section>
+
+        {view === "overview" ? <>
+          <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricCard label="Portfolio energy · today" value="4,723 kWh" detail="Measured across 3 demo sites" icon={Zap} tone="blue" />
+            <MetricCard label="Estimated energy cost" value="₹38,740" detail="Illustrative tariff · version IN-DEMO-1.4" icon={Activity} tone="green" />
+            <MetricCard label="Reading quality" value={stale ? "92.1%" : held ? "98.4%" : "98.8%"} detail={stale ? "One source is stale · no zero-fill" : held ? "One event quarantined or deduplicated" : "Valid records / received records"} icon={ShieldCheck} tone={stale || held ? "amber" : "green"} />
+            <MetricCard label="Open items" value={scenario === "normal" ? "1 review" : stale || scenario === "reset" ? "1 data issue" : "1 review"} detail="Rule-based · operator decides" icon={CircleAlert} tone="amber" />
+          </section>
+
+          <section className="grid gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(285px,.85fr)]">
+            <div className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-5 sm:p-6">
+              <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-lg bg-violet-400/10 text-violet-300"><Icon size={16} /></span><div><h2 className="text-base font-semibold">{site.name}</h2><p className="text-[11px] text-slate-500">{site.sector} · {site.location} · {site.meter}</p></div></div></div><span className={"rounded-full border px-2.5 py-1 text-[10px] font-medium " + (stale ? "border-amber-300/20 bg-amber-300/[0.08] text-amber-200" : held ? "border-sky-300/20 bg-sky-300/[0.08] text-sky-200" : "border-emerald-300/20 bg-emerald-300/[0.08] text-emerald-200")}>{stale ? "STALE · 42 MIN" : held ? scenario === "duplicate" ? "DUPLICATE SUPPRESSED" : "RESET QUARANTINED" : "SOURCE HEALTHY"}</span></div>
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4"><div><div className="text-[11px] text-slate-500">Today’s energy</div><div className="mt-1 text-lg font-semibold">{stale ? "—" : energy(usage, site.sector)}</div><div className="text-[10px] text-slate-600">{stale ? "Value withheld" : "Measured / interval total"}</div></div><div><div className="text-[11px] text-slate-500">Cost estimate</div><div className="mt-1 text-lg font-semibold">{stale || scenario === "reset" ? "—" : money(estimatedCost)}</div><div className="text-[10px] text-slate-600">{stale || scenario === "reset" ? "Incomplete data" : "Calculated · not a bill"}</div></div><div><div className="text-[11px] text-slate-500">Expected baseline</div><div className="mt-1 text-lg font-semibold">{energy(site.baseline, site.sector)}</div><div className="text-[10px] text-slate-600">Rule baseline · demo profile</div></div><div><div className="text-[11px] text-slate-500">Good units</div><div className="mt-1 text-lg font-semibold">{isIndustrial ? (site.goodUnits ?? 0).toLocaleString("en-IN") : "Not provided"}</div><div className="text-[10px] text-slate-600">{isIndustrial ? "Production context supplied" : "No production signal"}</div></div></div>
+              <div className="mt-6 h-[230px] w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={series} margin={{ top: 8, right: 4, left: -22, bottom: 0 }}><defs><linearGradient id="energyFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#38bdf8" stopOpacity={0.22} /><stop offset="95%" stopColor="#38bdf8" stopOpacity={0} /></linearGradient></defs><CartesianGrid stroke="rgba(255,255,255,.06)" vertical={false} /><XAxis dataKey="time" tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false} dy={8} /><YAxis tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: "#142027", border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, color: "#e2e8f0", fontSize: 12 }} /><Area type="monotone" dataKey="expected" name="Expected baseline (W)" stroke="#64748b" strokeDasharray="4 5" strokeWidth={1.5} fill="transparent" /><Area type="monotone" dataKey="actual" name="Measured (W)" stroke="#38bdf8" strokeWidth={2.5} fill="url(#energyFill)" activeDot={{ r: 4, fill: "#67e8f9" }} /></AreaChart></ResponsiveContainer></div>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4 text-[11px] text-slate-500"><span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-sky-300" />Measured interval power <span className="ml-2 h-[2px] w-4 border-t border-dashed border-slate-500" />Expected rule baseline</span><button onClick={() => setShowLineage(!showLineage)} className="text-sky-300 hover:text-sky-200">{showLineage ? "Hide data lineage" : "View data lineage"} <ArrowRight className="ml-1 inline" size={13} /></button></div>
+              {showLineage && <div className="mt-4 grid gap-2 rounded-xl border border-white/[0.07] bg-black/15 p-4 text-[11px] sm:grid-cols-2"><div><span className="text-slate-500">Source</span><p className="mt-1 text-slate-200">Browser digital twin · schema v1</p></div><div><span className="text-slate-500">Time semantics</span><p className="mt-1 text-slate-200">UTC event time · 15 min interval</p></div><div><span className="text-slate-500">Quality path</span><p className="mt-1 text-slate-200">Validated → normalized → dashboard</p></div><div><span className="text-slate-500">Tariff / method</span><p className="mt-1 text-slate-200">IN-DEMO-1.4 · flat ₹8/kWh · estimate only</p></div></div>}
+            </div>
+
+            <div className="space-y-5">
+              <div className={"rounded-2xl border p-5 " + (scenario === "normal" ? "border-sky-300/15 bg-gradient-to-br from-sky-300/[0.08] to-[#10191e]" : "border-amber-300/20 bg-gradient-to-br from-amber-300/[0.07] to-[#10191e]")}>
+                <div className="flex items-center justify-between"><span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-slate-400"><Sparkles size={14} className="text-cyan-300" />Explainable signal</span><span className="rounded-md border border-white/10 px-2 py-1 text-[9px] uppercase tracking-widest text-slate-400">{scenario === "normal" ? "Rule v0.1" : "Injected scenario"}</span></div>
+                <h2 className="mt-4 text-lg font-semibold leading-snug">{scenario === "normal" ? isIndustrial ? "Energy per good unit is above this shift’s reference" : "Usage is within the demo profile’s expected band" : scenario === "spike" ? "Usage rose 22% above the reference band" : scenario === "stale" ? "Meter heartbeat stopped; current-period cost is withheld" : scenario === "duplicate" ? "Repeated event was safely deduplicated" : scenario === "reset" ? "Cumulative counter reset; delta is not billable yet" : "New tariff version changes the cost estimate"}</h2>
+                <p className="mt-2 text-xs leading-relaxed text-slate-400">{scenario === "normal" ? isIndustrial ? "Observed 429 Wh per good unit against a 364 Wh reference. This is a pattern to investigate, not a diagnosis or savings claim." : "Contextual normalization is shown only where the source profile provides the required inputs." : scenario === "spike" ? "Deviation detected by a transparent threshold rule. Check schedule, load, and data quality before attributing a cause." : scenario === "stale" ? "Missing intervals are shown as missing. They are never silently treated as zero consumption." : scenario === "duplicate" ? "The event ID is already present. The twin retains the audit trace and prevents double counting." : scenario === "reset" ? "A negative cumulative delta is quarantined until a valid reset or rollover rule is configured." : "Estimate is recalculated using tariff v1.5. The simulated tariff is illustrative and is not jurisdiction-specific."}</p>
+                <div className="mt-4 grid grid-cols-2 gap-2"><div className="rounded-xl bg-black/20 p-3"><div className="text-[10px] text-slate-500">Observed</div><div className="mt-1 text-sm font-semibold">{scenario === "stale" || scenario === "reset" ? "Unavailable" : isIndustrial ? (scenario === "spike" ? "524" : "429") + " Wh / good unit" : (deviation >= 0 ? "+" : "") + deviation + "% vs ref"}</div></div><div className="rounded-xl bg-black/20 p-3"><div className="text-[10px] text-slate-500">Guardrail</div><div className="mt-1 text-sm font-semibold">{isIndustrial ? "Quality · 2.1% rejects" : site.sector === "Office" ? "Area · 0.27 kWh/m²" : "No output context"}</div></div></div>
+                <div className="mt-4 border-t border-white/[0.08] pt-4"><div className="mb-3 text-[10px] font-semibold uppercase tracking-[.12em] text-slate-500">Operator review</div>{decision ? <div className="flex items-start gap-2 rounded-xl border border-emerald-300/15 bg-emerald-300/[0.06] p-3 text-xs text-emerald-100"><CircleCheck size={15} className="mt-0.5 shrink-0" /><span>Decision recorded: <strong className="capitalize">{decision}</strong>. Verification remains labelled simulated.</span></div> : <div className="flex flex-wrap gap-2"><button onClick={() => setDecision("accepted")} className="rounded-lg bg-emerald-300 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-emerald-200">Record review</button><button onClick={() => setDecision("investigate")} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-300 hover:bg-white/[0.05]">Investigate</button><button onClick={() => setDecision("deferred")} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-400 hover:bg-white/[0.05]">Defer</button></div>}</div>
+              </div>
+              <div className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-5"><div className="flex items-center justify-between"><h3 className="text-sm font-semibold">Evidence quality</h3><span className="text-xs text-emerald-300">{site.quality}% valid</span></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.06]"><div className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300" style={{ width: (stale ? 92 : site.quality) + "%" }} /></div><div className="mt-3 grid grid-cols-2 gap-3 text-[10px]"><div><span className="text-slate-500">Last source event</span><p className="mt-1 text-slate-300">{stale ? "42 min ago" : site.freshness}</p></div><div><span className="text-slate-500">Model dependency</span><p className="mt-1 text-slate-300">None · rules only</p></div></div></div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-5 sm:p-6"><div className="mb-4 flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-semibold">Site comparison</h2><p className="mt-1 text-xs text-slate-500">Metrics retain sector context; missing dimensions stay explicit.</p></div><span className="text-[10px] text-slate-600">All values are synthetic</span></div><div className="overflow-x-auto"><table className="w-full min-w-[660px] text-left text-xs"><thead className="text-[10px] uppercase tracking-[.1em] text-slate-500"><tr><th className="pb-3 font-medium">Site</th><th className="pb-3 font-medium">Sector context</th><th className="pb-3 font-medium">Energy today</th><th className="pb-3 font-medium">Cost estimate</th><th className="pb-3 font-medium">Freshness</th><th className="pb-3 font-medium">Quality</th></tr></thead><tbody>{SITES.map((item) => { const RowIcon = sectorIcon(item.sector); return <tr key={item.id} onClick={() => changeSite(item.id)} className="cursor-pointer border-t border-white/[0.06] hover:bg-white/[0.025]"><td className="py-3.5"><span className="flex items-center gap-2.5"><span className="grid h-8 w-8 place-items-center rounded-lg bg-white/[0.05] text-slate-300"><RowIcon size={14} /></span><span><span className="block font-medium text-slate-200">{item.name}</span><span className="text-[10px] text-slate-600">{item.location}</span></span></span></td><td className="py-3.5 text-slate-400">{item.sector === "Industrial" ? (item.goodUnits ?? 0).toLocaleString("en-IN") + " good units" : item.sector === "Office" ? item.area + " m²" : "Usage pattern"}</td><td className="py-3.5 text-slate-200">{energy(item.usage, item.sector)}</td><td className="py-3.5 text-slate-200">{money(item.cost)} <span className="text-slate-600">est.</span></td><td className="py-3.5 text-slate-400">{item.freshness}</td><td className="py-3.5"><span className="rounded-md bg-emerald-300/[0.08] px-2 py-1 text-emerald-200">{item.quality}%</span></td></tr>; })}</tbody></table></div></section>
+        </> : <>
+          <section className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-5 sm:p-7"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[.14em] text-cyan-200"><Activity size={15} />End-to-end trace</div><h2 className="mt-3 text-xl font-semibold">A reading should carry its evidence all the way through.</h2><p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">This virtual workflow replaces the old board-specific demonstration. Each injected scenario goes through the same visible steps and keeps measured, calculated, and simulated values distinct.</p></div><span className="rounded-full border border-amber-300/20 bg-amber-300/[0.07] px-3 py-1.5 text-[10px] uppercase tracking-wider text-amber-200">Synthetic walkthrough</span></div>
+            <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-4">{PROCESS.map((step, index) => { const active = index === (scenario === "normal" ? 4 : scenario === "stale" || scenario === "reset" ? 2 : 4); const done = index < (scenario === "normal" ? 4 : scenario === "stale" || scenario === "reset" ? 2 : 4); const icons = [Radio, ArrowRight, ShieldCheck, Gauge, Sparkles, Check, RefreshCw]; const StepIcon = icons[index]; return <div key={step} className="relative rounded-xl border border-white/[0.08] bg-black/15 p-4"><div className="flex items-center justify-between"><span className={"grid h-9 w-9 place-items-center rounded-xl " + (active ? "bg-cyan-300/15 text-cyan-200" : done ? "bg-emerald-300/10 text-emerald-300" : "bg-white/[0.04] text-slate-500")}><StepIcon size={16} /></span><span className="text-[10px] text-slate-600">0{index + 1}</span></div><div className="mt-4 text-sm font-medium">{step}</div><div className="mt-1 text-[11px] leading-relaxed text-slate-500">{index === 0 ? "Twin emits a versioned, synthetic reading." : index === 1 ? "Source identity, schema, and event ID travel with the record." : index === 2 ? stale ? "Heartbeat timeout visible; no missing interval is zero-filled." : scenario === "reset" ? "Negative cumulative delta is held for inspection." : scenario === "duplicate" ? "Repeated ID is deduplicated before aggregation." : "Units, time, range, and quality are checked." : index === 3 ? "Normalized readings feed one common site view." : index === 4 ? "A deterministic rule shows evidence and uncertainty." : index === 5 ? "An operator records accept, investigate, or defer." : "Matched periods show outcome and guardrails."}</div><div className="mt-3 flex items-center gap-1 text-[10px] font-medium " + (active ? "text-cyan-200" : done ? "text-emerald-300" : "text-slate-600")}>{active ? "CURRENT STEP" : done ? "PASSED" : "NEXT"}{active ? <span className="ml-1 h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-200" /> : done ? <Check size={11} /> : null}</div></div>; })}</div>
+            <div className="mt-5 grid gap-4 lg:grid-cols-[1.2fr_.8fr]"><div className="rounded-xl border border-white/[0.07] bg-black/15 p-5"><div className="flex items-center justify-between"><div><h3 className="text-sm font-semibold">Current event trace</h3><p className="mt-1 text-xs text-slate-500">{site.meter} · {scenario === "normal" ? "EVT-SIM-1038" : "EVT-SIM-1042"} · schema v1</p></div><span className="rounded-md border border-sky-300/15 bg-sky-300/[0.06] px-2 py-1 text-[9px] uppercase tracking-wider text-sky-200">{scenario === "duplicate" ? "Duplicate rejected" : scenario === "reset" ? "Quarantined" : stale ? "Source stale" : "Simulation"}</span></div><div className="mt-5 grid gap-3 sm:grid-cols-3"><div><div className="text-[10px] text-slate-600">Event time (UTC)</div><div className="mt-1 text-xs text-slate-300">2026-10-16 08:30:00Z</div></div><div><div className="text-[10px] text-slate-600">Received time</div><div className="mt-1 text-xs text-slate-300">2026-10-16 08:30:01Z</div></div><div><div className="text-[10px] text-slate-600">Reading type</div><div className="mt-1 text-xs text-slate-300">Interval energy · 15 min</div></div></div><div className="mt-5 rounded-lg border border-white/[0.06] p-3 text-[11px] leading-relaxed text-slate-400">{scenario === "stale" ? "No valid interval received in the freshness window. The dashboard withholds current-period totals rather than substituting zero." : scenario === "reset" ? "Cumulative register decreased from 8,412.3 to 1.7 kWh. No rollover limit is configured, so the delta is held from billing." : scenario === "duplicate" ? "Event ID EVT-SIM-1038 already exists. Idempotent ingestion keeps the first accepted record and adds a duplicate audit outcome." : scenario === "tariff" ? "Tariff IN-DEMO-1.5 is effective for this scenario. Recalculation preserves the readings and points to the new tariff version." : scenario === "spike" ? "The usage rule flags the post-16:00 interval at 22% above baseline. No machine fault is inferred from the reading alone." : "The event validates against the demo schema, is normalized to kWh, and retains the source adapter and timestamp provenance."}</div></div><div className="rounded-xl border border-white/[0.07] bg-black/15 p-5"><div className="flex items-center gap-2 text-sm font-semibold"><Factory size={15} className="text-violet-300" />Watt2Yield reference scenario</div><p className="mt-2 text-xs leading-relaxed text-slate-400">The industrial example links energy to good output, then checks whether the proposed change preserves throughput and quality. This carries the Schneider project’s evidence discipline into a device-neutral workflow.</p><div className="mt-4 space-y-2 text-[11px]"><div className="flex justify-between rounded-lg bg-white/[0.03] px-3 py-2"><span className="text-slate-500">Energy per good unit</span><span className="text-slate-200">429 Wh / unit</span></div><div className="flex justify-between rounded-lg bg-white/[0.03] px-3 py-2"><span className="text-slate-500">Reference band</span><span className="text-slate-200">364 Wh / unit</span></div><div className="flex justify-between rounded-lg bg-white/[0.03] px-3 py-2"><span className="text-slate-500">Throughput guardrail</span><span className="text-emerald-200">7,990 good units</span></div><div className="flex justify-between rounded-lg bg-white/[0.03] px-3 py-2"><span className="text-slate-500">Reject rate</span><span className="text-emerald-200">2.1% · synthetic</span></div></div><div className="mt-4 rounded-lg border border-amber-300/10 bg-amber-300/[0.04] p-3 text-[10px] leading-relaxed text-amber-100/75">No savings claim is made from this synthetic sample. A real claim needs measured, matched pre/post periods and throughput plus quality guardrails.</div></div></div>
+          </section>
+          <section className="grid gap-4 md:grid-cols-3"><div className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-5"><div className="flex items-center gap-2 text-sm font-semibold"><Database size={16} className="text-sky-300" />Stable domain, replaceable adapters</div><p className="mt-2 text-xs leading-relaxed text-slate-500">Canonical records separate site, meter, interval/cumulative semantics, tariff version, provenance, and quality. Vendor and protocol connectors can be replaced without changing the dashboard contract.</p></div><div className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-5"><div className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck size={16} className="text-emerald-300" />AI is optional</div><p className="mt-2 text-xs leading-relaxed text-slate-500">Current signals use deterministic rules. Future models sit behind a provider boundary and must disclose model version, uncertainty, held-out evaluation, and rollback path.</p></div><div className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-5"><div className="flex items-center gap-2 text-sm font-semibold"><WifiOff size={16} className="text-amber-300" />No 30-year hardware promise</div><p className="mt-2 text-xs leading-relaxed text-slate-500">Long-lived value comes from exportable data and stable workflows. Hardware, protocols, hosting, and models are expected to change; the architecture isolates those choices.</p></div></section>
+        </>}
+        <footer className="flex flex-col justify-between gap-2 border-t border-white/[0.06] pt-4 text-[10px] text-slate-600 sm:flex-row"><span>Wattwise demo · synthetic readings · no external meter connected</span><span>Measured · calculated · model-estimated · scenario values stay distinct</span></footer>
+      </main>
+    </div>
+  </div>;
+}
