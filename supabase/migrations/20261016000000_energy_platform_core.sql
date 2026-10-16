@@ -270,9 +270,21 @@ create policy organizations_insert_creator on public.organizations for insert to
 create policy organizations_update_admin on public.organizations for update to authenticated using (public.has_org_role(id, array['owner', 'admin'])) with check (public.has_org_role(id, array['owner', 'admin']));
 
 create policy members_select_org on public.organization_members for select to authenticated using (public.is_org_member(organization_id));
-create policy members_insert_admin on public.organization_members for insert to authenticated with check (public.has_org_role(organization_id, array['owner', 'admin']));
-create policy members_update_admin on public.organization_members for update to authenticated using (public.has_org_role(organization_id, array['owner', 'admin'])) with check (public.has_org_role(organization_id, array['owner', 'admin']));
-create policy members_delete_admin on public.organization_members for delete to authenticated using (public.has_org_role(organization_id, array['owner', 'admin']));
+create policy members_insert_admin on public.organization_members for insert to authenticated
+with check (
+  public.has_org_role(organization_id, array['owner', 'admin'])
+  and role <> 'owner'
+  and (role <> 'admin' or public.has_org_role(organization_id, array['owner']))
+);
+create policy members_update_admin on public.organization_members for update to authenticated
+using (public.has_org_role(organization_id, array['owner', 'admin']) and role <> 'owner')
+with check (
+  public.has_org_role(organization_id, array['owner', 'admin'])
+  and role <> 'owner'
+  and (role <> 'admin' or public.has_org_role(organization_id, array['owner']))
+);
+create policy members_delete_admin on public.organization_members for delete to authenticated
+using (role <> 'owner' and public.has_org_role(organization_id, array['owner', 'admin']));
 
 create policy sites_select_org on public.sites for select to authenticated using (public.is_org_member(organization_id));
 create policy sites_insert_operator on public.sites for insert to authenticated with check (public.has_org_role(organization_id, array['owner', 'admin', 'operator']));
