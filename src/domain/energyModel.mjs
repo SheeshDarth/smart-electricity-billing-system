@@ -13,7 +13,7 @@ export function normalizeMeasurement(input) {
   if (!input || typeof input !== "object") return { status: "invalid", errors: ["record must be an object"] };
   if (!input.eventId || typeof input.eventId !== "string") errors.push("eventId is required");
   if (!input.siteId || !input.meterId) errors.push("siteId and meterId are required");
-  if (input.schemaVersion !== "1") errors.push("unsupported schemaVersion");
+  if (input.schemaVersion !== 1) errors.push("unsupported schemaVersion");
   if (!Number.isFinite(input.value)) errors.push("value must be finite");
   if (!(input.kind in TYPE_UNITS)) errors.push("unsupported measurement kind");
   if (!(input.unit in UNIT_SCALE)) errors.push("unsupported unit");
@@ -93,7 +93,7 @@ export function estimateEnergyCost(readings, tariff, options = {}) {
 }
 
 export function runDigitalTwinScenario(scenario, meterId = "MTR-I-033", siteId = "plant") {
-  const base = { schemaVersion: "1", siteId, meterId, kind: "interval_energy", unit: "Wh", quality: "valid", measuredAt: "2026-10-16T08:30:00Z", intervalStart: "2026-10-16T08:15:00Z", intervalEnd: "2026-10-16T08:30:00Z", sourceAdapter: "browser-digital-twin", sourceRecordRef: "twin://session-01" };
+  const base = { schemaVersion: 1, siteId, meterId, kind: "interval_energy", unit: "Wh", quality: "valid", measuredAt: "2026-10-16T08:30:00Z", intervalStart: "2026-10-16T08:15:00Z", intervalEnd: "2026-10-16T08:30:00Z", sourceAdapter: "browser-digital-twin", sourceRecordRef: "twin://session-01" };
   const event = { ...base, eventId: "EVT-SIM-1038", value: scenario === "spike" ? 760 : 620 };
   if (scenario === "stale") return { status: "stale", accepted: [], quarantined: [], duplicates: [], missingIsZero: false, tariffVersion: "IN-DEMO-1.4" };
   if (scenario === "reset") {
