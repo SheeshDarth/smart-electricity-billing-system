@@ -16,7 +16,7 @@ const RecentBills: React.FC<RecentBillsProps> = ({ billing, onBillingUpdate }) =
     if (updatingId) return;
     setUpdatingId(billId);
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("billing")
         .update({ paid: true })
         .eq("id", billId)
