@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { cumulativeDelta, deduplicateEvents, estimateEnergyCost, normalizeMeasurement, runDigitalTwinScenario } from "../src/domain/energyModel.mjs";
 
 const makeReading = (overrides = {}) => ({
-  eventId: "event-1", siteId: "site-1", meterId: "meter-1", schemaVersion: "1",
+  eventId: "event-1", siteId: "site-1", meterId: "meter-1", schemaVersion: 1,
   measuredAt: "2026-10-16T00:15:00Z", kind: "interval_energy", unit: "Wh", value: 500,
   quality: "valid", intervalStart: "2026-10-16T00:00:00Z", intervalEnd: "2026-10-16T00:15:00Z",
   sourceAdapter: "test", ...overrides,
