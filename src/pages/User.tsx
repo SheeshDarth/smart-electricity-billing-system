@@ -13,7 +13,7 @@ import BillHandler from "@/components/user/BillHandler";
 const UNIT_COST = 7.5; // INR per kWh as in dashboard
 
 const User = () => {
-  const [userData, setUserData] = useState<any | null>(null);
+  const [userData, setUserData] = useState<AuthUser | null>(null);
   const [energyUsage, setEnergyUsage] = useState<EnergyUsage[]>([]);
   const [billing, setBilling] = useState<Billing[]>([]);
   const [loading, setLoading] = useState(true);
