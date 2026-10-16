@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import type { User as AuthUser } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +14,7 @@ import BillHandler from "@/components/user/BillHandler";
 const UNIT_COST = 7.5; // INR per kWh as in dashboard
 
 const User = () => {
-  const [userData, setUserData] = useState<any | null>(null);
+  const [userData, setUserData] = useState<AuthUser | null>(null);
   const [energyUsage, setEnergyUsage] = useState<EnergyUsage[]>([]);
   const [billing, setBilling] = useState<Billing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +38,7 @@ const User = () => {
 
       try {
         // Get user's sockets
-        const { data: socketsData, error: socketsError } = await (supabase as any)
+        const { data: socketsData, error: socketsError } = await supabase
           .from('sockets')
           .select("id,number")
           .eq("user_id", session.user.id);
