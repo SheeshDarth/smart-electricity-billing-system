@@ -72,7 +72,7 @@ export default function Index() {
     const readings = Array.from({ length: 4 }, (_, index) => {
       const start = Date.parse("2026-10-16T08:00:00Z") + index * 15 * 60 * 1000;
       const end = start + 15 * 60 * 1000;
-      return { schemaVersion: "1", siteId: site.id, meterId: site.meter, eventId: site.meter + "-20261016-" + index, measuredAt: new Date(end).toISOString(), kind: "interval_energy", unit: "kWh", value: usage / 4, quality: "valid", intervalStart: new Date(start).toISOString(), intervalEnd: new Date(end).toISOString(), sourceAdapter: "browser-digital-twin" };
+      return { schemaVersion: 1, siteId: site.id, meterId: site.meter, eventId: site.meter + "-20261016-" + index, measuredAt: new Date(end).toISOString(), kind: "interval_energy", unit: "kWh", value: usage / 4, quality: "valid", intervalStart: new Date(start).toISOString(), intervalEnd: new Date(end).toISOString(), sourceAdapter: "browser-digital-twin" };
     });
     if (scenario === "reset") return estimateEnergyCost([{ ...readings[0], kind: "cumulative_energy", value: 1.7 }], tariff);
     if (scenario === "duplicate") readings.push({ ...readings[0] });
