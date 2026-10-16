@@ -27,16 +27,17 @@ const Admin = () => {
   }, [navigate]);
 
   const handleFetchSocket = async () => {
-    if (!socketNumber) return;
+    if (!socketNumber.trim()) return;
 
     try {
-      const { data, error } = await (supabase as any)
-        .from('sockets')
-        .select("*, energy_usage(*), billing(*)")
-        .eq("number", socketNumber)
+      const { data: socket, error } = await supabase
+        .from("sockets")
+        .select("id,number,user_id")
+        .eq("number", socketNumber.trim())
         .maybeSingle();
 
-      if (error || !data) {
+      if (error) throw error;
+      if (!socket) {
         toast({
           title: "Socket Not Found",
           description: "Check the socket number and try again.",
@@ -45,13 +46,24 @@ const Admin = () => {
         setSocketInfo(null);
         return;
       }
-      
-      setSocketInfo(data as SocketWithDetails);
+
+      const [usageResult, billingResult] = await Promise.all([
+        supabase.from("energy_usage").select("*").eq("socket_id", socket.id),
+        supabase.from("billing").select("*").eq("socket_id", socket.id),
+      ]);
+      if (usageResult.error) throw usageResult.error;
+      if (billingResult.error) throw billingResult.error;
+
+      setSocketInfo({
+        ...socket,
+        energy_usage: usageResult.data ?? [],
+        billing: billingResult.data ?? [],
+      });
     } catch (error) {
       console.error("Error fetching socket:", error);
       toast({
         title: "Error",
-        description: "An error occurred while fetching socket data.",
+        description: error instanceof Error ? error.message : "An error occurred while fetching socket data.",
         variant: "destructive",
       });
     }
@@ -76,12 +88,12 @@ const Admin = () => {
             <div>
               <h3 className="text-lg font-bold">Socket #{socketInfo.number}</h3>
               <div>User: {socketInfo.user_id}</div>
-              <div>Total usage: {(socketInfo.energy_usage?.reduce((sum: number, u: any) => sum + u.amount, 0) || 0).toFixed(2)} kWh</div>
+              <div>Total usage: {(socketInfo.energy_usage?.reduce((sum, usage) => sum + usage.amount, 0) || 0).toFixed(2)} kWh</div>
               {/* List billing info */}
               <div className="mt-4">
                 <strong>Billing this month:</strong>
                 <ul className="list-disc ml-5 mt-2">
-                  {socketInfo.billing?.map((bill: any) => (
+                  {socketInfo.billing?.map((bill) => (
                     <li key={bill.id}>
                       {bill.period}: ₹{bill.amount.toFixed(2)} (Paid: {bill.paid ? "Yes" : "No"})
                     </li>
