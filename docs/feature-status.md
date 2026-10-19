@@ -1,6 +1,6 @@
 # Feature and readiness matrix
 
-Status snapshot: 16 October 2026, branch codex/energy-product-enhancements. “Implemented” means present in this repository; it does not mean production validated, deployed, certified, or supported against live equipment.
+Status snapshot: 19 October 2026, PR #4 branch codex/phase2-db-rls-validation. “Implemented” means present in this repository; it does not mean production validated, deployed, certified, or supported against live equipment. CI run #34 validates the local migration, RLS suite, and Node checks; no hosted Supabase database was changed.
 
 ## Product capability status
 
@@ -17,11 +17,11 @@ Status snapshot: 16 October 2026, branch codex/energy-product-enhancements. “I
 | Industrial energy per good unit | **Illustrative scenario** | Watt2Yield informs context, throughput/quality guardrails, operator decisions, and matched-period verification. No measured factory data or savings claim exists. |
 | Action and savings verification | **Simulated evidence loop** | The twin demonstrates a human decision and simulated before/after state. It does not prove causality or measured savings. |
 | AI, GPU, or LLM analysis | **Not implemented** | No trained model, inference service, GPU dependency, model evaluation, or LLM flow exists. Core demo and estimate code do not require them. |
-| Multi-tenant database | **Schema draft** | Additive Supabase migration defines a cross-sector foundation. It has not been applied to a hosted database or adversarially tested for tenant isolation. |
+| Multi-tenant database | **CI validated locally** | Fresh local Supabase migration passes in CI run #34. 27 pgTAP assertions cover tenant-scoped reads on all 12 tables and representative viewer/operator/admin/owner write boundaries. No hosted project was migrated; full CRUD/policy matrix and rollback remain open. |
 | Authentication and authorization | **Not production validated** | Legacy routes retain old application assumptions. Frontend route checks are not a server-side authorization boundary. |
 | Evidence export | **Synthetic snapshot only** | The UI exports selected scenario, twin results, estimate, operator decision, and timestamp as JSON. Measurement-history export/import and buyer migration are not implemented. |
 | Real integrations | **Not implemented** | DLMS/COSEM, OPC UA, MQTT, vendor APIs, gateways, and hardware-in-the-loop integrations remain future work. See [source adapter contract](adapter-contract.md). |
-| Automated checks | **Starter CI and domain tests** | Pull-request CI runs lint, typecheck, selected Node domain tests, and production build. Tests cover unit mismatch, deduplication, counter reset, tariff boundaries, gaps, effective windows, expected interval count, and twin quarantine. UI, migration, RLS, daylight-boundary, and live-integration paths are not covered. |
+| Automated checks | **CI passing for current checks** | PR #4 CI run #34 passes Node 22/24 lint, typecheck, domain tests, production build, local Supabase migration, and 27 pgTAP assertions. UI interaction, full RLS CRUD matrix, export/import, daylight-boundary, and live integration remain uncovered. |
 | Deployment and operations | **Not packaged for production** | The repository has a local Vite demo and setup notes. Supported hosting, monitoring, backup, incident, and service-level commitments are undefined. |
 
 ## Profile matrix
@@ -36,7 +36,7 @@ Shared screens do not mean the three sectors are equally validated. Use a metric
 
 ## Buyer-safe description today
 
-> A browser-based, synthetic cross-sector energy monitoring prototype with in-process measurement normalization, deterministic cost estimates, a scenario evidence export, a Watt2Yield-inspired industrial example, and starter CI/domain tests.
+> A browser-based, synthetic cross-sector energy monitoring prototype with in-process measurement normalization, deterministic cost estimates, a scenario evidence export, a Watt2Yield-inspired industrial example, and CI-validated local migration/RLS tests.
 
 Do not describe this snapshot as utility AMI, a deployed multi-tenant service, a production billing or payment platform, live hardware interoperability, AI-powered diagnostics, certified compliance, or a proven energy-savings product.
 
@@ -44,7 +44,7 @@ Do not describe this snapshot as utility AMI, a deployed multi-tenant service, a
 
 1. Run from a clean checkout with no seller-owned credentials; keep the core demo deterministic and clearly synthetic.
 2. Validate the full tariff contract, including intervals crossing TOU boundaries, daylight-saving and timezone behavior, effective-date boundaries, missing tariff coverage, precision, and rounding.
-3. Add UI behavior tests and database migration/RLS tests using separate synthetic tenants; fix access boundaries before loading customer data.
+3. Add UI behavior tests and expand role-based database CRUD coverage; the clean local migration and current 27-assertion RLS suite pass in CI.
 4. Apply migrations to a disposable buyer-owned environment; verify rollback, recovery, and portable export/import semantics.
 5. Implement a real connector only for identified equipment and validate permissions, source mapping, units, timestamps, replay, and failure behavior.
 6. Obtain site-specific evidence before presenting industrial performance or savings; preserve throughput and quality guardrails alongside energy metrics.
