@@ -109,3 +109,4 @@ Do not present this branch as production-ready until all are true:
 - Missing, duplicate, late, reset, and invalid measurements have explicit outcomes.
 - Pilot outcomes distinguish measured savings from estimates and preserve throughput/quality.
 - Ownership, external data, licenses, and repository history have been reviewed.
+
