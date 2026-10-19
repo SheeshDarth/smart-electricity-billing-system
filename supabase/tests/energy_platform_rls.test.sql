@@ -138,7 +138,8 @@ select throws_ok($$insert into public.sites (organization_id, name, sector) valu
 select throws_ok($$insert into public.measurements (organization_id, site_id, meter_id, event_id, schema_version, measured_at, value, unit, kind, interval_start, interval_end, quality) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', '60000000-0000-0000-0000-000000000001', 'viewer-forbidden', 1, '2026-10-19T10:30:00Z', 0.1, 'kWh', 'interval_energy', '2026-10-19T10:15:00Z', '2026-10-19T10:30:00Z', 'valid')$$, '42501', null, 'viewer cannot insert measurements');
 select throws_ok($$insert into public.tariffs (organization_id, site_id, name, version, currency, timezone, effective_from, components) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Viewer tariff', 'viewer-forbidden', 'INR', 'Asia/Kolkata', '2026-01-01T00:00:00Z', '[]'::jsonb)$$, '42501', null, 'viewer cannot create tariffs');
 select throws_ok($$insert into public.organization_members (organization_id, user_id, role) values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000006', 'viewer')$$, '42501', null, 'viewer cannot add organization members');
-select is((with changed as (update public.sites set name = 'Viewer changed site' where id = '30000000-0000-0000-0000-000000000001' returning 1) select count(*)::integer from changed), 0, 'viewer cannot update site configuration');
+update public.sites set name = 'Viewer changed site' where id = '30000000-0000-0000-0000-000000000001';
+select is((select count(*)::integer from public.sites where id = '30000000-0000-0000-0000-000000000001' and name = 'Site A'), 1, 'viewer cannot update site configuration');
 
 set local request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
 set local request.jwt.claims = '{"sub":"10000000-0000-0000-0000-000000000003","role":"authenticated"}';
@@ -163,7 +164,8 @@ delete from public.organization_members where organization_id = '20000000-0000-0
 select is((select role from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000001'), 'owner', 'owner cannot demote or remove the final owner');
 select lives_ok($$insert into public.organizations (name) values ('Owner-created test organization')$$, 'authenticated owner can create an organization');
 select is((select count(*)::integer from public.organizations o join public.organization_members m on m.organization_id = o.id where o.name = 'Owner-created test organization' and m.user_id = '10000000-0000-0000-0000-000000000001' and m.role = 'owner'), 1, 'organization creator is automatically an owner');
-select is((with removed as (delete from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000004' returning 1) select count(*)::integer from removed), 1, 'owner can remove a viewer member');
+delete from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000004';
+select is((select count(*)::integer from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000004'), 0, 'owner can remove a viewer member');
 
 set local request.jwt.claim.sub = '10000000-0000-0000-0000-000000000004';
 set local request.jwt.claims = '{"sub":"10000000-0000-0000-0000-000000000004","role":"authenticated"}';
