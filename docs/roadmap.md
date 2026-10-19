@@ -1,6 +1,6 @@
 # Implementation gates and validation plan
 
-This roadmap records what was implemented in the feature branch and what remains before a pilot or sale. Status is as of 16 October 2026. Product validation interviews and live security checks have not been performed.
+This roadmap records implemented work and remaining pilot/sale gates. Status is as of 19 October 2026. Product validation interviews and hosted-project security checks have not been performed. CI on PR #4 applies the additive migration to a fresh local Supabase stack, passes 27 pgTAP assertions, and passes Node 22/24 lint, typecheck, unit tests, and production builds.
 
 ## Phase 0 — Validate buyer and use case (not started)
 
@@ -43,13 +43,13 @@ Before extending sector scope:
 
 **Still required:**
 
-- Run unit tests and SQL migration checks in CI; test the migration on a disposable Supabase instance, then add a rollback/upgrade path.
+- CI applies the migration to a clean local Supabase stack and passes 27 pgTAP assertions across all 12 energy platform tables. No hosted database has been migrated. Add a rollback/upgrade strategy before production use.
 - Add explicit fixtures and tests for invalid ranges, impossible/future timestamps, unit conversion, counter resets and configured rollovers, sequence gaps, late/out-of-order events, schema version rejection, daylight boundaries, tariff boundary crossings, and precision/rounding.
 - Add export/import schema and round-trip tests preserving timestamps, units, event IDs, quality, tariff version, and provenance.
-- Test tenant isolation with users from different organizations for every table and role. Cover anonymous, viewer, operator, admin, owner, membership removal, and last-owner constraints.
+- Extend RLS coverage to a full allowed/denied CRUD matrix for every role and table. Current pgTAP checks tenant-scoped reads for all 12 tables and representative viewer/operator/admin/owner write boundaries, including membership removal and last-owner protection.
 - Decide retention, raw event policy, correction events, deletion/export obligations, and partitioning based on measured workload.
 
-**Exit gate:** migration runs from a clean database; tests prove no cross-tenant reads/writes; import/export round-trips a fixture without changing cost outcomes.
+**Exit gate:** clean local migration and the tested tenant-read/representative-write boundaries pass in CI. The full gate remains open until a broader CRUD matrix, rollback/upgrade, and export/import round-trip checks also pass.
 
 ## Phase 3 — Complete the browser digital twin (implemented as synthetic demo)
 
@@ -94,9 +94,9 @@ Start with interpretable rules and robust statistical baselines. Add an inferenc
 
 ## Phase 7 — Security, deployment, and buyer package (partially implemented)
 
-**Implemented here:** CI workflow, README, architecture/data-contract notes, due-diligence checklist, roadmap, tests, sample synthetic workflow, and environment template.
+**Implemented here:** CI workflow, README, architecture/data-contract notes, due-diligence checklist, roadmap, tests, sample synthetic workflow, and environment template. PR #4 CI applies the database migration and passes 27 pgTAP assertions plus Node 22/24 checks.
 
-**Still required:** execute CI and resolve failures; validate SQL/RLS; add accessibility and browser interaction review; dependency/SBOM/license review; security and secret/history review; a clean deployment recipe; backup/export/restore; API/adapter contract; and a feature matrix with implemented/planned/unknown labels. Fill DataVendor fields only from verified outputs and reviewed private-data state.
+**Still required:** broaden RLS CRUD coverage; add migration rollback/upgrade checks; accessibility and browser interaction review; dependency/SBOM/license review; security and secret/history review; a clean deployment recipe; backup/export/restore; API/adapter contract; and a feature matrix with implemented/planned/unknown labels. Fill DataVendor fields only from verified outputs and reviewed private-data state.
 
 ## Release and pilot decision gates
 
