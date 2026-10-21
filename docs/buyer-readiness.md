@@ -6,7 +6,7 @@ This checklist is for preparing the energy prototype for a codebase marketplace.
 
 - The feature branch adds a synthetic browser twin, source-to-verification workflow, canonical measurement and tariff functions, a Node test suite, CI configuration, environment-based Supabase setup, an additive SQL schema draft, and setup/product documentation.
 - The root demo does not need a seller-owned database. Legacy /login, /admin, and /user screens still depend on the old schema and are not covered by the new migration.
-- CI has been added but must run on the pull request; a workflow file is not proof that checks pass.
+- Pull-request CI passed on Node 22 and 24 in [run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978), including lint, typecheck, domain tests, build, local Supabase migration, database lint, pgTAP, and disposable stack cleanup. It does not prove hosted production security.
 - The migration is not applied or audited against a hosted service.
 
 ## Repository and ownership
@@ -29,7 +29,7 @@ This checklist is for preparing the energy prototype for a codebase marketplace.
 
 ## Technical evidence for the marketplace listing
 
-- [ ] Run npm ci, npm run lint, npm run typecheck, npm test, and npm run build from a clean checkout.
+- [x] Run npm ci, npm run lint, npm run typecheck, npm test, and npm run build on clean CI checkouts: [run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978).
 - [x] Save the successful pull-request CI run and test output before claiming CI or test coverage: [CI run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978).
 - [ ] Verify a clean install and browser demo using no seller credentials.
 - [ ] Record exact supported Node, browser, database, and deployment versions; avoid long-lived hardware or vendor guarantees.
