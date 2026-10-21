@@ -15,8 +15,8 @@ Status snapshot: 21 October 2026, branch codex/phase2-db-rls-validation, PR #4. 
 | Utility bill comparison | Planned | Bill-to-estimate variance, reconciliation workflow, document input, and reviewer evidence are not implemented. |
 | Human review and outcome | Synthetic workflow | The browser demonstrates a local decision and simulated verification. It does not create a persistent intervention or prove savings. |
 | Energy archive schema v1 | Implemented domain utility | src/domain/energyArchive.mjs validates required top-level arrays and basic measurement fields, and serializes at most 10 MiB. It has no UI/database integration, entity relation checks, import transaction, or dedicated tests. |
-| Supabase multi-tenant schema | CI validated locally in earlier run | Additive migrations and 27 pgTAP assertions previously passed on a clean local stack, covering tenant reads and representative role write boundaries. No hosted database has been migrated. |
-| Database lint and cleanup | Added; latest CI pending | Workflow includes local database lint and always-run local stack shutdown. A green run of these added steps is needed before claiming the current pipeline passes. |
+| Supabase multi-tenant schema | CI validated locally | Additive migrations and 27 pgTAP assertions pass on a clean local stack, covering tenant reads and representative role write boundaries. No hosted database has been migrated. |
+| Database lint and cleanup | CI validated | Local schema lint and always-run Supabase stack cleanup passed in [CI run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978). |
 | Authentication and authorization | Not production validated | RLS tests are not a complete CRUD/policy audit. Legacy UI routes retain old application assumptions. |
 | Live meter adapters | Not implemented | No DLMS/COSEM, OPC UA, MQTT, vendor API, gateway, or hardware-in-the-loop integration. |
 | AI, GPU, or LLM service | Not implemented | No model, inference provider, evaluation dataset, AI diagnosis, or GPU dependency. Monitoring and cost domain logic do not require AI. |
@@ -40,7 +40,7 @@ Do not claim production authorization, live interoperability, jurisdiction-ready
 1. Validate buyer and pain through interviews; select one segment and document accessible meter and bill data.
 2. Complete an end-to-end bill comparison using test documents, stable tariff inputs, explicit variance treatment, and privacy/retention controls.
 3. Add dedicated archive parser/serializer tests, round-trip fixtures, malformed-input cases, relationship validation, import transaction design, and compatibility rules.
-4. Confirm the updated CI run passes migration, pgTAP, database lint, Node checks, and cleanup; expand RLS coverage to the full allowed/denied CRUD matrix and migration upgrade/recovery cases.
+4. Expand RLS coverage to the full allowed/denied CRUD matrix and migration upgrade/recovery cases.
 5. Validate tariff behavior for timezones/daylight transitions, boundaries, rounding, and customer-specific charges before presenting a production amount.
 6. Prototype a real source adapter only after buyer/equipment selection; verify identity binding, replay, ordering, timestamps, units, disconnection, and recovery.
 7. Conduct security, privacy, ownership, dependency-license, repository-history, external-backend, backup/restore, and operational review before handling live readings or bills.
