@@ -15,7 +15,7 @@ This is a narrower extension of the existing billing prototype than a broad ener
 - A browser demo with synthetic site and meter scenarios.
 - Domain code validates measurement kinds and units, normalizes supported units, deduplicates event IDs, quarantines unproven cumulative-register resets, and rejects missing intervals instead of treating them as zero.
 - Deterministic flat-rate and time-of-use estimates include tariff version, effective window, currency, timezone, and an interval breakdown.
-- An additive Supabase schema covers organizations, sites, meters, readings, tariffs, billing runs, insights, and interventions. Current CI validates a fresh local migration and 27 pgTAP assertions; hosted security and full CRUD coverage remain unverified.
+- An additive Supabase schema covers organizations, sites, meters, readings, tariffs, billing runs, insights, and interventions. An earlier CI run passed the clean local migration and 27 pgTAP assertions. CI now runs local database lint before pgTAP and always removes disposable volumes; the latest run must confirm these newer stages. Hosted security and full CRUD coverage remain unverified.
 - A browser workflow and synthetic evidence snapshot. Legacy login/admin/user billing screens, bill document, and payment flag are not the new product workflow.
 - This branch adds a versioned JSON archive validator/serializer as a portability foundation; it is not a database importer or UI export feature.
 
