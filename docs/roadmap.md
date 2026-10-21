@@ -1,111 +1,135 @@
-# Implementation gates and validation plan
+# Implementation roadmap and release gates
 
-This roadmap records what was implemented in the feature branch and what remains before a pilot or sale. Status is as of 16 October 2026. Product validation interviews and live security checks have not been performed.
+Status snapshot: 21 October 2026. This roadmap replaces the earlier broad energy-intelligence direction with a focused electricity visibility and bill-evidence hypothesis. Buyer demand and willingness to pay have not been validated. No customer data or hosted Supabase project has been used in this work.
 
-## Phase 0 — Validate buyer and use case (not started)
+## Product outcome
 
-The first product promise is: for organizations monitoring multiple locations, consolidate heterogeneous energy readings, show data quality and cost assumptions, explain unusual usage, and record whether an operator action changed the outcome. Home, office, and industrial examples share the data and workflow core, but do not pretend to share every business rule.
+A multi-site property or business operator should be able to import readings, understand which records are complete and trusted, calculate a transparent tariff-based estimate, compare it with a supplier-stated bill amount, investigate variances, and retain a review trail. This is a hypothesis, not a proven market need. The first pilot should be read-only and use synthetic or customer-approved sample data.
 
-Before extending sector scope:
+Core rules:
 
-1. Interview 2–3 home energy users, 2–3 building/facility operators, and 2–3 industrial energy or production operators (6–9 total). Do not collect names, meter IDs, bills, or confidential production data unless necessary and explicitly consented.
-2. Ask what sources they use, what decisions they make, what they distrust, which context is already available, and how they judge a successful intervention.
-3. Record the job, current workaround, buyer, data access, trust barrier, purchase trigger, and evidence needed. Use unknown where there is no evidence.
-4. Select one initial buyer profile and one demo/pilot scenario only after interviews. Keep the other sector profiles illustrative until demand is evidenced.
+- Show source, measured time, received time when available, unit conversion, quality, tariff version, and calculation assumptions for every summary.
+- Preserve unknown or missing as unknown. Never silently fill gaps with zero.
+- Distinguish measured reading, calculated estimate, supplier-stated bill amount, and simulated example.
+- Do not call a variance a fault or saving without evidence and comparable periods.
+- Keep protocol, storage, hosting, and any AI provider replaceable. Do not promise a specific technology lasts decades.
 
-**Exit gate:** one shared pain point has evidence from at least one target profile; a buyer, decision, required data, and success measure are stated. A cross-sector product story is retained only if interviews support shared workflow demand.
+## Current baseline
 
-### Interview prompts
+The branch has synthetic browser scenarios, measurement domain logic, deterministic flat/time-of-use estimates, additive Supabase migrations, and a versioned JSON archive utility. [CI run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978) passed the local migration, database lint, 27 pgTAP assertions, and stack cleanup. Bill import/comparison, live ingestion, persistent production workflow, a complete archive importer, and a supported deployment are not implemented.
 
-- Walk through the last time you noticed unexpectedly high energy use. What data did you inspect and what did you do next?
-- Which meter, building, machine, shift, output, tariff, and quality data can you access today? Who owns it?
-- What makes you trust or reject a baseline or alert? How many false alerts are tolerable?
-- If a suggested action changes energy use, what else must remain stable before you call it a saving?
-- What security, privacy, uptime, integration, procurement, or compliance conditions prevent a trial?
-- Who would sponsor and pay for a pilot, and what evidence would justify continuing?
+## P0 — Keep evaluation safe and reproducible
 
-## Phase 1 — Make the prototype safe to evaluate (partially implemented)
+### Work
 
-**Implemented here:** replaced the starter README, removed the Lovable runtime injection from the HTML shell, moved Supabase browser configuration to environment variables, ignored local env files, added a placeholder env template, and made the root demo synthetic and backend-independent. Added tests and pull-request CI scaffolding.
+1. Keep the root demo independent of seller-owned Supabase credentials and ensure a clean checkout can start from documented prerequisites.
+2. Keep the inherited login/admin/user flows labeled as legacy until they are migrated separately or removed by an explicit decision.
+3. Require npm install from lockfile, lint, typecheck, unit tests, production build, local Supabase migration, pgTAP, database lint, and always-run local stack cleanup on pull requests.
+4. Add focused tests for the energy archive parser and serializer: valid minimal archive; bad format/version; missing collections; malformed measurement; missing timezone; invalid interval range; non-finite values; oversize input; round-trip preservation of fields.
+5. Keep all screenshots and demo content labeled synthetic; verify the UI cannot imply that a simulated decision changed a real device.
+6. Complete the repository sale-readiness review separately: Git history, checked-in data, dependency licenses, ownership/contributor rights, current repository visibility, Lovable terms, and external Supabase project state.
 
-**Still required:**
+### Exit gate
 
-- Review full Git history, current GitHub visibility, Lovable ownership/transfer terms, dependency licenses, checked-in data, and commit contributors before making a sale or exclusivity statement.
-- Inspect the external Supabase project, policies, backups, logs, and records with its owner. The code change cannot establish that external data is private or deleted.
-- The new migration does not convert old billing tables. Decide whether legacy login/admin/user screens are retained, migrated, or removed before a production handoff.
-- Validate that authorization is enforced server-side for every legacy table and API. Frontend route checks are not an authorization boundary.
+Current status: CI's Node 22/24, local migration, database lint, pgTAP, and cleanup jobs passed in [run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978). README documents the root demo without seller credentials, but a clean-start smoke test remains outstanding. The archive parser/serializer test matrix in item 4, repository history and rights review, and external backend review also remain outstanding.
 
-**Exit gate:** a clean clone runs the twin with no seller credentials; a separate disposable database proves expected RLS behavior; ownership and data scope are documented.
+## P1 — Validate buyer, data access, and first scenario
 
-## Phase 2 — Establish the common model (partially implemented)
+### Work
 
-**Implemented here:** a version-1 measurement envelope, unit normalization, event ID deduplication, cumulative-register reset quarantine, effective-dated tariff estimation, and an additive multi-tenant SQL schema with roles and indexes.
+1. Start with one buyer hypothesis: multi-site property operators or small businesses. Interview 5–8 relevant operators before choosing the segment; include a finance/billing stakeholder where possible.
+2. Ask participants to walk through a recent unexpected bill or usage variance. Record current tools, decision, time spent, accessible exports, correction process, privacy constraints, buyer, purchase trigger, and acceptable onboarding effort.
+3. Request synthetic or redacted sample formats only with permission. Do not collect account credentials, bank/payment data, or identifiable bill documents for discovery.
+4. Make a dated competitor matrix covering source onboarding, missing-data handling, tariff assumptions, bill comparison, review trail, export, access control, and deployment. Use unknown when public evidence is absent.
+5. Compare candidate MVP flows by business value, data access, privacy burden, validation cost, and integration risk. Choose one site type and one tariff jurisdiction for the first pilot after interviews.
 
-**Still required:**
+### Exit gate
 
-- Run unit tests and SQL migration checks in CI; test the migration on a disposable Supabase instance, then add a rollback/upgrade path.
-- Add explicit fixtures and tests for invalid ranges, impossible/future timestamps, unit conversion, counter resets and configured rollovers, sequence gaps, late/out-of-order events, schema version rejection, daylight boundaries, tariff boundary crossings, and precision/rounding.
-- Add export/import schema and round-trip tests preserving timestamps, units, event IDs, quality, tariff version, and provenance.
-- Test tenant isolation with users from different organizations for every table and role. Cover anonymous, viewer, operator, admin, owner, membership removal, and last-owner constraints.
-- Decide retention, raw event policy, correction events, deletion/export obligations, and partitioning based on measured workload.
+At least one repeated pain point has evidence from multiple interviews; the user, buyer, decision, data source, and success metric are explicit; a permissible sample file or equivalent synthetic fixture represents the selected flow. If bill reconciliation is not a priority, stop before building document processing.
 
-**Exit gate:** migration runs from a clean database; tests prove no cross-tenant reads/writes; import/export round-trips a fixture without changing cost outcomes.
+## P2 — Build a safe reading import workflow
 
-## Phase 3 — Complete the browser digital twin (implemented as synthetic demo)
+### Work
 
-The portfolio, home/office/industrial profiles, source-to-verification workflow, and fault controls are present. Twin events use the versioned measurement module; duplicates and resets exercise explicit validation outcomes.
+1. Start with CSV upload or local sample file. Avoid live streaming protocols until one buyer and source are chosen.
+2. Provide a dry-run preview. Map timestamp, meter, value, unit, interval bounds, and source identifier; specify timezone and whether readings are interval energy or cumulative registers.
+3. Validate file size, rows, timestamp offset, supported unit, finite value, interval bounds, meter mapping, duplicate ID, and expected cadence before persistence.
+4. Return row-level accepted, duplicate, quarantined, and rejected outcomes with actionable reasons. Preserve the original file reference and row number; do not log sensitive full bill content.
+5. Make retries idempotent across uploads. Keep import batch ID, mapping version, user, time, and source digest. Prevent an uploaded row from changing site ownership.
+6. Render quality/freshness summaries from stored canonical records, including data coverage and explicit unknown periods.
 
-**Still required:**
+### Exit gate
 
-- Verify every scenario against a visible outcome and test the browser interaction at narrow and wide viewports.
-- Make the event detail view show raw source fields, normalized fields, quality reasons, calculation inputs, and provenance on demand.
-- Add replay, out-of-order, invalid unit/range, clock drift, disconnect/reconnect, and missing-interval scenarios.
-- Keep every simulation badge and simulated before/after result visible in exported screenshots and demo material.
+A second upload of the same file adds no duplicate energy; changed mappings are reviewable; invalid rows never enter totals; exports retain source lineage; user can see incomplete coverage without mistaking it for zero use.
 
-**Exit gate:** scenarios are deterministic, share the same validation path, and never imply a physical meter or actual savings.
+## P3 — Deliver transparent estimate and bill-variance review
 
-## Phase 4 — Portfolio metrics and cost estimates (partially implemented)
+### Work
 
-The domain module supports deterministic flat and time-of-day estimates; the UI uses a synthetic flat-rate fixture. A cost estimate is not an authoritative bill.
+1. Use effective-dated tariffs with currency, timezone, billing period, calculation version, and explicit components. Begin with flat and time-of-use examples only.
+2. Define billing cutoffs and supported interval cadence with the pilot user; split intervals across tariff boundaries only when the allocation assumption is displayed.
+3. Show estimate drill-down: source rows and accepted coverage, conversions, missing/quarantined rows, tariff component, rounding, subtotal, and total.
+4. Let the reviewer enter the bill period and supplier-stated amount manually for the first pilot. Add file parsing only after document privacy, retention, access, and error-correction needs are agreed.
+5. Compare estimate and bill as a variance with clear sign and units. Never claim a cause automatically; route differences to a review queue with evidence and user notes.
+6. Preserve source reading, tariff, calculation version, reviewer identity, timestamp, and correction history. Do not overwrite imported data silently.
+7. Keep taxes, fixed/demand charges, export/netting, arrears, penalties, and jurisdiction-specific rules out until reviewed against a named customer and tariff source.
 
-**Still required:**
+### Exit gate
 
-- Connect charts and period summaries to persisted interval readings, not display-only constants.
-- Build a reading-to-cost drill-down showing accepted interval IDs, rejected/missing intervals, conversions, tariff component, effective date, currency, timezone, calculation version, and rounding.
-- Add tariff slabs, fixed/demand charges, export/net metering and jurisdiction rules only for a validated customer and after domain review.
-- Support multiple meters and organization/site access with persisted user roles; do not infer floor-area or production normalization when context is missing.
-- Replace hard-coded synthetic summary cards with calculated fixture outputs and tests so every displayed subtotal reconciles.
+An independent reviewer can reproduce the estimate from the displayed records and tariff; incomplete intervals affect coverage visibly; bill comparison labels the bill as supplier-stated and the estimate as calculated; corrections are auditable.
 
-**Exit gate:** portfolio, site, and exported estimate reconcile to the same validated readings and tariff version, or are visibly incomplete.
+## P4 — Harden tenant boundaries and portability
 
-## Phase 5 — Watt2Yield-inspired evidence loop (simulation only today)
+### Work
 
-The UI presents industrial energy per good unit, reference, quality/throughput guardrails, operator decision buttons, and a simulated label. It does not yet implement matched before/after measurement or claim an intervention saved energy.
+1. Complete allowed/denied CRUD tests for each role on every tenant table, including cross-organization attempts, membership removal, and last-owner protection.
+2. Test migrations from a clean database and supported previous version; define rollback, forward-fix, backup, restore, retention, deletion, and export procedures.
+3. Complete the archive format contract: entity fields/relationships, IDs, timestamp semantics, unknown-field policy, compatibility rules, and privacy classification.
+4. Add round-trip and corruption checks and a dry-run import report before exposing archive import to users. Apply import transactionally; never partially mutate live data without a recoverable record.
+5. Validate secrets, role checks, row ownership, upload limits, rate limits, log redaction, and operational access before a live pilot.
+6. Choose a buyer-owned pilot deployment and define monitoring, backup cadence, recovery objective, incident contacts, data processing/retention terms, and support boundaries.
 
-**Next implementation:** cycle/session identity; machine state and product/load context; good/reject counts; baseline window; anomaly evidence; likely contributing factors with uncertainty; operator decision and notes; matched post-action window; throughput/reject guardrails; measured versus modeled versus simulated outcome types.
+### Exit gate
 
-**Exit gate:** one real pilot demonstrates an explainable signal, recorded operator decision, matched comparison, and stable throughput/quality. Synthetic data cannot satisfy this gate.
+Tenant isolation and restore/import checks pass in a disposable buyer-like environment; no seller credential or database is required to run; archive round-trip reproduces IDs, units, timestamps, quality, tariff, and source references.
 
-## Phase 6 — Evaluate optional AI (not implemented)
+## P5 — Add one real adapter and operate a bounded pilot
 
-Start with interpretable rules and robust statistical baselines. Add an inference provider only if it improves an agreed decision outcome on chronologically held-out sessions and separate sites. Evaluate baseline error/bias, anomaly precision/recall, false alerts per day or cycle, detection delay, model/site drift, latency, runtime cost, and privacy. Record input window, model/runtime version, uncertainty, and rollback. Monitoring and cost calculations must work with the provider unavailable. Do not use an LLM to diagnose a machine or alter a bill.
+### Work
 
-**Exit gate:** evaluation protocol and results are reproducible; model improves the agreed baseline; operator understands evidence and uncertainty; rollback is tested.
+1. Select a source only when a pilot buyer provides equipment or export documentation, sample records, data permission, and a responsible technical contact.
+2. Keep the adapter replaceable and map source data to the versioned canonical envelope. Bind source credentials to allowed organization/site/meter IDs server-side.
+3. Specify retry, duplicate, ordering, late-arrival, disconnect, replay, clock-drift, counter rollover, and recovery behavior. Use a durable idempotency store before streaming ingestion.
+4. Validate the connector against fixtures and vendor sandbox or hardware-in-the-loop where required. Record exact source models/versions tested.
+5. Start read-only. Measure onboarding effort, interval completeness, data freshness, duplicate/quarantine rate, estimate-to-bill variance, review usefulness, and support incidents.
 
-## Phase 7 — Security, deployment, and buyer package (partially implemented)
+### Exit gate
 
-**Implemented here:** CI workflow, README, architecture/data-contract notes, due-diligence checklist, roadmap, tests, sample synthetic workflow, and environment template.
+A named pilot source runs without bypassing tenant or quality checks; failure and recovery are visible; customer can export and restore data; pilot metrics have a baseline and an owner. Do not claim broad interoperability from one adapter.
 
-**Still required:** execute CI and resolve failures; validate SQL/RLS; add accessibility and browser interaction review; dependency/SBOM/license review; security and secret/history review; a clean deployment recipe; backup/export/restore; API/adapter contract; and a feature matrix with implemented/planned/unknown labels. Fill DataVendor fields only from verified outputs and reviewed private-data state.
+## P6 — Evaluate optional analytics and AI
 
-## Release and pilot decision gates
+Begin with transparent rules and simple statistical baselines. Add an inference provider only if real or appropriately de-identified data supports an agreed decision outcome. Evaluate chronologically held-out periods and separate sites where possible. Track false alerts, missed events, detection delay, bias, uncertainty, drift, latency, runtime cost, and privacy. Compare against the non-AI baseline and provide disable/rollback controls. Any summary must point to stored readings and rule/model version. AI may not set a bill amount or operate equipment.
 
-Do not present this branch as production-ready until all are true:
+### Exit gate
 
-- A new reviewer can run the demo from a clean checkout without the seller's backend, account, or credentials.
-- Tests, typecheck, lint, and production build pass in CI.
-- Tenant RLS tests prove isolation and role boundaries against the migrated schema.
-- Every dashboard cost and insight traces to data, tariff/rule/model version, and provenance.
-- Missing, duplicate, late, reset, and invalid measurements have explicit outcomes.
-- Pilot outcomes distinguish measured savings from estimates and preserve throughput/quality.
-- Ownership, external data, licenses, and repository history have been reviewed.
+Monitoring, estimates, exports, and history remain available when the AI service is off. A reproducible evaluation shows improvement on the buyer's agreed metric, with uncertainty and operational cost understood. GPU is an implementation choice, not a product requirement.
+
+## Risks and controls
+
+| Risk | Control |
+|---|---|
+| Buyer need is not distinct from existing dashboards or bill tools | Interview first; test file-to-evidence workflow against actual current process. |
+| Bad timestamps, units, gaps, or cumulative resets produce misleading totals | Validate rows, preserve raw references, surface coverage, quarantine ambiguous records. |
+| Tariff estimate diverges from actual bill | State assumptions/version, compare as estimate, validate only named jurisdiction and components. |
+| Bill documents expose private account or location data | Begin with manual amount/period; define access, storage, retention, deletion, and redaction before upload. |
+| Multi-tenant schema gives false confidence | Expand test matrix and review storage/API/server paths, migrations, backup, and recovery. |
+| One integration locks product into a vendor | Keep adapters versioned and replaceable; build only for validated demand. |
+| AI appears more certain than evidence supports | Keep optional, benchmark against rules, display uncertainty, avoid causal and savings claims. |
+| Scope expands toward utility/industrial control | Keep first pilot read-only; gate new context by buyer evidence and safety requirements. |
+
+## Success measures
+
+Do not set public numerical targets before baseline measurement. Track time to first trusted estimate, valid interval coverage, data freshness, duplicate/quarantine rates, estimate-to-bill variance with tariff coverage, review outcomes, onboarding effort, export recovery, and security/support incidents. These measure product usefulness without implying that a synthetic demo proves energy savings.
+
+For implemented status and exact limits, see [feature readiness](feature-status.md), [product scope](product-scope.md), and [architecture](architecture.md).

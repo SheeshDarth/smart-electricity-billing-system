@@ -48,3 +48,29 @@ jobs:
 
       - name: Build production bundle
         run: npm run build
+
+  database:
+    name: Database migration, RLS, and lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359 # v3
+        with:
+          version: 2.121.0
+
+      - name: Start disposable Supabase stack and apply migrations
+        run: supabase start
+
+      - name: Lint local database schema
+        run: supabase db lint --local --fail-on error
+
+      - name: Run pgTAP database and RLS tests
+        run: supabase test db --local
+
+      - name: Stop disposable Supabase stack
+        if: always()
+        run: supabase stop --no-backup
