@@ -11,9 +11,9 @@ This repository is a synthetic demonstration, not a deployed monitoring service,
 - A deterministic flat-rate and time-of-use cost estimator with effective dates, timezone context, and visible assumptions. Results are estimates, not official bills.
 - A workflow view that traces sample events through validation, site summaries, a signal, a human review, and simulated verification.
 - A JSON snapshot of the selected synthetic walkthrough. It is not a complete measurement-history export or migration package.
-- A versioned energy archive parser/serializer with schema validation and a 10 MiB input limit. It is a domain utility only; it is not connected to the UI, database, or import/export workflow.
+- A versioned energy archive parser/serializer with dedicated validation tests and a 10 MiB input limit. It remains a domain utility, not connected to the UI, database, or import/export workflow.
 - An additive Supabase schema for organizations, roles, sites, meters, readings, tariffs, billing runs, insights, and interventions. It has not been applied to any hosted project.
-- Pull-request CI for Node checks plus local Supabase migration, pgTAP, database lint, and stack cleanup.
+- Pull-request CI for Node checks, a built-demo HTTP smoke check, local Supabase migration, pgTAP, database lint, and stack cleanup.
 
 All readings and outcomes are synthetic. INR rates and tariff IDs are illustrative. No real savings, AI diagnosis, live hardware interoperability, or regulatory compliance is claimed.
 
@@ -34,8 +34,9 @@ See the [digital twin demo guide](docs/digital-twin-demo-guide.md) for scenario 
     npm run typecheck
     npm test
     npm run build
+    npm run smoke:demo
 
-The GitHub Actions workflow also starts a disposable local Supabase stack, applies migrations, runs database tests and lint, then stops the stack. These checks do not validate a hosted database or production deployment.
+The demo smoke check serves the built site locally without Supabase credentials and verifies that the HTML shell and JavaScript bundle respond. It is an HTTP packaging check, not an automated browser interaction test. The GitHub Actions workflow also starts a disposable local Supabase stack, applies migrations, runs database tests and lint, then stops the stack. These checks do not validate a hosted database or production deployment.
 
 ## Optional Supabase configuration
 
@@ -49,6 +50,7 @@ The new migration is additive and does not convert the legacy billing tables. Re
 - [Architecture and data contract](docs/architecture.md)
 - [Implementation roadmap](docs/roadmap.md)
 - [Feature and readiness matrix](docs/feature-status.md)
+- [Energy archive format v1](docs/energy-archive.md)
 - [Source adapter contract](docs/adapter-contract.md)
 - [Market landscape and differentiation hypothesis](docs/market-landscape.md)
 - [Buyer due-diligence checklist](docs/buyer-readiness.md)
