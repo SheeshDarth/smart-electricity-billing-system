@@ -30,7 +30,7 @@ This checklist is for preparing the energy prototype for a codebase marketplace.
 ## Technical evidence for the marketplace listing
 
 - [ ] Run npm ci, npm run lint, npm run typecheck, npm test, and npm run build from a clean checkout.
-- [ ] Save the successful pull-request CI run and test output before claiming CI or test coverage.
+- [x] Save the successful pull-request CI run and test output before claiming CI or test coverage: [CI run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978).
 - [ ] Verify a clean install and browser demo using no seller credentials.
 - [ ] Record exact supported Node, browser, database, and deployment versions; avoid long-lived hardware or vendor guarantees.
 - [ ] Label the digital twin, site records, scenarios, tariff, cost, and verification outcome as synthetic or simulated.
