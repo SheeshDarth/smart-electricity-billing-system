@@ -15,7 +15,7 @@ The first release should be read-only for physical data sources. It must not con
 | Browser portfolio and digital-twin scenarios | Synthetic demo; no live source |
 | Measurement normalization and tariff estimates | Domain module with deterministic tests |
 | Supabase multi-tenant migration and RLS tests | Additive migration; 27 pgTAP assertions previously passed in CI on a clean local stack; not applied to a hosted project |
-| Database lint and local-stack cleanup | Added to the CI workflow; latest run must confirm the new steps |
+| Database lint and local-stack cleanup | Passed in CI run 48 | Local schema lint and always-run Supabase stack cleanup passed; hosted projects are not involved |
 | Versioned JSON energy archive parser/serializer | Implemented in src/domain/energyArchive.mjs; not connected to UI/storage and not covered by dedicated archive tests |
 | Authenticated ingestion API, persistent production dashboards, live meter adapters | Not implemented |
 | Official utility invoices, payment processing, device control, AI inference | Not implemented |
@@ -70,7 +70,7 @@ This is an early serialization boundary, not a complete interchange specificatio
 
 ## Tenant and access model
 
-The additive Supabase migration defines organizations, memberships, sites, areas, assets, meters, source adapters, measurements, tariffs, billing runs, insights, and interventions. It defines organization-scoped access and role-specific policies. CI applies it to a disposable local stack and runs pgTAP. A previous CI run reported 27 assertions over tenant-scoped reads and representative role write boundaries. The newly added database lint step still needs a passing CI run.
+The additive Supabase migration defines organizations, memberships, sites, areas, assets, meters, source adapters, measurements, tariffs, billing runs, insights, and interventions. It defines organization-scoped access and role-specific policies. The clean local migration, database lint, pgTAP checks, and cleanup passed in [CI run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978). The pgTAP suite contains 27 assertions over tenant-scoped reads and representative role write boundaries. This remains a prototype check, not a production security audit.
 
 This is not a production security audit. Expand role/table CRUD tests, validate membership changes and owner recovery, review storage and API access, check every write path, exercise rollback/upgrade and backup/restore, and validate against a buyer-owned environment before real data. The client must never contain a service-role credential. Legacy billing routes and their tables are not converted by this migration.
 
