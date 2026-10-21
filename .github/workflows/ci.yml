@@ -67,3 +67,11 @@ jobs:
 
       - name: Run pgTAP database and RLS tests
         run: supabase test db --local
+
+
+      - name: Lint database schema
+        run: supabase db lint --local --fail-on error
+
+      - name: Stop disposable Supabase stack
+        if: always()
+        run: supabase stop --no-backup
