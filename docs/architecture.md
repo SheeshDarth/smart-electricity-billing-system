@@ -1,99 +1,89 @@
 # Architecture and data contract
 
-Date: 16 October 2026. This document separates code that exists on the feature branch from future architecture. It does not claim that a production ingestion service or live device connector has been deployed.
+Status snapshot: 21 October 2026. This document distinguishes implemented prototype code from proposed production architecture. Nothing here implies a live meter deployment, hosted database migration, or utility-grade billing service.
 
-## Current implementation status
+## Product boundary
 
-| Capability | Status in this branch |
+The first product hypothesis is electricity visibility and bill evidence for multi-site property or business operators. It should help a reviewer understand what readings were received, whether they are usable, what tariff assumptions produce an estimate, and how that estimate compares with a submitted bill. This buyer problem remains unvalidated. Home and office examples in the browser are synthetic; industrial content is demonstration material only. The rejected Schneider-linked concept is not a product requirement.
+
+The first release should be read-only for physical data sources. It must not control relays, breakers, or machinery. Billing calculations remain deterministic and explainable. AI is optional future work, never the source of billed totals.
+
+## Implementation status
+
+| Capability | Current status |
 |---|---|
-| Browser digital twin for home, office, and industrial profiles | Implemented with synthetic records |
-| Spike, stale source, duplicate event, counter reset, and tariff scenarios | Implemented in the twin; duplicate and reset pass through canonical validation functions |
-| Interval/cumulative distinction, unit normalization, duplicate suppression, reset quarantine, flat/TOU cost estimate | Implemented in src/domain/energyModel.mjs with deterministic tests |
-| Cross-sector relational schema and tenant role policies | Migration drafted; not applied to any hosted project and not yet validated against a live Supabase instance |
-| Real meter/gateway adapters, authenticated ingestion API, production dashboard persistence | Not implemented |
-| AI inference, causal attribution, machine control, official utility billing or payments | Not implemented |
+| Browser portfolio and digital-twin scenarios | Synthetic demo; no live source |
+| Measurement normalization and tariff estimates | Domain module with deterministic tests |
+| Supabase multi-tenant migration and RLS tests | Additive migration; 27 pgTAP assertions previously passed in CI on a clean local stack; not applied to a hosted project |
+| Database lint and local-stack cleanup | Passed in CI run 48 | Local schema lint and always-run Supabase stack cleanup passed; hosted projects are not involved |
+| Versioned JSON energy archive parser/serializer | Implemented in src/domain/energyArchive.mjs; not connected to UI/storage and not covered by dedicated archive tests |
+| Authenticated ingestion API, persistent production dashboards, live meter adapters | Not implemented |
+| Official utility invoices, payment processing, device control, AI inference | Not implemented |
 
-## Architecture direction
+## Data flow
 
-The browser twin is the first source implementation. Future protocol adapters should feed the same versioned event contract and validation logic rather than creating per-device dashboard or billing code paths.
+The demo exercises a local synthetic source through the same measurement validation and deterministic estimate logic used by its domain utilities. A future source adapter must enter through a server-side authenticated ingestion boundary; it must never bypass schema, quality, or tenant checks.
 
-~~~mermaid
+```mermaid
 flowchart LR
-  subgraph Implemented now
-    T[Browser digital twin] --> V[Canonical validation module]
-    V --> Q[Quality and deduplication outcome]
-    Q --> D[Portfolio and site demo]
-    D --> E[Explainable rule and tariff estimate]
-    E --> H[Human review decision]
-    H --> S[Simulated verification]
-  end
-  subgraph Future adapters and services
-    DL[DLMS or vendor adapter] -. planned .-> API[Versioned ingestion API]
-    OPC[OPC UA or site connector] -. planned .-> API
-    MQTT[Other authenticated source] -. planned .-> API
-    API -. planned .-> V2[Server-side quality gate]
-    V2 -. planned .-> DB[(Portable canonical store)]
-    DB -. planned .-> PORT[Portfolio and history views]
-    DB -. planned .-> BILL[Deterministic tariff engine]
-    DB -. optional .-> AI[Replaceable inference provider]
-    PORT --> EVT[Evidence and intervention record]
-    BILL --> EVT
-    AI --> EVT
-    EVT --> H2[Human approval]
-    H2 --> MV[Matched before/after measurement]
-    MV --> EVT
-  end
-~~~
-
-DLMS/COSEM and OPC UA are candidate integration boundaries, not implemented integrations. Hardware and protocols are adapter concerns. The durable product contract is the versioned data and evidence trail.
+  SRC[Meter file, vendor feed, or digital twin] --> AD[Replaceable source adapter]
+  AD --> ING[Versioned ingestion boundary]
+  ING --> VAL[Schema, identity, timestamp, and unit validation]
+  VAL --> Q{Quality outcome}
+  Q -->|accepted| REC[Canonical reading record]
+  Q -->|rejected or quarantined| ERR[Reasoned review queue]
+  REC --> VIEW[Site and portfolio usage view]
+  REC --> COST[Deterministic tariff estimate]
+  BILL[Submitted utility bill] --> CMP[Bill comparison evidence]
+  COST --> CMP
+  VIEW --> CMP
+  CMP --> HUM[Human review and notes]
+  HUM --> EXP[Portable archive and audit trail]
+```
 
 ## Canonical measurement envelope
 
-The migration stores these concepts independently of a device vendor:
+The migration and domain module describe energy data independently of a specific board or vendor. The core fields are:
 
-- organization_id, site_id, optional area/asset, meter_id, and optional adapter_id establish ownership and hierarchy.
-- schema_version, stable event_id, optional sequence_id, source_record_ref, and provenance allow replay-safe ingestion and later explanation.
-- measured_at is source event time in UTC; received_at is when the platform accepted it. Site timezone is separate display and tariff context.
-- kind distinguishes interval_energy, cumulative_energy, power, voltage, and current. Interval bounds are stored only when known.
-- value and unit retain an explicit physical unit. Normalization does not erase the source record reference.
-- quality is valid, suspect, invalid, or quarantined. Invalid and suspect records must remain diagnosable without entering cost totals.
+- Organization, site, optional area/asset, meter, and optional adapter identifiers define hierarchy and ownership.
+- Schema version, stable event ID, and optional source sequence/reference support reproducibility and duplicate detection.
+- Measured-at is event time with an explicit offset; received-at is a separate server timestamp. The site timezone is configuration for display and tariff evaluation.
+- Kind distinguishes interval energy, cumulative energy, power, voltage, and current. Bounds are required for interval-energy measurements.
+- Value and unit retain physical meaning. Supported domain conversions currently include Wh/kWh, W/kW, V, and A.
+- Quality is valid, suspect, invalid, or quarantined. Missing, stale, invalid, and incomplete readings must never be silently interpreted as zero.
 
-The current demo module supports Wh/kWh energy, W/kW power, V, and A. It rejects unsupported kind/unit combinations. Cumulative readings are differenced separately: a decrease is quarantined unless a configured register maximum proves rollover. The application must never silently treat a gap, invalid reading, or stale source as zero.
+The domain validator handles supported kinds/units, finite values, timestamps, duplicate IDs within one batch, and cumulative counter deltas. A decrease is quarantined unless a configured register maximum explains rollover. It does not provide durable cross-request idempotency, source authentication, a reorder buffer, or persistent raw-payload storage. The twin makes selected fault scenarios visible but does not prove the same behavior against hardware.
 
-The database applies a unique key to organization_id plus event_id as an idempotency backstop. A production ingestion service must also authenticate sources, validate payload size and schema version, bound timestamps, handle out-of-order arrivals, and record replay outcomes.
+## Tariff estimate and bill comparison
 
-## Tariff and cost contract
+Tariffs need currency, timezone, effective dates, billing period, and explicit charge components. The current deterministic estimator supports flat and time-of-use examples and returns a cost estimate with calculation details. It can split an interval across local-hour tariff boundaries and rejects gaps, overlaps, missing coverage, and incomplete expected interval sets. It is not a jurisdiction-ready invoice calculation.
 
-Tariffs are effective-dated, carry currency and timezone, and store components as structured data. Billing runs retain the tariff version and calculation version. The deterministic estimate function currently supports a flat rate and time-of-day hour bands; it rejects missing/overlapping intervals, readings outside the tariff effective window, incomplete expected interval counts, unsupported records, and uncovered time-of-use periods. It returns an estimated or incomplete outcome and does not create payment state.
+A future bill comparison should preserve the uploaded or entered bill amount, bill period, source document reference, tariff version, reading window, calculated estimate, variance, and reviewer notes. It must label the result as a comparison or estimate, not an authoritative charge. Any document handling needs privacy, retention, access, and deletion rules before accepting real customer bills.
 
-The UI's ₹8/kWh example is synthetic. Production tariff support still needs demand charges, taxes, fixed charges, jurisdiction-specific rounding, daylight-saving boundaries, meter multipliers, export/netting rules, corrections, and review by the customer or utility. AI and generative models must never set a billed amount.
+Production tariff work still requires customer-specific review of fixed and demand charges, taxes/fees, adjustments, net metering, meter multipliers, precision/rounding, timezones/daylight transitions, billing cutoffs, and correction workflows. AI must not change bill totals.
 
-## Tenant access model
+## Portable archive contract
 
-The additive Supabase migration defines organizations, organization_members, sites, areas, assets, meters, source_adapters, measurements, tariffs, billing_runs, insights, and interventions. Membership roles are owner, admin, operator, and viewer. RLS policies provide organization-scoped reads, operator-scoped operational writes, admin-scoped configuration, and append-only measurement behavior for authenticated users. Service-role keys must stay server-side.
+The current utility exports and revalidates a JSON document with format identifier wattwise.energy-archive and schema version 1. It requires arrays for organizations, sites, areas, assets, meters, adapters, measurements, tariffs, billing runs, insights, and interventions. Measurement entries receive basic checks for identifiers, schema version, timestamp offset, kind, unit, finite value, quality, and interval bounds. The parser limits input to 10 MiB.
 
-This SQL is a starting point, not a completed security audit. Apply it to a clean disposable Supabase project, inspect generated SQL, run cross-tenant read/write tests, verify role changes and deletion behavior, then add migration coverage before using it with customer data. The legacy billing tables and screens are not migrated by this schema.
+This is an early serialization boundary, not a complete interchange specification: entity-specific schemas and relationships are not fully checked; there is no import transaction, database mapping, migration path, cryptographic signature, or dedicated test suite yet. Before external use, document field semantics and compatibility policy, add round-trip and malformed-input tests, protect sensitive bill data, and decide how forward-compatible unknown fields are handled.
 
-## Watt2Yield evidence loop
+## Tenant and access model
 
-The Schneider/Watt2Yield project informs the industrial example: compare energy with good output, show the deviation and its evidence, let an operator choose the action, then verify a matched period while checking throughput and quality. The cross-sector core uses the same discipline but varies context by site:
+The additive Supabase migration defines organizations, memberships, sites, areas, assets, meters, source adapters, measurements, tariffs, billing runs, insights, and interventions. It defines organization-scoped access and role-specific policies. The clean local migration, database lint, pgTAP checks, and cleanup passed in [CI run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978). The pgTAP suite contains 27 assertions over tenant-scoped reads and representative role write boundaries. This remains a prototype check, not a production security audit.
 
-- Home: consumption patterns and optional generation/storage only when those signals exist.
-- Office/building: area or occupancy normalization only when source context is present and comparable.
-- Industrial: energy per good unit only when energy, cycle/output, good count, and reject context are available.
+This is not a production security audit. Expand role/table CRUD tests, validate membership changes and owner recovery, review storage and API access, check every write path, exercise rollback/upgrade and backup/restore, and validate against a buyer-owned environment before real data. The client must never contain a service-role credential. Legacy billing routes and their tables are not converted by this migration.
 
-An alert is not a machine diagnosis; correlation is not a verified saving. Any future model insight must carry its input window, model/rule version, confidence or uncertainty, and evidence. Savings need matched pre/post windows plus throughput and quality guardrails.
+## Replaceability and longevity
 
-## Optional AI and 30–40 year resilience
+Keep vendor transport, identity mapping, measurement normalization, tariff calculation, storage, and presentation behind stable interfaces. Preserve raw/source references alongside normalized values. Version schemas and migrations, publish an export contract, and test import/recovery. Add a new protocol only for identified equipment and validated buyer demand; DLMS/COSEM, OPC UA, MQTT, and vendor APIs are candidate options, not current features.
 
-Monitoring, data exports, deterministic cost calculation, and history must continue when AI is disabled or unavailable. Future inference belongs behind a provider boundary that can run on CPU, GPU, edge, or hosted compute. The product should record model/runtime versions, evaluate on chronologically separated and separate-site data, track false alerts and detection delay, compare candidate models with the current baseline, and support rollback. LLMs may summarize stored evidence but must not invent a fault or control equipment.
+Monitoring, historical calculations, exports, and cost estimates should remain useful if an AI provider or cloud service is unavailable. Future AI can be evaluated behind a provider interface with model/runtime version, input window, uncertainty, measured accuracy, and rollback. No specific board, protocol, hosting provider, model family, or framework can credibly be guaranteed for 30–40 years.
 
-No specific board, protocol, cloud, model, or framework can credibly be promised for 30–40 years. Long-lived value comes from open export formats, schema versions and migrations, replaceable adapters, stable identifiers, deterministic historical calculations, and a tested recovery path.
+## Security and operational limits
 
-## Security and operational boundaries
-
-- The root demo needs no seller-owned backend or secret.
-- Supabase client URL/key are read from environment variables. .env.example contains placeholders; publishable/anon keys are browser-safe but still require correct RLS.
-- The GitHub repository is currently public. This change does not change visibility, inspect external database state, revoke a key, or clean historical commits.
-- No physical control, relay operation, payment processing, or production bill is connected.
-- Export/import formats, backup/restore, production auth, audit logging, rate limits, retention, privacy review, and deployment automation remain future work.
+- The root browser demo requires no seller-owned backend credentials.
+- The GitHub repository is currently public; changing this branch does not change visibility or external Supabase state.
+- No physical control, payment processor, production invoice, or live adapter is connected.
+- Real readings or bills require access controls, retention/deletion rules, encryption, audit logs, incident response, and customer-approved hosting before a pilot.
+- The repository still needs history, checked-in-data, contributor ownership, dependency license, external backend, and transfer review before sale claims.
