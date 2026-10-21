@@ -31,7 +31,7 @@ The branch has synthetic browser scenarios, measurement domain logic, determinis
 
 ### Exit gate
 
-Latest CI is green on Node 22 and 24, including new database lint and cleanup steps; clean setup works without vendor secrets; archive utility behavior has focused tests. External backend and ownership facts are documented only after inspection by its owner.
+Current status: CI's Node 22/24, local migration, database lint, pgTAP, and cleanup jobs passed in [run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978). README documents the root demo without seller credentials, but a clean-start smoke test remains outstanding. The archive parser/serializer test matrix in item 4, repository history and rights review, and external backend review also remain outstanding.
 
 ## P1 — Validate buyer, data access, and first scenario
 
