@@ -1,6 +1,6 @@
 # Feature and readiness matrix
 
-Status snapshot: 21 October 2026, branch codex/phase2-db-rls-validation, PR #4. Implemented means code exists in this repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data.
+Status snapshot: 21 October 2026, branch codex/archive-demo-readiness. Implemented means code exists in this repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data.
 
 ## Product capability status
 
@@ -39,10 +39,10 @@ Do not claim production authorization, live interoperability, jurisdiction-ready
 
 1. Validate buyer and pain through interviews; select one segment and document accessible meter and bill data.
 2. Complete an end-to-end bill comparison using test documents, stable tariff inputs, explicit variance treatment, and privacy/retention controls.
-3. Add dedicated archive parser/serializer tests, round-trip fixtures, malformed-input cases, relationship validation, import transaction design, and compatibility rules.
+3. Add archive reference-integrity checks, duplicate/conflict behavior, rollback/transaction boundaries, compatibility rules, and production import design.
 4. Expand RLS coverage to the full allowed/denied CRUD matrix and migration upgrade/recovery cases.
 5. Validate tariff behavior for timezones/daylight transitions, boundaries, rounding, and customer-specific charges before presenting a production amount.
 6. Prototype a real source adapter only after buyer/equipment selection; verify identity binding, replay, ordering, timestamps, units, disconnection, and recovery.
 7. Conduct security, privacy, ownership, dependency-license, repository-history, external-backend, backup/restore, and operational review before handling live readings or bills.
 
-Related detail: [product scope](product-scope.md), [architecture](architecture.md), [roadmap](roadmap.md), [market landscape](market-landscape.md), [buyer due diligence](buyer-readiness.md), [source adapter contract](adapter-contract.md), and [demo guide](digital-twin-demo-guide.md).
+Related detail: [product scope](product-scope.md), [architecture](architecture.md), [energy archive format](energy-archive.md), [roadmap](roadmap.md), [market landscape](market-landscape.md), [buyer due diligence](buyer-readiness.md), [source adapter contract](adapter-contract.md), and [demo guide](digital-twin-demo-guide.md).
