@@ -1,30 +1,32 @@
-# Wattwise: cross-sector energy intelligence prototype
+# Wattwise: electricity visibility and bill evidence
 
-**Wattwise is a working product name.** This repository is being repositioned from a single smart-socket billing demo into a hardware-agnostic energy monitoring and evidence workflow. The current release is a browser simulation for buyer evaluation; it is not a utility billing product or a deployed meter platform.
+Wattwise is a working product name for a browser prototype that explores electricity usage, data quality, tariff-based cost estimates, and reviewable evidence. The initial product hypothesis is a lightweight way for multi-site property or business operators to understand readings and compare them with bills. This buyer and need are not yet validated.
+
+This repository is a synthetic demonstration, not a deployed monitoring service, utility billing system, payment processor, or certified meter platform.
 
 ## What works in this branch
 
-- A portfolio view with synthetic home, office, and industrial sites.
-- A browser digital twin with normal, usage-spike, stale-source, duplicate-event, counter-reset, invalid-unit, and tariff-change scenarios. It does not represent ESP32 hardware, a relay, or a physical device.
-- A visible workflow from source event through schema and quality checks, normalized site data, a deterministic signal, a human decision, and a simulated verification state.
-- A canonical measurement module that distinguishes interval energy from cumulative registers, normalizes supported units, suppresses duplicate event IDs, quarantines unverified counter resets, and refuses to turn missing intervals into zero.
-- A deterministic tariff estimate function with effective windows and timezone-aware time-of-use periods. Intervals are allocated by elapsed time across local-hour rate boundaries. Its output is an estimate, not an official bill or payment state.
-- A synthetic JSON evidence snapshot for inspecting the selected scenario, calculation, and operator decision. This is not a full measurement-history export or buyer migration tool.
-- A Supabase migration foundation for organizations, roles, sites, meters, readings, tariffs, billing runs, insights, and intervention evidence. It is additive and has not been applied to any hosted project.
-- Pull-request CI for lint, TypeScript checks, domain tests, and the production build.
+- A browser-based portfolio of synthetic sites and meters, with scenario controls for spikes, stale data, duplicates, counter resets, invalid units, and tariff changes.
+- A shared measurement validator that distinguishes interval energy from cumulative registers, normalizes supported units, detects duplicate event IDs in a batch, quarantines unverified counter resets, and does not turn missing intervals into zero.
+- A deterministic flat-rate and time-of-use cost estimator with effective dates, timezone context, and visible assumptions. Results are estimates, not official bills.
+- A workflow view that traces sample events through validation, site summaries, a signal, a human review, and simulated verification.
+- A JSON snapshot of the selected synthetic walkthrough. It is not a complete measurement-history export or migration package.
+- A versioned energy archive parser/serializer with schema validation and a 10 MiB input limit. It is a domain utility only; it is not connected to the UI, database, or import/export workflow.
+- An additive Supabase schema for organizations, roles, sites, meters, readings, tariffs, billing runs, insights, and interventions. It has not been applied to any hosted project.
+- Pull-request CI for Node checks plus local Supabase migration, pgTAP, database lint, and stack cleanup.
 
-All visible readings and outcomes are synthetic. The INR rates and tariff IDs are illustrative. No measured saving, AI diagnosis, regulatory compliance, or real hardware interoperability is claimed.
+All readings and outcomes are synthetic. INR rates and tariff IDs are illustrative. No real savings, AI diagnosis, live hardware interoperability, or regulatory compliance is claimed.
 
 ## Run locally
 
-Requirements: Node.js 22 or newer and npm. Node.js 24 LTS is the CI target.
+Requirements: Node.js 22 or newer and npm. CI checks Node.js 22 and 24.
 
     npm ci
     npm run dev
 
-Open the local URL printed by Vite. Choose a site and scenario in the portfolio controls, then open **Workflow** to follow the event trace. Use **View data lineage** for source, timestamp, quality, tariff, and calculation context. Use the evidence JSON export control to save the current synthetic walkthrough.
+Open the local Vite URL. Choose a site and scenario, then open Workflow to follow the event trace. Use View data lineage for source, timestamp, quality, tariff, and calculation context. The evidence JSON control saves the current synthetic walkthrough.
 
-For a step-by-step scenario guide, see [Digital twin demo guide](docs/digital-twin-demo-guide.md).
+See the [digital twin demo guide](docs/digital-twin-demo-guide.md) for scenario details.
 
 ## Quality checks
 
@@ -33,33 +35,34 @@ For a step-by-step scenario guide, see [Digital twin demo guide](docs/digital-tw
     npm test
     npm run build
 
-GitHub Actions runs these checks for pull requests and pushes to [main](https://github.com/SheeshDarth/smart-electricity-billing-system/tree/main). The domain tests use Node's built-in test runner and do not require a hosted database or credentials.
+The GitHub Actions workflow also starts a disposable local Supabase stack, applies migrations, runs database tests and lint, then stops the stack. These checks do not validate a hosted database or production deployment.
 
 ## Optional Supabase configuration
 
-The browser digital twin starts without Supabase. The inherited /login, /admin, and /user routes are legacy billing screens; they are not part of the new demo flow and still expect the old application tables. To exercise them, create a buyer-owned Supabase project, review and apply the appropriate migrations, then copy .env.example to .env.local and enter that project's URL and browser-safe publishable/anon key. Never put a service-role key in the browser or in this repository.
+The browser twin runs without Supabase. The inherited /login, /admin, and /user routes are legacy billing screens and are not part of the current demo flow; they still expect the old application tables. To exercise them, configure a buyer-owned Supabase project with the appropriate schema and environment variables. Never place a service-role key in browser code or this repository.
 
-The new migration creates the cross-sector schema only. It does not create or convert the legacy billing tables. The repository's current client no longer contains a project URL or key, but repository-history and external-backend review are still required before sale or transfer.
+The new migration is additive and does not convert the legacy billing tables. Repository history and any external backend still require separate review before transfer or sale.
 
-## Product and architecture notes
+## Product and engineering notes
 
+- [Product scope and pilot gates](docs/product-scope.md)
 - [Architecture and data contract](docs/architecture.md)
-- [Implementation gates and validation plan](docs/roadmap.md)
+- [Implementation roadmap](docs/roadmap.md)
 - [Feature and readiness matrix](docs/feature-status.md)
 - [Source adapter contract](docs/adapter-contract.md)
 - [Market landscape and differentiation hypothesis](docs/market-landscape.md)
 - [Buyer due-diligence checklist](docs/buyer-readiness.md)
 
-The industrial example follows the Watt2Yield project's evidence discipline: relate energy to good output when those signals exist, present a deviation with its context, ask an operator to decide, and verify a matched before/after period while guarding throughput and quality. The dashboard keeps this as an illustrative scenario; it does not reuse Schneider source code or assert factory savings.
+Schneider Electric is included in the market landscape as an established competitor. A previously explored Schneider-linked concept was rejected and is not the product direction. The industrial site in the browser remains synthetic demonstration content only.
 
-## Important limits before a pilot or sale
+## Important limits
 
-- No live meter, DLMS/COSEM, OPC UA, MQTT, gateway, or device connector is implemented. Those are future adapter options, not supported features today.
-- The twin exercises validation logic but is not a substitute for hardware-in-the-loop, site data, or safety testing.
-- The rule signal is deterministic. There is no trained AI model, LLM dependency, GPU workload, or verified model evaluation in this release.
-- The sample tariff is not jurisdiction-specific. Production billing needs tariff review, time-zone and daylight-boundary testing, taxes and fees, rounding rules, and local legal review.
-- The migration's row-level security policies need execution against a clean Supabase instance and adversarial tenant-isolation tests before production use. No hosted database has been changed by this work.
-- The original billing screens, payment flag, and bill document flow have not been converted into production payment or invoicing. Treat them as legacy demonstration code.
-- The GitHub repository is currently public. Repository history, Supabase project state, checked-in records, contributor ownership, and any Lovable relationship need review before making an exclusivity or private-data claim.
+- No live meter, gateway, DLMS/COSEM, OPC UA, MQTT, or vendor adapter is implemented.
+- The twin does not represent a specific board, control a device, or replace hardware-in-the-loop and site validation.
+- The rule signal is deterministic. No trained AI model, LLM service, or GPU workload is included.
+- The sample tariff is not jurisdiction-specific. Production billing requires validated tariff rules, taxes and fees, timezone and daylight-boundary behavior, rounding, and local review.
+- The new schema has local CI coverage, but hosted deployment, complete authorization review, recovery, and production readiness remain open.
+- The legacy payment flag and bill document flow are demo code, not payment processing or production invoicing.
+- The GitHub repository is currently public. Repository history, checked-in records, external backend state, ownership, licenses, and contributor rights need review before marketplace claims or transfer.
 
-The architecture targets replaceable sources, schema-versioned data, portable formats, deterministic cost calculation, and optional AI. A promise that a particular board, protocol, model, or hosting provider will last 30–40 years would be misleading.
+Long-term resilience comes from replaceable adapters and providers, versioned schemas, portable data, and deterministic calculations. No board, protocol, cloud, AI model, or framework can credibly be promised to last 30–40 years.
