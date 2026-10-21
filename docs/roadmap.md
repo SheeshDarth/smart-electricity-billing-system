@@ -16,7 +16,7 @@ Core rules:
 
 ## Current baseline
 
-The branch has synthetic browser scenarios, measurement domain logic, deterministic flat/time-of-use estimates, additive Supabase migrations, 27 pgTAP assertions that passed in an earlier local CI run, and a versioned JSON archive utility. The newest CI changes add database lint and stack cleanup; their latest run still needs confirmation. Bill import/comparison, live ingestion, persistent production workflow, a complete archive importer, and a supported deployment are not implemented.
+The branch has synthetic browser scenarios, measurement domain logic, deterministic flat/time-of-use estimates, additive Supabase migrations, and a versioned JSON archive utility. [CI run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978) passed the local migration, database lint, 27 pgTAP assertions, and stack cleanup. Bill import/comparison, live ingestion, persistent production workflow, a complete archive importer, and a supported deployment are not implemented.
 
 ## P0 — Keep evaluation safe and reproducible
 
