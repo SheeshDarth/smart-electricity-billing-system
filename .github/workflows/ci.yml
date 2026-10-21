@@ -49,6 +49,9 @@ jobs:
       - name: Build production bundle
         run: npm run build
 
+      - name: Smoke-test built demo without seller credentials
+        run: npm run smoke:demo
+
   database:
     name: Database migration, RLS, and lint
     runs-on: ubuntu-24.04
