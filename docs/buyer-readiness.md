@@ -4,7 +4,7 @@ Preparation notes for a possible codebase marketplace listing. This checklist do
 
 ## Current snapshot
 
-As of 27 October 2026, PR #5 (`codex/archive-demo-readiness`) is open and unmerged. Its [CI run 57](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39590374920) passed:
+As of 27 October 2026, PR #5 merged into `main`. The [default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240) passed:
 
 - Node 22 and 24: locked install, lint, typecheck, domain tests, production build, and no-credentials HTTP smoke check.
 - Disposable local Supabase: migration, database lint, pgTAP, and stack cleanup.
@@ -16,7 +16,7 @@ The branch contains a synthetic browser twin, measurement/tariff domain logic, a
 ## Listing blockers to resolve
 
 - [ ] **Repository privacy:** GitHub currently reports the repository as public. DataVendor's [estimator](https://datavendor.ai/estimator) says public repositories do not qualify for a private-supply quote. The visibility change was approved, but still requires an authenticated GitHub session and verification.
-- [ ] **Default branch:** PR #5 is open and unmerged. Merge only after review; verify the intended listing snapshot points to the resulting commit.
+- [x] **Default branch:** PR #5 is merged. The archive tests, demo smoke check, listing draft, and package metadata update are on `main`.
 - [ ] **Ownership and rights:** Review commit history, contributors, generated code, third-party work, fonts, icons, datasets, dependency licenses, and any Lovable relationship. GitHub reports no repository license metadata.
 - [ ] **History and secrets:** Review all commits and branches, not only the current tree, for credentials, personal/customer information, and material you cannot license.
 - [ ] **External backend:** Inspect any Supabase project for tables, users, logs, backups, storage, functions, secrets, and data retention. Its state is unknown from this repository review.
@@ -26,7 +26,7 @@ The branch contains a synthetic browser twin, measurement/tariff domain logic, a
 
 ## Evidence safe to describe
 
-- [x] Automated lint, typecheck, domain tests, production build, and demo HTTP packaging smoke pass in PR CI run 57.
+- [x] Automated lint, typecheck, domain tests, production build, and demo HTTP packaging smoke pass in default-branch CI run.
 - [x] Local disposable Supabase migration, database lint, pgTAP, and cleanup pass in PR CI run 57.
 - [x] The browser twin runs without a seller-owned Supabase project; it uses synthetic records.
 - [x] The repository documents supported flows and known limits in the [README](../README.md), [demo guide](digital-twin-demo-guide.md), and [feature matrix](feature-status.md).
@@ -40,7 +40,7 @@ The branch contains a synthetic browser twin, measurement/tariff domain logic, a
 | Domain | Electricity/energy software, tariff estimates, data-quality workflow | Select the closest available energy/software category; do not claim utility-grade AMI. |
 | Asking price | Seller price not selected; prior estimate is not refreshed for the current private snapshot | Re-run estimator after private-repository and rights checks, then choose a price and license scope. |
 | Tests/coverage | Automated tests pass in PR CI | State that tests pass. Leave any coverage percentage blank unless a coverage tool reports it. |
-| CI on PRs | GitHub Actions PR run 57 passed on the branch | Mark CI present only for the branch/commit containing these workflow changes. |
+| CI on PRs | Default-branch CI passed after PR #5 merged | Mark CI present; the current `main` branch contains the workflow changes. |
 | Private code supply | Repository is currently public | Do not claim private eligibility until the visibility change is applied and DataVendor re-scans it. |
 | Private data | Synthetic demo records; Git history and external backend not audited | Keep unconfirmed until both are reviewed. |
 
