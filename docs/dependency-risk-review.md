@@ -26,6 +26,6 @@ The scan establishes only that package metadata declares these expressions. A se
 
 The 27 October 2026 audit reports **zero known vulnerabilities**. To resolve the earlier 9 findings, Vite was upgraded to 6.4.5, `@vitejs/plugin-react-swc` to 3.11.0, and React Router DOM to 7.18.4. Unused Zod, `@hookform/resolvers`, Tailwind Typography, and Lovable's development tagger were removed. The Vite config no longer binds the development server to all network interfaces. `npm audit` must be re-run before listing because registry advisories change. This result does not certify the code or deployed environment as vulnerability-free.
 
-The dependency changes passed local lint, type-check, domain tests, production build, browser tests, and HTTP smoke checks. PR CI must pass again for the updated dependency set before merge.
+The dependency changes passed local lint, type-check, domain tests, production build, audit, and license-metadata checks. The updated Node 22/24, browser E2E, HTTP smoke, disposable migration, schema lint, and pgTAP jobs passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40494161969). The local Windows Codex sandbox cannot load SWC's native binding because it blocks the secure cache path; this is a sandbox limitation, while the clean Linux CI browser test passes.
 
 Run `npm audit` again before a listing or dependency release. The count is a time-specific registry result and can change. This report is not a claim that the repository is vulnerability-free.
