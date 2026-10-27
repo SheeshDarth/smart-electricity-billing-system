@@ -85,7 +85,7 @@ See the [digital-twin demo guide](digital-twin-demo-guide.md) and [e-bill workfl
 | Domain | Electricity/energy software and billing examples | Choose the closest available energy or software domain tags; avoid utility-grade or IoT claims. |
 | Asking price | No current seller price selected | Refresh the platform estimate after privacy changes, then choose a price and rights scope. A platform estimate is advisory, not a buyer offer. |
 | Tests and coverage | Automated tests exist and passed in CI | State that tests pass. Do not enter a coverage percentage unless a coverage tool produces one. |
-| CI on pull requests | Node 22/24 and disposable database jobs pass on `main` after PR #6 merged; e-bill changes pass local checks and await PR CI | Mark CI as present for the current default branch; claim the new workflow as CI-verified after its PR checks pass. |
+| CI on pull requests | Node 22/24 and disposable database jobs pass on `main` after PR #6 merged and on draft PR #7 | Mark CI as present; describe the new e-bill workflow as CI-verified but still unmerged. |
 | Private code supply | GitHub currently reports this repository as public while improvements are in progress | Do not claim a private-supply quote or publish until the intended final snapshot is private and DataVendor re-scans it. |
 | Private/personal data | This branch's demo values are synthetic; Git history and external Supabase state have not been audited | Keep this field unconfirmed until repository history and external backend data are reviewed. |
 

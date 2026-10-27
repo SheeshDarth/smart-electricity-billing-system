@@ -16,7 +16,7 @@ Core rules:
 
 ## Current baseline
 
-The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a versioned JSON archive utility, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. The e-bill slice validates interval-energy rows, calculates a flat tariff, supports a manually entered same-period supplier amount, and generates a PDF estimate. Files and bills are not persisted, and the PDF is not an official utility invoice. [Earlier default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240) passed before this workflow was added; pull-request CI must verify the new code. Live ingestion, supplier-document parsing, a complete archive importer, and a supported production deployment remain unimplemented.
+The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a versioned JSON archive utility, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. The e-bill slice validates interval-energy rows, calculates a flat tariff, supports a manually entered same-period supplier amount, and generates a PDF estimate. Files and bills are not persisted, and the PDF is not an official utility invoice. The earlier default-branch CI run passed before this workflow was added; draft [PR #7 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40481467654) passed Node 22/24 and disposable database checks. The PR remains unmerged. Live ingestion, supplier-document parsing, a complete archive importer, and a supported production deployment remain unimplemented.
 
 ## P0 — Keep evaluation safe and reproducible
 
@@ -31,7 +31,7 @@ The application includes synthetic browser scenarios, measurement and tariff dom
 
 ### Exit gate
 
-Current status: the Node 22/24 checks and disposable database job passed on main before this e-bill branch. Archive tests and the no-credentials HTTP smoke check are in main. The new local CSV/e-bill slice adds focused parser, estimate, and PDF checks in this branch; PR CI must pass before merge. Repository history, rights, external backend review, and buyer validation remain open.
+Current status: the Node 22/24 checks and disposable database job passed on main before this e-bill branch. Archive tests and the no-credentials HTTP smoke check are in main. The local CSV/e-bill slice adds focused parser, estimate, and PDF checks, and draft PR #7 CI has passed. Repository history, rights, external backend review, and buyer validation remain open.
 
 ## P1 — Validate buyer, data access, and first scenario
 
