@@ -52,7 +52,7 @@ The PDF includes:
 - a supplier-stated total and variance only after same-period confirmation;
 - the excluded charge classes and an estimate-only disclosure.
 
-The Chromium walkthrough downloads the generated PDF and verifies its `.pdf` filename, header, expected estimate and variance, and official-invoice disclaimer. These browser assertions passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40494987844). Domain tests separately verify cross-reference structure and additional required disclosures.
+The Chromium walkthrough downloads the generated PDF and verifies its `.pdf` filename, header, expected estimate and variance, and official-invoice disclaimer. These browser assertions passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40499896507). Replacing a CSV or changing its mapping, meter, or interval definition clears the previous supplier comparison. Domain tests separately verify cross-reference structure and additional required disclosures.
 
 The estimate excludes taxes, fixed charges, demand charges, arrears, export credits, corrections, meter multipliers, and jurisdiction-specific rules. No unsupported charge is silently added as zero or inferred from a supplier bill. Supplier amount is entered manually; the app does not upload or parse utility bill documents.
 
