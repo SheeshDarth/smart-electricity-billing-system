@@ -63,7 +63,7 @@ The new migration is additive and does not convert the legacy billing tables. Re
 - [Buyer due-diligence checklist](docs/buyer-readiness.md)
 - [Marketplace listing copy draft and readiness gates](docs/marketplace-listing-draft.md)
 
-The listing document is factual draft copy only. PR #6 merged into `main` on 27 October 2026. The current e-bill workflow changes are under development and must pass pull-request CI before merge. The repository is intentionally staying public while improvements are in progress; external Supabase state and the full rights position are unverified. Complete the technical and due-diligence work first, then make the intended listing snapshot private and refresh the platform estimate before publishing an offer or setting its price.
+The listing document is factual draft copy only. PR #6 merged into `main` on 27 October 2026. The e-bill implementation in draft PR #7 passed its Node 22/24 and disposable database CI checks; it remains unmerged. The repository is intentionally staying public while improvements are in progress; external Supabase state and the full rights position are unverified. Complete the technical and due-diligence work first, then make the intended listing snapshot private and refresh the platform estimate before publishing an offer or setting its price.
 
 Schneider Electric is included in the market landscape as an established competitor. A previously explored Schneider-linked concept was rejected and is not the product direction. The industrial site in the browser remains synthetic demonstration content only.
 

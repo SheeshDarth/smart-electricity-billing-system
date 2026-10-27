@@ -11,7 +11,7 @@ As of 27 October 2026, PR #6 merged into `main`. The [default-branch CI run](htt
 
 The smoke check confirms the built HTML shell and JavaScript bundle are served without Supabase credentials. It is not a browser interaction test. Database checks run locally in a disposable stack, not on a hosted project.
 
-The default branch contains a synthetic browser twin, measurement/tariff domain logic, archive parser/serializer and tests, GitHub Actions workflow, additive SQL schema, database tests, and product/setup documentation. The current development branch also adds the local CSV-to-e-bill estimate workflow; its local checks pass, and pull-request CI remains the merge gate. The energy archive utility is not connected to the UI or database.
+The default branch contains a synthetic browser twin, measurement/tariff domain logic, archive parser/serializer and tests, GitHub Actions workflow, additive SQL schema, database tests, and product/setup documentation. Draft PR #7 adds the local CSV-to-e-bill estimate workflow; its Node 22/24 and disposable database CI checks passed in [PR run 40481467654](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40481467654). It remains unmerged. The energy archive utility is not connected to the UI or database.
 
 ## Listing blockers to resolve
 
@@ -40,7 +40,7 @@ The default branch contains a synthetic browser twin, measurement/tariff domain 
 | Domain | Electricity/energy software, tariff estimates, data-quality workflow | Select the closest available energy/software category; do not claim utility-grade AMI. |
 | Asking price | Seller price not selected; prior estimate is not refreshed for the intended private snapshot | Re-run estimator after private-repository and rights checks, then choose a price and license scope. |
 | Tests/coverage | Automated tests pass in PR CI | State that tests pass. Leave any coverage percentage blank unless a coverage tool reports it. |
-| CI on PRs | Default-branch CI passed after PR #6 merged; current e-bill changes pass local checks and await PR CI | Mark CI present for the default branch; report the e-bill changes as verified only after their PR CI completes. |
+| CI on PRs | Default-branch CI and draft PR #7 checks passed on Node 22/24 and disposable database jobs | Mark CI present; describe the new e-bill branch as CI-verified but still unmerged. |
 | Private code supply | Repository is intentionally public during improvement work | Do not claim private eligibility until the final snapshot is private and DataVendor re-scans it. |
 | Private data | Synthetic demo records; Git history and external backend not audited | Keep unconfirmed until both are reviewed. |
 
