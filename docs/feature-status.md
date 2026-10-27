@@ -1,6 +1,6 @@
 # Feature and readiness matrix
 
-Status snapshot: 27 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. PR #8's latest [CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40494987844) passed Node 22/24, browser, migration, database lint, and pgTAP checks.
+Status snapshot: 27 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. PR #8's latest [CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40499896507) passed Node 22/24, browser, migration, database lint, and pgTAP checks.
 
 ## Product capability status
 
@@ -19,7 +19,7 @@ Status snapshot: 27 October 2026. “Implemented” means code exists in the rep
 | Energy archive v1 | Local export and validated summary | Browser exports synthetic linked records and validates a complete selected JSON archive. Reports all detected issues/counts and refuses partial import. No Supabase persistence, authentication, signature, full non-measurement schemas, or transactional production import. |
 | Supabase multi-tenant schema | Additive migration; expanded RLS suite passed in PR #8 CI | Role/table reads, representative writes, cross-organization denials, and membership changes pass against disposable tenants. Hosted project remains uninspected. |
 | Database lint and cleanup | Passed in PR #8 CI | Disposable migration, schema lint, pgTAP, and stack cleanup passed. Hosted projects are not involved. |
-| Demo packaging | HTTP smoke and browser E2E passed in PR #8 CI | HTTP smoke checks built assets. Two Chromium tests cover valid CSV/e-bill comparison and invalid-row blocking. |
+| Demo packaging | HTTP smoke and browser E2E passed in PR #8 CI | HTTP smoke checks built assets. Three Chromium tests cover valid CSV/e-bill comparison and PDF download, invalid-row blocking, and resetting supplier confirmation after file replacement. |
 | Domain coverage | Measured on current branch | Node reports 91.47% lines, 77.34% branches, 98.90% functions across four domain modules only. No UI, SQL, or whole-repository coverage claim. |
 | Authentication and authorization | Not production validated | RLS remains a draft schema. Tests are synthetic and not a full deployed security audit. Legacy routes retain old application assumptions. |
 | Live meter adapters | Not implemented | No DLMS/COSEM, OPC UA, MQTT, vendor API, gateway, or hardware-in-the-loop integration. |
@@ -29,7 +29,7 @@ Status snapshot: 27 October 2026. “Implemented” means code exists in the rep
 
 ## Target and non-target
 
-The initial buyer hypothesis is multi-site property or business operators who need a trustworthy view of usage, reading quality, and bill variance. It has not been validated through interviews or a live pilot. Three short research notes were sent to publicly listed property/facility operations business contacts on 27 October 2026; replies and interviews are pending. See the [interview guide](buyer-validation-interview-guide.md).
+The initial buyer hypothesis is multi-site property or business operators who need a trustworthy view of usage, reading quality, and bill variance. It has not been validated through interviews, customer evidence, or a live pilot. See the [interview guide](buyer-validation-interview-guide.md).
 
 The prototype is not a utility AMI/DISCOM replacement, smart-home controller, payment system, industrial optimization suite, or AI-savings product. The Schneider-linked concept was rejected. Schneider Electric appears only as a competitor; industrial demo records are illustrative.
 

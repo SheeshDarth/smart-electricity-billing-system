@@ -2,7 +2,7 @@
 
 ## Status
 
-This is a field guide, not evidence that interviews have happened. On 27 October 2026, three short research notes were sent to publicly listed business contact channels for property/facility operations organizations. Replies and interviews are pending. No billing files or customer data were requested. Conduct 3–5 short conversations before expanding sectors or integrations; do not request actual customer bills or identifiable meter exports, since synthetic or redacted examples are sufficient.
+This is a field guide, not evidence that interviews have happened. Conduct 3–5 short conversations before expanding sectors or integrations; do not request actual customer bills or identifiable meter exports, since synthetic or redacted examples are sufficient.
 
 ## Who to speak with
 
