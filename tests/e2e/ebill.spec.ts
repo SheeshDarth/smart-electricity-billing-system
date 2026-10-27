@@ -1,11 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { mkdirSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 const screenshots = resolve("docs/assets/ebill-walkthrough");
 const sampleCsv = resolve("public/sample-energy-readings.csv");
 
-test("CSV upload → validation → estimate → supplier bill comparison", async ({ page }) => {
+test("CSV upload → validation → estimate → comparison → PDF download", async ({ page }) => {
   page.clock.setFixedTime(new Date("2026-10-16T12:00:00.000Z"));
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
@@ -32,6 +33,18 @@ test("CSV upload → validation → estimate → supplier bill comparison", asyn
   await expect(page.getByText(/Variance:.*-₹3\.24/)).toBeVisible();
   await page.screenshot({ path: resolve(screenshots, "03-bill-variance.png"), fullPage: true });
 
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Download PDF" }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^wb-\d{14}-[a-z0-9]{5}\.pdf$/i);
+  const pdf = await readFile(await download.path());
+  const pdfText = pdf.toString("latin1");
+  expect(pdfText).toMatch(/^%PDF-1\.4/);
+  expect(pdfText).toContain("INR 21.76");
+  expect(pdfText).toContain("INR -3.24");
+  expect(pdfText).toContain("NOT AN OFFICIAL UTILITY INVOICE");
+  await expect(page.getByRole("status")).toContainText("E-bill PDF downloaded");
 });
 
 test("invalid CSV rows are reported and block bill generation", async ({ page }) => {
