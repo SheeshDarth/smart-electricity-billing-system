@@ -18,7 +18,7 @@ Research refresh: 21 October 2026. This is a public-document review, not a produ
 
 The initial feature list overlaps heavily with incumbent capability. EnergyCAP is the strongest direct comparison for multi-site bill and meter data; Egrid is a relevant India-facing comparison for sub-meter billing and tariff workflows. Home Assistant is a household energy-view comparator, while Schneider, Jio, and ABB demonstrate more mature building, utility, and industrial categories.
 
-This repo currently has no live data, file import, actual bill comparison, deployed roles, or operational history. It cannot compete on breadth, customer proof, integration coverage, compliance, or maturity. Its current value is a small prototype and a domain foundation for data-quality transparency and deterministic estimate explanations.
+This repo currently has no live data, deployed roles, or operational history. It includes a local interval-energy CSV import and a manually entered supplier-total comparison, but it does not parse utility bills or reconcile authoritative charges. It cannot compete on breadth, customer proof, integration coverage, compliance, or maturity. Its current value is a small prototype and a domain foundation for data-quality transparency and deterministic estimate explanations.
 
 ## Differentiation hypothesis to test
 

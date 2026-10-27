@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { estimateEnergyCost, runDigitalTwinScenario } from "@/domain/energyModel.mjs";
+import EbillWorkspace from "@/components/billing/EbillWorkspace";
 import {
   Activity, ArrowDownRight, ArrowRight, ArrowUpRight, Building2, Check,
   ChevronDown, ChevronRight, CircleAlert, CircleCheck, Clock3, Database, Factory,
@@ -57,7 +58,7 @@ export default function Index() {
   const [siteId, setSiteId] = useState("plant");
   const [scenario, setScenario] = useState<Scenario>("normal");
   const [decision, setDecision] = useState<Decision>(null);
-  const [view, setView] = useState<"overview" | "workflow">("overview");
+  const [view, setView] = useState<"overview" | "workflow" | "billing">("overview");
   const [scenarioOpen, setScenarioOpen] = useState(false);
   const [showLineage, setShowLineage] = useState(false);
   const site = SITES.find((item) => item.id === siteId) ?? SITES[2];
@@ -131,10 +132,11 @@ export default function Index() {
         <div className="hidden items-center gap-1 rounded-xl border border-white/[0.08] bg-white/[0.03] p-1 sm:flex">
           <button onClick={() => setView("overview")} className={"rounded-lg px-4 py-2 text-sm transition " + (view === "overview" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white")}>Portfolio</button>
           <button onClick={() => setView("workflow")} className={"rounded-lg px-4 py-2 text-sm transition " + (view === "workflow" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white")}>Workflow</button>
+          <button onClick={() => setView("billing")} className={"rounded-lg px-4 py-2 text-sm transition " + (view === "billing" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white")}>E-bill</button>
         </div>
         <div className="flex items-center gap-2"><span className="rounded-full border border-amber-400/25 bg-amber-300/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] text-amber-200"><span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-300" />Simulation</span><button onClick={exportEvidence} aria-label="Download evidence JSON" title="Download synthetic evidence JSON" className="rounded-xl border border-white/[0.08] p-2.5 text-slate-400 hover:text-white"><Download size={17} /></button></div>
       </div>
-      <div className="mx-auto flex max-w-[1500px] gap-1 px-5 pb-3 sm:hidden"><button onClick={() => setView("overview")} className={"rounded-lg px-3 py-2 text-xs " + (view === "overview" ? "bg-white/10" : "text-slate-400")}>Portfolio</button><button onClick={() => setView("workflow")} className={"rounded-lg px-3 py-2 text-xs " + (view === "workflow" ? "bg-white/10" : "text-slate-400")}>Workflow</button></div>
+      <div className="mx-auto flex max-w-[1500px] gap-1 px-5 pb-3 sm:hidden"><button onClick={() => setView("overview")} className={"rounded-lg px-3 py-2 text-xs " + (view === "overview" ? "bg-white/10" : "text-slate-400")}>Portfolio</button><button onClick={() => setView("workflow")} className={"rounded-lg px-3 py-2 text-xs " + (view === "workflow" ? "bg-white/10" : "text-slate-400")}>Workflow</button><button onClick={() => setView("billing")} className={"rounded-lg px-3 py-2 text-xs " + (view === "billing" ? "bg-white/10" : "text-slate-400")}>E-bill</button></div>
     </header>
 
     <div className="mx-auto grid max-w-[1500px] gap-6 px-5 py-6 lg:grid-cols-[245px_minmax(0,1fr)] lg:px-8 lg:py-8">
@@ -152,9 +154,9 @@ export default function Index() {
       </aside>
 
       <main className="min-w-0 space-y-6">
-        <section className="flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><div className="mb-2 flex items-center gap-2 text-xs text-slate-500"><span>Portfolio</span><ChevronRight size={13} /><span className="text-slate-300">{view === "workflow" ? "Evidence workflow" : site.name}</span></div><h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{view === "workflow" ? "From reading to verified action" : "Energy, with its context."}</h1><p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">{view === "workflow" ? "Follow one simulated event through ingestion, quality checks, a human decision, and a labelled before/after comparison." : "One portfolio view for homes, buildings, and production sites. Every value is traceable to its source and assumptions."}</p></div><div className="flex items-center gap-2 self-start rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-400 md:self-auto"><Clock3 size={14} />Today · 16 Oct 2026 <span className="mx-1 text-slate-700">|</span><span className="text-emerald-300">UTC stored</span></div></section>
+        <section className="flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><div className="mb-2 flex items-center gap-2 text-xs text-slate-500"><span>Portfolio</span><ChevronRight size={13} /><span className="text-slate-300">{view === "workflow" ? "Evidence workflow" : view === "billing" ? "E-bill builder" : site.name}</span></div><h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{view === "workflow" ? "From reading to verified action" : view === "billing" ? "Generate a transparent e-bill estimate" : "Energy, with its context."}</h1><p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">{view === "workflow" ? "Follow one simulated event through ingestion, quality checks, a human decision, and a labelled before/after comparison." : view === "billing" ? "Use validated interval readings and an explicit tariff to generate a downloadable PDF e-bill estimate." : "One portfolio view for homes, buildings, and production sites. Every value is traceable to its source and assumptions."}</p></div><div className="flex items-center gap-2 self-start rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-400 md:self-auto"><Clock3 size={14} />Today · 16 Oct 2026 <span className="mx-1 text-slate-700">|</span><span className="text-emerald-300">UTC stored</span></div></section>
 
-        {view === "overview" ? <>
+        {view === "billing" ? <EbillWorkspace siteId={site.id} siteName={site.name} defaultMeterId={site.meter} /> : view === "overview" ? <>
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard label="Portfolio energy · today" value={Math.round(portfolioEnergyKwh).toLocaleString("en-IN") + " kWh"} detail={coveredSites + "/" + SITES.length + " sites with usable readings"} icon={Zap} tone="blue" />
             <MetricCard label="Estimated energy cost" value={money(portfolioCost) + (unavailable ? " †" : "")} detail={unavailable ? "Partial portfolio · excluded site has no usable estimate" : "Estimated · current scenario tariff"} icon={Activity} tone="green" />

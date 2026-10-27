@@ -16,7 +16,7 @@ Core rules:
 
 ## Current baseline
 
-The `main` branch has synthetic browser scenarios, measurement domain logic, deterministic flat/time-of-use estimates, additive Supabase migrations, a versioned JSON archive utility with dedicated tests, and a no-credentials demo smoke check. [Default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240) passed the Node 22/24 checks and local database job. Bill import/comparison, live ingestion, persistent production workflow, a complete archive importer, and a supported deployment are not implemented.
+The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a versioned JSON archive utility, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. The e-bill slice validates interval-energy rows, calculates a flat tariff, supports a manually entered same-period supplier amount, and generates a PDF estimate. Files and bills are not persisted, and the PDF is not an official utility invoice. The earlier default-branch CI run passed before this workflow was added; draft [PR #7 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40481467654) passed Node 22/24 and disposable database checks. The PR remains unmerged. Live ingestion, supplier-document parsing, a complete archive importer, and a supported production deployment remain unimplemented.
 
 ## P0 — Keep evaluation safe and reproducible
 
@@ -31,7 +31,7 @@ The `main` branch has synthetic browser scenarios, measurement domain logic, det
 
 ### Exit gate
 
-Current status: the Node 22/24 checks and disposable database job pass in [default-branch CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240). The archive parser/serializer tests and no-credentials HTTP smoke check are complete. Repository history, rights, and external backend review remain open; these are diligence tasks, not software features. The next product slice remains a read-only CSV import preview and bill-variance review using synthetic fixtures until a buyer supplies approved sample data.
+Current status: the Node 22/24 checks and disposable database job passed on main before this e-bill branch. Archive tests and the no-credentials HTTP smoke check are in main. The local CSV/e-bill slice adds focused parser, estimate, and PDF checks, and draft PR #7 CI has passed. Repository history, rights, external backend review, and buyer validation remain open.
 
 ## P1 — Validate buyer, data access, and first scenario
 
@@ -49,6 +49,8 @@ At least one repeated pain point has evidence from multiple interviews; the user
 
 ## P2 — Build a safe reading import workflow
 
+Current implementation: the browser provides local CSV column mapping, an interval-energy preview, row-level rejection and duplicate handling, file/row limits, and a synthetic example. It does not persist import batches, provide cross-upload idempotence, or store source files.
+
 ### Work
 
 1. Start with CSV upload or local sample file. Avoid live streaming protocols until one buyer and source are chosen.
@@ -63,6 +65,8 @@ At least one repeated pain point has evidence from multiple interviews; the user
 A second upload of the same file adds no duplicate energy; changed mappings are reviewable; invalid rows never enter totals; exports retain source lineage; user can see incomplete coverage without mistaking it for zero use.
 
 ## P3 — Deliver transparent estimate and bill-variance review
+
+Current implementation: a single-meter e-bill PDF estimate uses validated interval-energy records and a user-configured flat tariff. It can include a reviewer-entered supplier total after same-period confirmation. Time-of-use tariffs in this workflow, supplier-document parsing, official invoice semantics, jurisdiction-specific components, and persistent review history remain open.
 
 ### Work
 
