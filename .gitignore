@@ -12,6 +12,7 @@ node_modules
 dist
 dist-ssr
 *.local
+/output/pdf/
 
 # Environment credentials (.env.example is safe to commit)
 .env
