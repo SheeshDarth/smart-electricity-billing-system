@@ -23,6 +23,6 @@ Legend: **R** read rows; **C** create; **U** update; **D** delete; **—** no po
 
 ## Test coverage in the repository
 
-The pgTAP suite seeds two organizations and owner, admin, operator, viewer, and second-tenant accounts. It checks tenant-scoped reads on all 12 tables for each role; representative allowed and denied writes by role; membership add/promotion/removal rules; final-owner protection; cross-organization insert attempts across the energy tables; and representative cross-organization membership, site, and meter update/delete denials. Run it with `supabase test db --local` after starting the disposable Supabase stack.
+The pgTAP suite seeds two organizations and owner, admin, operator, viewer, and second-tenant accounts. It checks tenant-scoped reads on all 12 tables for each role; representative allowed and denied writes by role; membership add/promotion/removal rules; final-owner protection; cross-organization insert attempts across the energy tables; and representative cross-organization membership, site, and intervention update/delete denials. Run it with `supabase test db --local` after starting the disposable Supabase stack.
 
 These tests do not inspect or change an external Supabase project. The project owner must review that project's deployed migration history, policies, auth settings, storage, logs, and secrets separately before any visibility change or transfer.
