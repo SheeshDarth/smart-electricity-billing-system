@@ -73,7 +73,7 @@ npm run build
 npm run smoke:demo
 ```
 
-PRs #6 and #7 are merged. PR #7's default-branch CI run passed its Node 22/24 checks and disposable database job. PR #8's latest [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40489575623) passed Node 22/24, browser E2E, database migration/lint, and expanded pgTAP. Locally, the branch passed 47 Node domain tests and two Playwright browser tests. Node measured 91.47% line, 77.34% branch, and 98.90% function coverage across four JavaScript domain modules only. The browser tests walk through accepted and rejected CSV rows, estimate calculation, same-period supplier comparison, variance, and blocked generation for invalid data. Database checks run against a disposable local stack, not a hosted project.
+PRs #6 and #7 are merged. PR #7's default-branch CI run passed its Node 22/24 checks and disposable database job. PR #8 remains an open draft; its latest [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40490158841) passed Node 22/24, browser E2E, database migration/lint, and expanded pgTAP. Locally, the branch passed 47 Node domain tests and two Playwright browser tests. Node measured 91.47% line, 77.34% branch, and 98.90% function coverage across four JavaScript domain modules only. The browser tests walk through accepted and rejected CSV rows, estimate calculation, same-period supplier comparison, variance, and blocked generation for invalid data. Database checks run against a disposable local stack, not a hosted project.
 
 See the [digital-twin demo guide](digital-twin-demo-guide.md), [e-bill workflow guide](ebill-generation.md), and [visual browser walkthrough](ebill-browser-walkthrough.md) for the steps and screenshots. The sample file is synthetic; uploaded files are handled locally in the browser. The Playwright test does not claim to verify browser-managed PDF downloads; PDF structure is covered by a separate domain test.
 
@@ -101,7 +101,7 @@ DataVendor's [codebase estimator](https://datavendor.ai/estimator) describes its
 5. Decide the exact license or sale scope, including AI training/use, derivative works, onward licensing, exclusivity, retention, and buyer access, with qualified advice where needed.
 6. Re-scan the intended repository snapshot and use its dated estimate as one input to the asking-price decision. Do not treat the prior screenshot estimate as current or guaranteed.
 7. Refresh the measured domain coverage after further code or test changes, and preserve its module scope. Do not enter it as UI, SQL, or whole-repository coverage.
-8. Complete 3–5 property/business operator interviews using the [buyer-validation guide](buyer-validation-interview-guide.md); record anonymized findings before expanding sector or integration scope.
+8. Complete 3–5 property/business operator interviews using the [buyer-validation guide](buyer-validation-interview-guide.md); three initial business-contact research notes were sent on 27 October 2026, with replies pending. Record anonymized findings before expanding sector or integration scope.
 9. Publish only after the private-data answer, rights, price, and delivered revision are confirmed.
 
 The DataVendor estimator and source-code guide are linked for reference. This draft does not accept terms or grant any buyer a license.

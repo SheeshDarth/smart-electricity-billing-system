@@ -1,6 +1,6 @@
 # Product scope: electricity visibility and bill evidence
 
-Status: working recommendation, updated 27 October 2026. Buyer demand has not been validated through interviews or a live pilot. Implemented prototype behavior is separated from proposed scope.
+Status: working recommendation, updated 27 October 2026. Buyer demand has not been validated through interviews or a live pilot. Three short research notes were sent to publicly listed property/facility operations business contacts; replies and interviews are pending. Implemented prototype behavior is separated from proposed scope.
 
 ## Product decision
 

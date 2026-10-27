@@ -14,7 +14,7 @@ The first release should be read-only for physical data sources. It must not con
 |---|---|
 | Browser portfolio and digital-twin scenarios | Synthetic demo; no live source |
 | Measurement normalization and tariff estimates | Domain module with deterministic tests |
-| Supabase multi-tenant migration and RLS tests | Additive migration; expanded role/table and cross-organization pgTAP suite passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40489575623). Not applied to a hosted project. |
+| Supabase multi-tenant migration and RLS tests | Additive migration; expanded role/table and cross-organization pgTAP suite passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40490158841). Not applied to a hosted project. |
 | Database lint and local-stack cleanup | Passed in PR #8 CI | Disposable migration, schema lint, and always-run stack cleanup passed; hosted projects are not involved |
 | Versioned JSON energy archive | Local synthetic export and validated preview; duplicate IDs and known cross-record references are checked; no database persistence or transactional production import. |
 | Authenticated ingestion API, persistent production dashboards, live meter adapters | Not implemented |
@@ -70,7 +70,7 @@ This is an early serialization boundary, not a complete interchange specificatio
 
 ## Tenant and access model
 
-The additive Supabase migration defines organizations, memberships, sites, areas, assets, meters, source adapters, measurements, tariffs, billing runs, insights, and interventions. It defines organization-scoped access and role-specific policies. The original 27-assertion suite passed in [default-branch CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240); the expanded role/table, cross-organization, and membership checks passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40489575623). These disposable tests do not inspect a hosted project and are not a production security audit.
+The additive Supabase migration defines organizations, memberships, sites, areas, assets, meters, source adapters, measurements, tariffs, billing runs, insights, and interventions. It defines organization-scoped access and role-specific policies. The original 27-assertion suite passed in [default-branch CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240); the expanded role/table, cross-organization, and membership checks passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40490158841). These disposable tests do not inspect a hosted project and are not a production security audit.
 
 This is not a production security audit. Expand role/table CRUD tests, validate membership changes and owner recovery, review storage and API access, check every write path, exercise rollback/upgrade and backup/restore, and validate against a buyer-owned environment before real data. The client must never contain a service-role credential. Legacy billing routes and their tables are not converted by this migration.
 
