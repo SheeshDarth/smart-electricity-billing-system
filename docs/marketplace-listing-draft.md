@@ -70,7 +70,7 @@ npm run build
 npm run smoke:demo
 ```
 
-The [successful PR CI run 57](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39590374920) passed the Node 22 and 24 jobs and the disposable Supabase migration, database-lint, and pgTAP job. The smoke check verifies HTTP delivery of the built HTML shell and JavaScript bundle; it is not an end-to-end browser interaction test. The database checks run against a disposable local stack, not a hosted project. Test coverage percentage is not currently measured or reported.
+The [successful default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240) passed the Node 22 and 24 jobs and the disposable Supabase migration, database-lint, and pgTAP job. The smoke check verifies HTTP delivery of the built HTML shell and JavaScript bundle; it is not an end-to-end browser interaction test. The database checks run against a disposable local stack, not a hosted project. Test coverage percentage is not currently measured or reported.
 
 See the [digital-twin demo guide](digital-twin-demo-guide.md) for the walkthrough and scenario meanings. All values and outcomes in that demo are synthetic or simulated.
 
@@ -82,7 +82,7 @@ See the [digital-twin demo guide](digital-twin-demo-guide.md) for the walkthroug
 | Domain | Electricity/energy software and billing examples | Choose the closest available energy or software domain tags; avoid utility-grade or IoT claims. |
 | Asking price | No current seller price selected | Refresh the platform estimate after privacy changes, then choose a price and rights scope. A platform estimate is advisory, not a buyer offer. |
 | Tests and coverage | Automated tests exist and passed in CI | State that tests pass. Do not enter a coverage percentage unless a coverage tool produces one. |
-| CI on pull requests | Node 22/24 and disposable database jobs pass on PR #5 | Mark CI as present after confirming the listing is based on the branch/commit containing PR #5. |
+| CI on pull requests | Node 22/24 and disposable database jobs pass on `main` after PR #5 merged | Mark CI as present for the current default branch. |
 | Private code supply | GitHub currently reports this repository as public | Do not claim a private-supply quote or publish until the approved visibility change is completed and DataVendor re-scans it. |
 | Private/personal data | This branch's demo values are synthetic; Git history and external Supabase state have not been audited | Keep this field unconfirmed until repository history and external backend data are reviewed. |
 

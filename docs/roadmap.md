@@ -1,6 +1,6 @@
 # Implementation roadmap and release gates
 
-Status snapshot: 21 October 2026. This roadmap replaces the earlier broad energy-intelligence direction with a focused electricity visibility and bill-evidence hypothesis. Buyer demand and willingness to pay have not been validated. No customer data or hosted Supabase project has been used in this work.
+Status snapshot: 27 October 2026. This roadmap replaces the earlier broad energy-intelligence direction with a focused electricity visibility and bill-evidence hypothesis. Buyer demand and willingness to pay have not been validated. No customer data or hosted Supabase project has been used in this work.
 
 ## Product outcome
 
@@ -16,7 +16,7 @@ Core rules:
 
 ## Current baseline
 
-The branch has synthetic browser scenarios, measurement domain logic, deterministic flat/time-of-use estimates, additive Supabase migrations, and a versioned JSON archive utility. [CI run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978) passed the local migration, database lint, 27 pgTAP assertions, and stack cleanup. Bill import/comparison, live ingestion, persistent production workflow, a complete archive importer, and a supported deployment are not implemented.
+The `main` branch has synthetic browser scenarios, measurement domain logic, deterministic flat/time-of-use estimates, additive Supabase migrations, a versioned JSON archive utility with dedicated tests, and a no-credentials demo smoke check. [Default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240) passed the Node 22/24 checks and local database job. Bill import/comparison, live ingestion, persistent production workflow, a complete archive importer, and a supported deployment are not implemented.
 
 ## P0 — Keep evaluation safe and reproducible
 
@@ -31,7 +31,7 @@ The branch has synthetic browser scenarios, measurement domain logic, determinis
 
 ### Exit gate
 
-Current status: CI's Node 22/24, local migration, database lint, pgTAP, and cleanup jobs passed in [run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978). README documents the root demo without seller credentials, but a clean-start smoke test remains outstanding. The archive parser/serializer test matrix in item 4, repository history and rights review, and external backend review also remain outstanding.
+Current status: the Node 22/24 checks and disposable database job pass in [default-branch CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240). The archive parser/serializer tests and no-credentials HTTP smoke check are complete. Repository history, rights, and external backend review remain open; these are diligence tasks, not software features. The next product slice remains a read-only CSV import preview and bill-variance review using synthetic fixtures until a buyer supplies approved sample data.
 
 ## P1 — Validate buyer, data access, and first scenario
 
