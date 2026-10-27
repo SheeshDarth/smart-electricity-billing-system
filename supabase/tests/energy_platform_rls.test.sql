@@ -152,8 +152,14 @@ select lives_ok($$insert into public.assets (organization_id, site_id, name, ass
 select throws_ok($$insert into public.areas (organization_id, site_id, name) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Operator area')$$, '42501', null, 'operator cannot create an area');
 select throws_ok($$insert into public.meters (organization_id, site_id, name, measurement_kind, canonical_unit) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Operator meter', 'interval_energy', 'kWh')$$, '42501', null, 'operator cannot change meter configuration');
 select throws_ok($$insert into public.source_adapters (organization_id, site_id, adapter_type) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'simulation')$$, '42501', null, 'operator cannot change source adapter configuration');
-select is((with changed as (update public.measurements set quality = 'suspect' where id = '80000000-0000-0000-0000-000000000001' returning 1) select count(*)::integer from changed), 0, 'operator cannot update append-only measurements');
-select is((with removed as (delete from public.billing_runs where id = 'a0000000-0000-0000-0000-000000000001' returning 1) select count(*)::integer from removed), 0, 'operator cannot delete a billing run');
+update public.measurements set quality = 'suspect' where id = '80000000-0000-0000-0000-000000000001';
+delete from public.billing_runs where id = 'a0000000-0000-0000-0000-000000000001';
+set local request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set local request.jwt.claims = '{"sub":"10000000-0000-0000-0000-000000000001","role":"authenticated"}';
+select is((select quality from public.measurements where id = '80000000-0000-0000-0000-000000000001'), 'valid', 'operator cannot update append-only measurements');
+select is((select count(*)::integer from public.billing_runs where id = 'a0000000-0000-0000-0000-000000000001'), 1, 'operator cannot delete a billing run');
+set local request.jwt.claim.sub = '10000000-0000-0000-0000-000000000003';
+set local request.jwt.claims = '{"sub":"10000000-0000-0000-0000-000000000003","role":"authenticated"}';
 select throws_ok($$insert into public.tariffs (organization_id, site_id, name, version, currency, timezone, effective_from, components) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Operator tariff', 'operator-forbidden', 'INR', 'Asia/Kolkata', '2026-01-01T00:00:00Z', '[]'::jsonb)$$, '42501', null, 'operator cannot change tariff configuration');
 select throws_ok($$insert into public.organization_members (organization_id, user_id, role) values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000006', 'viewer')$$, '42501', null, 'operator cannot change organization membership');
 
