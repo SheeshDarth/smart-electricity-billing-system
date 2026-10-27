@@ -1,6 +1,6 @@
 # Product scope: electricity visibility and bill evidence
 
-Status: working recommendation, 21 October 2026. Buyer demand has not been validated through interviews or a live pilot. Implemented prototype behavior is separated from proposed scope.
+Status: working recommendation, updated 27 October 2026. Buyer demand has not been validated through interviews or a live pilot. Implemented prototype behavior is separated from proposed scope.
 
 ## Product decision
 
@@ -15,9 +15,9 @@ This is a narrower extension of the existing billing prototype than a broad ener
 - A browser demo with synthetic site and meter scenarios.
 - Domain code validates measurement kinds and units, normalizes supported units, deduplicates event IDs, quarantines unproven cumulative-register resets, and rejects missing intervals instead of treating them as zero.
 - Deterministic flat-rate and time-of-use estimates include tariff version, effective window, currency, timezone, and an interval breakdown.
-- An additive Supabase schema covers organizations, sites, meters, readings, tariffs, billing runs, insights, and interventions. [CI run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978) passed the clean local migration, database lint, 27 pgTAP assertions, and disposable stack cleanup. Hosted security and full CRUD coverage remain unverified.
+- An additive Supabase schema covers organizations, sites, meters, readings, tariffs, billing runs, insights, and interventions. [default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240) passed the clean local migration, database lint, 27 pgTAP assertions, and disposable stack cleanup. Hosted security and full CRUD coverage remain unverified.
 - A browser workflow and synthetic evidence snapshot. Legacy login/admin/user billing screens, bill document, and payment flag are not the new product workflow.
-- This branch adds a versioned JSON archive validator/serializer as a portability foundation; it is not a database importer or UI export feature.
+- The repository includes a versioned JSON archive validator/serializer and dedicated tests as a portability foundation; it is not a database importer or UI export feature.
 
 All demo records and outcomes are synthetic. Passing local tests does not establish live support, tariff correctness, or production readiness.
 
