@@ -1,6 +1,6 @@
 # Feature and readiness matrix
 
-Status snapshot: 27 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. The current `codex/remaining-readiness` changes still need their own CI run.
+Status snapshot: 27 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. PR #8's latest CI run passed Node 22/24, browser, migration, database lint, and pgTAP checks.
 
 ## Product capability status
 
@@ -17,9 +17,9 @@ Status snapshot: 27 October 2026. “Implemented” means code exists in the rep
 | Supplier-stated bill comparison | Implemented manual comparison | Reviewer enters an amount and confirms same-period coverage. PDF shows estimate-minus-stated-total variance. No invoice parsing or persisted reconciliation history. |
 | Human review and outcome | Synthetic workflow | Local decision and simulated verification only; no persistent intervention or proven savings. |
 | Energy archive v1 | Local export and validated summary | Browser exports synthetic linked records and validates a complete selected JSON archive. Reports all detected issues/counts and refuses partial import. No Supabase persistence, authentication, signature, full non-measurement schemas, or transactional production import. |
-| Supabase multi-tenant schema | Additive migration; expanded RLS suite pending current CI | Existing merged CI passed the original test set. The current branch expands role/table read/write and cross-organization/membership checks; hosted project remains uninspected. |
-| Database lint and cleanup | Previously CI validated; current branch pending | Prior clean local migration/lint/test/cleanup passed in CI. Confirm this branch's expanded pgTAP result before describing it as passing. |
-| Demo packaging | Existing HTTP smoke plus new browser E2E | HTTP smoke checks built assets. Current branch adds two Chromium tests for valid CSV/e-bill comparison and invalid-row blocking; passed locally, branch CI pending. |
+| Supabase multi-tenant schema | Additive migration; expanded RLS suite passed in PR #8 CI | Role/table reads, representative writes, cross-organization denials, and membership changes pass against disposable tenants. Hosted project remains uninspected. |
+| Database lint and cleanup | Passed in PR #8 CI | Disposable migration, schema lint, pgTAP, and stack cleanup passed. Hosted projects are not involved. |
+| Demo packaging | HTTP smoke and browser E2E passed in PR #8 CI | HTTP smoke checks built assets. Two Chromium tests cover valid CSV/e-bill comparison and invalid-row blocking. |
 | Domain coverage | Measured on current branch | Node reports 91.47% lines, 77.34% branches, 98.90% functions across four domain modules only. No UI, SQL, or whole-repository coverage claim. |
 | Authentication and authorization | Not production validated | RLS remains a draft schema. Tests are synthetic and not a full deployed security audit. Legacy routes retain old application assumptions. |
 | Live meter adapters | Not implemented | No DLMS/COSEM, OPC UA, MQTT, vendor API, gateway, or hardware-in-the-loop integration. |
@@ -45,7 +45,6 @@ Do not claim production authorization, live interoperability, jurisdiction-ready
 2. The pattern-based history scan found one historical Supabase anonymous client key matching its historical project URL. The external project has not been reviewed.
 3. Ownership/contributor rights, project license, third-party asset rights, and full legal license compatibility review are incomplete.
 4. No operator interviews or customer pilot have validated the buyer hypothesis.
-5. Current readiness branch CI, especially the expanded database suite, still needs to pass.
-6. The current npm audit reports 9 advisories (7 moderate, 2 high) after safe semver updates.
+5. The current npm audit reports 9 advisories (7 moderate, 2 high) after safe semver updates.
 
 See [marketplace listing draft](marketplace-listing-draft.md) and [buyer due diligence](buyer-readiness.md) for detailed evidence and blockers.
