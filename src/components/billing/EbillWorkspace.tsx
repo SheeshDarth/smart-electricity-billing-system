@@ -93,6 +93,11 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
   const [actionMessage, setActionMessage] = useState("");
   const [bill, setBill] = useState<ReturnType<typeof createEnergyBill> | null>(null);
 
+  const resetSupplierComparison = () => {
+    setSupplierAmount("");
+    setSupplierPeriodConfirmed(false);
+  };
+
   useEffect(() => {
     setBill(null);
     setActionMessage("");
@@ -157,9 +162,11 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
     setFileError("");
     setActionMessage("");
     setBill(null);
+    resetSupplierComparison();
+    setFileName(file.name);
+    setCsvText("");
+    setHeaders([]);
     if (file.size > MAX_ENERGY_CSV_BYTES) {
-      setCsvText("");
-      setHeaders([]);
       setFileError("This file exceeds the 5 MiB import limit.");
       return;
     }
@@ -193,11 +200,15 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
   };
 
   const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) await loadCsv(file, "user-uploaded-csv");
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = "";
+    await loadCsv(file, "user-uploaded-csv");
   };
 
   const updateMapping = (key: keyof CsvMapping, value: string) => {
+    resetSupplierComparison();
     setMapping((current) => ({ ...current, [key]: value }));
   };
 
@@ -300,10 +311,10 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
           <p className="mt-1 text-xs text-slate-500">The generated document includes only interval energy and the selected flat tariff.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Site / bill name</span><input value={billSiteName} maxLength={68} onChange={(event) => setBillSiteName(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" />{!billSiteName.trim() && <span className="mt-1 block text-[10px] text-amber-200">Enter a site or bill name to generate the PDF.</span>}</label>
-            <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Default meter ID (used when no meter column is mapped)</span><input value={fallbackMeterId} onChange={(event) => setFallbackMeterId(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
-            <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Interval length when no start column exists</span><div className="flex items-center gap-2"><input type="number" min="1" max="1440" step="1" value={intervalMinutes} onChange={(event) => setIntervalMinutes(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /><span className="text-xs text-slate-500">minutes</span></div></label>
+            <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Default meter ID (used when no meter column is mapped)</span><input value={fallbackMeterId} onChange={(event) => { resetSupplierComparison(); setFallbackMeterId(event.target.value); }} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
+            <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Interval length when no start column exists</span><div className="flex items-center gap-2"><input type="number" min="1" max="1440" step="1" value={intervalMinutes} onChange={(event) => { resetSupplierComparison(); setIntervalMinutes(event.target.value); }} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /><span className="text-xs text-slate-500">minutes</span></div></label>
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Default unit when no unit column exists</span><select value={defaultUnit} onChange={(event) => setDefaultUnit(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50"><option value="kWh">kWh</option><option value="Wh">Wh</option></select></label>
-            {meterOptions.length > 0 && <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Meter for this e-bill</span><select value={activeMeter} onChange={(event) => setSelectedMeter(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50">{meterOptions.map((meter) => <option key={meter} value={meter}>{meter}</option>)}</select></label>}
+            {meterOptions.length > 0 && <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Meter for this e-bill</span><select value={activeMeter} onChange={(event) => { resetSupplierComparison(); setSelectedMeter(event.target.value); }} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50">{meterOptions.map((meter) => <option key={meter} value={meter}>{meter}</option>)}</select></label>}
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Tariff currency</span><input maxLength={3} value={currency} onChange={(event) => setCurrency(event.target.value.toUpperCase())} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm uppercase outline-none focus:border-cyan-300/50" /></label>
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Flat rate per kWh</span><input type="number" min="0" step="0.0001" value={ratePerKwh} onChange={(event) => setRatePerKwh(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Tariff version</span><input value={tariffVersion} onChange={(event) => setTariffVersion(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
