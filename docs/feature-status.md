@@ -1,6 +1,6 @@
 # Feature and readiness matrix
 
-Status snapshot: 27 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. PR #8's latest [CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40494161969) passed Node 22/24, browser, migration, database lint, and pgTAP checks.
+Status snapshot: 27 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. PR #8's latest [CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40494987844) passed Node 22/24, browser, migration, database lint, and pgTAP checks.
 
 ## Product capability status
 
