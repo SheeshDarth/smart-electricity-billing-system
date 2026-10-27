@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(27);
+select no_plan();
 
 -- Fixed synthetic users and two isolated organizations; the entire file rolls back.
 insert into auth.users (id, email) values
@@ -148,13 +148,26 @@ select lives_ok($$insert into public.measurements (organization_id, site_id, met
 select lives_ok($$insert into public.billing_runs (organization_id, site_id, tariff_id, period_start, period_end, calculation_version, status, energy_kwh, total_amount, currency, reading_count) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', '90000000-0000-0000-0000-000000000001', '2026-10-19T10:00:00Z', '2026-10-19T10:30:00Z', 'test-v1', 'complete', 0.6, 4.8, 'INR', 2)$$, 'operator can record a billing estimate');
 select lives_ok($$insert into public.insights (organization_id, site_id, source_type, rule_or_model_version, window_start, window_end, evidence) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'rule', 'test-v1', '2026-10-19T10:00:00Z', '2026-10-19T10:30:00Z', '{"synthetic":true}'::jsonb)$$, 'operator can record an insight');
 select lives_ok($$insert into public.interventions (organization_id, site_id, insight_id, decision, result_kind) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'investigate', 'simulated')$$, 'operator can record an intervention');
+select lives_ok($$insert into public.assets (organization_id, site_id, name, asset_type) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Operator asset', 'machine')$$, 'operator can create an asset in their organization');
+select throws_ok($$insert into public.areas (organization_id, site_id, name) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Operator area')$$, '42501', null, 'operator cannot create an area');
+select throws_ok($$insert into public.meters (organization_id, site_id, name, measurement_kind, canonical_unit) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Operator meter', 'interval_energy', 'kWh')$$, '42501', null, 'operator cannot change meter configuration');
+select throws_ok($$insert into public.source_adapters (organization_id, site_id, adapter_type) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'simulation')$$, '42501', null, 'operator cannot change source adapter configuration');
+select is((with changed as (update public.measurements set quality = 'suspect' where id = '80000000-0000-0000-0000-000000000001' returning 1) select count(*)::integer from changed), 0, 'operator cannot update append-only measurements');
+select is((with removed as (delete from public.billing_runs where id = 'a0000000-0000-0000-0000-000000000001' returning 1) select count(*)::integer from removed), 0, 'operator cannot delete a billing run');
 select throws_ok($$insert into public.tariffs (organization_id, site_id, name, version, currency, timezone, effective_from, components) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Operator tariff', 'operator-forbidden', 'INR', 'Asia/Kolkata', '2026-01-01T00:00:00Z', '[]'::jsonb)$$, '42501', null, 'operator cannot change tariff configuration');
 select throws_ok($$insert into public.organization_members (organization_id, user_id, role) values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000006', 'viewer')$$, '42501', null, 'operator cannot change organization membership');
 
 set local request.jwt.claim.sub = '10000000-0000-0000-0000-000000000002';
 set local request.jwt.claims = '{"sub":"10000000-0000-0000-0000-000000000002","role":"authenticated"}';
 select lives_ok($$insert into public.tariffs (organization_id, site_id, name, version, currency, timezone, effective_from, components) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Admin tariff', 'admin-test', 'INR', 'Asia/Kolkata', '2026-01-01T00:00:00Z', '[{"name":"energy","ratePerKwh":10}]'::jsonb)$$, 'admin can add tariff configuration');
+select lives_ok($$insert into public.areas (organization_id, site_id, name) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Admin area')$$, 'admin can create an area');
+select lives_ok($$insert into public.meters (organization_id, site_id, name, measurement_kind, canonical_unit) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Admin meter', 'interval_energy', 'kWh')$$, 'admin can create meter configuration');
+select lives_ok($$insert into public.source_adapters (organization_id, site_id, adapter_type) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'simulation')$$, 'admin can create source adapter configuration');
 select lives_ok($$insert into public.organization_members (organization_id, user_id, role) values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000006', 'viewer')$$, 'admin can add a viewer member');
+update public.organization_members set role = 'operator' where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000006';
+select is((select role from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000006'), 'operator', 'admin can change a non-owner member role');
+update public.organization_members set role = 'viewer' where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000006';
+select throws_ok($$update public.organization_members set role = 'admin' where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000006'$$, '42501', null, 'admin cannot grant another member admin role');
 select throws_ok($$update public.organization_members set role = 'owner' where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000006'$$, '42501', null, 'admin cannot promote a member to owner');
 
 set local request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
@@ -173,7 +186,37 @@ select is((select count(*)::integer from public.organizations), 0, 'removed view
 
 set local request.jwt.claim.sub = '10000000-0000-0000-0000-000000000005';
 set local request.jwt.claims = '{"sub":"10000000-0000-0000-0000-000000000005","role":"authenticated"}';
+select ok(
+  not exists (select 1 from public.organizations where id = '20000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.sites where id = '30000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.areas where id = '40000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.assets where id = '50000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.meters where id = '60000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.source_adapters where id = '70000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.measurements where id = '80000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.tariffs where id = '90000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.billing_runs where id = 'a0000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.insights where id = 'b0000000-0000-0000-0000-000000000001')
+  and not exists (select 1 from public.interventions where id = 'c0000000-0000-0000-0000-000000000001'),
+  'tenant B cannot read any tenant A row across the full table matrix'
+);
 select throws_ok($$insert into public.sites (organization_id, name, sector) values ('20000000-0000-0000-0000-000000000001', 'Cross-tenant forbidden', 'office')$$, '42501', null, 'tenant B user cannot create a site in tenant A');
+select throws_ok($$insert into public.organization_members (organization_id, user_id, role) values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000006', 'viewer')$$, '42501', null, 'tenant B owner cannot add a member to tenant A');
+select throws_ok($$insert into public.areas (organization_id, site_id, name) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Cross-tenant area')$$, '42501', null, 'tenant B cannot write tenant A areas');
+select throws_ok($$insert into public.assets (organization_id, site_id, name, asset_type) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Cross-tenant asset', 'machine')$$, '42501', null, 'tenant B cannot write tenant A assets');
+select throws_ok($$insert into public.meters (organization_id, site_id, name, measurement_kind, canonical_unit) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Cross-tenant meter', 'interval_energy', 'kWh')$$, '42501', null, 'tenant B cannot write tenant A meters');
+select throws_ok($$insert into public.source_adapters (organization_id, site_id, adapter_type) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'simulation')$$, '42501', null, 'tenant B cannot write tenant A source adapters');
+select throws_ok($$insert into public.measurements (organization_id, site_id, meter_id, event_id, schema_version, measured_at, value, unit, kind, interval_start, interval_end, quality) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', '60000000-0000-0000-0000-000000000001', 'cross-tenant-event', 1, '2026-10-19T10:30:00Z', 0.1, 'kWh', 'interval_energy', '2026-10-19T10:15:00Z', '2026-10-19T10:30:00Z', 'valid')$$, '42501', null, 'tenant B cannot append tenant A measurements');
+select throws_ok($$insert into public.tariffs (organization_id, site_id, name, version, currency, timezone, effective_from, components) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Cross-tenant tariff', 'cross-tenant', 'INR', 'Asia/Kolkata', '2026-01-01T00:00:00Z', '[]'::jsonb)$$, '42501', null, 'tenant B cannot write tenant A tariffs');
+select throws_ok($$insert into public.billing_runs (organization_id, site_id, tariff_id, period_start, period_end, calculation_version, status, energy_kwh, total_amount, currency, reading_count) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', '90000000-0000-0000-0000-000000000001', '2026-10-19T10:00:00Z', '2026-10-19T10:15:00Z', 'test-v1', 'complete', 0.5, 4, 'INR', 1)$$, '42501', null, 'tenant B cannot write tenant A billing runs');
+select throws_ok($$insert into public.insights (organization_id, site_id, source_type, rule_or_model_version, window_start, window_end, evidence) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'rule', 'test-v1', '2026-10-19T10:00:00Z', '2026-10-19T10:15:00Z', '{}'::jsonb)$$, '42501', null, 'tenant B cannot write tenant A insights');
+select throws_ok($$insert into public.interventions (organization_id, site_id, decision) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'investigate')$$, '42501', null, 'tenant B cannot write tenant A interventions');
+select is((with changed as (update public.organization_members set role = 'operator' where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000002' returning 1) select count(*)::integer from changed), 0, 'tenant B cannot change a tenant A member role');
+select is((with removed as (delete from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000002' returning 1) select count(*)::integer from removed), 0, 'tenant B cannot remove a tenant A member');
+select is((with changed as (update public.sites set name = 'Cross-tenant changed' where id = '30000000-0000-0000-0000-000000000001' returning 1) select count(*)::integer from changed), 0, 'tenant B cannot update a tenant A site');
+select is((with removed as (delete from public.meters where id = '60000000-0000-0000-0000-000000000001' returning 1) select count(*)::integer from removed), 0, 'tenant B cannot delete a tenant A meter');
+select lives_ok($$insert into public.assets (organization_id, site_id, name, asset_type) values ('20000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000002', 'Tenant B operator asset', 'machine')$$, 'tenant B owner retains write access within tenant B');
 
 select * from finish();
 rollback;

@@ -1,62 +1,51 @@
 # Feature and readiness matrix
 
-Status snapshot: 27 October 2026, after adding the local e-bill estimate workflow. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data.
+Status snapshot: 27 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. The current `codex/remaining-readiness` changes still need their own CI run.
 
 ## Product capability status
 
 | Capability | Status | Evidence and limit |
 |---|---|---|
 | Browser site and meter views | Synthetic demo | Illustrative home, office, and industrial records; no live sites or meters. |
-| Source-to-dashboard workflow | Local simulation | Twin readings pass through in-process validation; there is no production ingestion API, queue, or persistent stream. |
-| Measurement normalization | Implemented domain slice | Schema validation, supported unit conversion, quality outcomes, batch event-ID deduplication, and cumulative-register delta helper in `src/domain/energyModel.mjs`. No durable idempotency or register history. |
-| Data freshness and quality | Demo and domain checks | Spike, stale, duplicate, reset, and invalid-unit cases are simulated. There is no live monitoring or operational alert delivery. |
-| Flat/time-of-use estimate | Implemented deterministic domain logic | Effective date, currency, timezone, tariff version, interval allocation, and incomplete/gap rejection are handled. Results are estimates, not official bills. |
-| CSV reading preview | Implemented local-only workflow | Column mapping, explicit-offset timestamps, interval-energy unit checks, duplicate/conflict handling, row-level outcomes, 5 MiB file limit, and 50,000-row limit. No upload, persistence, cumulative-register conversion, or cross-session idempotency. |
-| Tariff coverage | Incomplete for production | Taxes, fixed/demand charges, adjustments, meter multipliers, net-metering, jurisdiction rounding, and daylight-saving validation remain open. |
-| E-bill PDF | Implemented estimate document | Generated locally from validated interval readings and the selected flat tariff. Shows the reading period, tariff and calculation versions, usage, charge, duplicate count, and excluded charge classes; explicitly disclaims official invoice or amount-due status. |
-| Supplier-stated bill comparison | Implemented manual comparison | Reviewer enters an amount and confirms it covers the same period. The PDF shows estimate-minus-stated-total variance; there is no supplier-document parsing, official bill validation, or persisted reconciliation record. |
-| Human review and outcome | Synthetic workflow | The browser demonstrates a local decision and simulated verification. It does not create a persistent intervention or prove savings. |
-| Energy archive schema v1 | Implemented domain utility; CI tested | `src/domain/energyArchive.mjs` validates the envelope and basic measurement fields, preserves unknown fields, and enforces a 10 MiB limit. Dedicated parser/serializer tests pass in PR CI. There is no entity relation check, UI/database integration, or transactional import/export. |
-| Supabase multi-tenant schema | CI validated locally | Additive migrations and 27 pgTAP assertions pass on a clean local stack, covering tenant reads and representative role write boundaries. No hosted database has been migrated. |
-| Database lint and cleanup | CI validated | Local schema lint and always-run Supabase stack cleanup pass in [default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240). |
-| Demo packaging | CI smoke checked | Built HTML shell and JavaScript bundle are served without Supabase credentials. This is an HTTP packaging check, not browser interaction coverage. |
-| Test coverage percentage | Not measured | Automated tests exist and pass, but coverage instrumentation/reporting is not configured. Do not claim a percentage. |
-| Authentication and authorization | Not production validated | RLS tests are not a complete CRUD/policy audit. Legacy UI routes retain old application assumptions. |
+| Source-to-dashboard workflow | Local simulation | Twin readings pass through in-process validation; no production ingestion API, queue, or persistent stream. |
+| Measurement normalization | Implemented domain slice | Schema validation, supported unit conversion, quality outcomes, batch event-ID deduplication, and cumulative-register delta helper. No durable idempotency or register history. |
+| Data freshness and quality | Demo and domain checks | Spike, stale, duplicate, reset, and invalid-unit cases are simulated. No live monitoring or alert delivery. |
+| Flat/time-of-use estimate | Implemented deterministic domain logic | Effective date, currency, timezone, tariff version, interval allocation, and incomplete/gap rejection. A multi-version tariff helper now splits intervals at effective boundaries. Results remain estimates. |
+| CSV reading preview | Implemented local-only workflow | Column mapping, explicit-offset timestamps, interval-energy unit checks, duplicate/conflict handling, row-level outcomes, 5 MiB/50,000-row limits. No upload, persistence, cumulative-register conversion, or cross-session idempotency. |
+| Tariff and data-quality cases | Expanded domain test coverage | Tests cover DST spring-forward/fall-back, tariff version boundaries/gaps/overlaps, rounding, duplicate and out-of-order readings, overlapping intervals, and reset validation. Jurisdiction-specific charges and production tariff verification remain open. |
+| E-bill PDF | Implemented estimate document | Generated locally from validated interval readings and selected flat tariff. Shows period, tariff/calculation versions, usage, charge, duplicate count, and exclusions; disclaims official invoice/amount due. |
+| Supplier-stated bill comparison | Implemented manual comparison | Reviewer enters an amount and confirms same-period coverage. PDF shows estimate-minus-stated-total variance. No invoice parsing or persisted reconciliation history. |
+| Human review and outcome | Synthetic workflow | Local decision and simulated verification only; no persistent intervention or proven savings. |
+| Energy archive v1 | Local export and validated summary | Browser exports synthetic linked records and validates a complete selected JSON archive. Reports all detected issues/counts and refuses partial import. No Supabase persistence, authentication, signature, full non-measurement schemas, or transactional production import. |
+| Supabase multi-tenant schema | Additive migration; expanded RLS suite pending current CI | Existing merged CI passed the original test set. The current branch expands role/table read/write and cross-organization/membership checks; hosted project remains uninspected. |
+| Database lint and cleanup | Previously CI validated; current branch pending | Prior clean local migration/lint/test/cleanup passed in CI. Confirm this branch's expanded pgTAP result before describing it as passing. |
+| Demo packaging | Existing HTTP smoke plus new browser E2E | HTTP smoke checks built assets. Current branch adds two Chromium tests for valid CSV/e-bill comparison and invalid-row blocking; passed locally, branch CI pending. |
+| Domain coverage | Measured on current branch | Node reports 91.47% lines, 77.34% branches, 98.90% functions across four domain modules only. No UI, SQL, or whole-repository coverage claim. |
+| Authentication and authorization | Not production validated | RLS remains a draft schema. Tests are synthetic and not a full deployed security audit. Legacy routes retain old application assumptions. |
 | Live meter adapters | Not implemented | No DLMS/COSEM, OPC UA, MQTT, vendor API, gateway, or hardware-in-the-loop integration. |
-| AI, GPU, or LLM service | Not implemented | No model, inference provider, evaluation dataset, AI diagnosis, or GPU dependency. Monitoring and cost logic do not require AI. |
-| Payments and authoritative invoices | Not implemented | Legacy payment flags and document screens remain demo code; the new E-bill is an estimate only. There is no payment processor or official invoice workflow. |
-| Deployment and operations | Not packaged for production | Hosting, monitoring, incident response, backups, recovery objectives, retention, and service-level commitments remain undefined. |
+| AI, GPU, or LLM service | Not implemented | No model, inference provider, evaluation dataset, AI diagnosis, or GPU dependency. Monitoring and costs do not require AI. |
+| Payments and authoritative invoices | Not implemented | Unused simulated card-entry modal removed; legacy billing flags remain explicitly demo-only. No payment processor or official invoice. |
+| Deployment and operations | Not packaged for production | Hosting, monitoring, incident response, backup/recovery objectives, retention, and service-level commitments remain undefined. |
 
 ## Target and non-target
 
-The initial buyer hypothesis is multi-site property or business operators who need a trustworthy view of usage, reading quality, and cost variance. This has not been validated through interviews or a live pilot.
+The initial buyer hypothesis is multi-site property or business operators who need a trustworthy view of usage, reading quality, and bill variance. It has not been validated through interviews or a live pilot. The [interview guide](buyer-validation-interview-guide.md) is prepared; no operator outreach has happened.
 
-The prototype is not a utility AMI/DISCOM replacement, smart-home controller, payment system, industrial optimization suite, or AI-savings product. The Schneider-linked concept was rejected. Schneider Electric appears only as a competitor in the market landscape; industrial demo records are illustrative.
+The prototype is not a utility AMI/DISCOM replacement, smart-home controller, payment system, industrial optimization suite, or AI-savings product. The Schneider-linked concept was rejected. Schneider Electric appears only as a competitor; industrial demo records are illustrative.
 
 ## Buyer-safe description
 
-> Wattwise is an early-stage browser prototype with synthetic energy scenarios and a local CSV-to-e-bill estimate workflow. It validates interval-energy rows, calculates a configurable flat-tariff estimate, supports a reviewer-entered supplier-total comparison, and generates a clearly labelled PDF. The repository also includes domain tests, CI, an additive Supabase schema draft, and technical documentation. It is not a deployed billing service, official invoicing system, or live meter platform.
+> Wattwise is an early-stage browser prototype with synthetic energy scenarios and a local CSV-to-e-bill estimate workflow. It validates interval-energy rows, calculates an explicit flat-tariff estimate, compares a reviewer-entered supplier total for a confirmed matching period, and generates a labelled PDF estimate. It also includes a local energy archive validator/exporter, domain tests, a draft additive Supabase schema, CI, and technical documentation. It is not a deployed billing service, official invoicing system, or live meter platform.
 
 Do not claim production authorization, live interoperability, jurisdiction-ready billing, supplier-document parsing, automated reconciliation, AI diagnostics, verified savings, compliance certification, or production security.
 
-## Current listing blockers
+## Listing blockers
 
-1. GitHub reports the repository as **public**. The repository will remain public while product improvements are in progress. Before the final private-supply listing, make the intended snapshot private, verify access, and re-run DataVendor's estimator; public-repository estimates do not establish private-supply eligibility.
-2. No customer pilot or buyer interviews have validated the multi-site property/business hypothesis.
-3. Git history, checked-in records, external backend state, ownership, contributor rights, generated content, and dependency licenses have not been fully reviewed.
-4. The external Supabase project's data and configuration are unknown from this repository review.
-5. Coverage percentage is not measured. Report passing tests and CI; do not enter a guessed coverage number.
+1. The GitHub repository remains public. Keep it that way until external-project and rights reviews are complete; then change visibility and refresh DataVendor's estimate.
+2. The pattern-based history scan found one historical Supabase anonymous client key matching its historical project URL. The external project has not been reviewed.
+3. Ownership/contributor rights, project license, third-party asset rights, and full legal license compatibility review are incomplete.
+4. No operator interviews or customer pilot have validated the buyer hypothesis.
+5. Current readiness branch CI, especially the expanded database suite, still needs to pass.
+6. The current npm audit reports 9 advisories (7 moderate, 2 high) after safe semver updates.
 
-See [marketplace listing draft](marketplace-listing-draft.md) for copy and the field-by-field evidence checklist.
-
-## Gates before a customer pilot
-
-1. Validate buyer and pain through interviews; select one segment and document accessible meter and bill data.
-2. Validate the CSV-to-e-bill workflow with buyer-approved formats, representative tariffs, explicit coverage and variance treatment, and privacy/retention controls.
-3. Add archive reference-integrity checks, duplicate/conflict behavior, rollback/transaction boundaries, compatibility rules, and production import design.
-4. Expand RLS coverage to the full allowed/denied CRUD matrix and migration upgrade/recovery cases.
-5. Validate tariff behavior for timezones/daylight transitions, boundaries, rounding, and customer-specific charges before presenting a production amount.
-6. Prototype a real source adapter only after buyer/equipment selection; verify identity binding, replay, ordering, timestamps, units, disconnection, and recovery.
-7. Conduct security, privacy, ownership, dependency-license, repository-history, external-backend, backup/restore, and operational review before handling live readings or bills.
-
-Related detail: [product scope](product-scope.md), [architecture](architecture.md), [energy archive format](energy-archive.md), [roadmap](roadmap.md), [market landscape](market-landscape.md), [buyer due diligence](buyer-readiness.md), [source adapter contract](adapter-contract.md), and [demo guide](digital-twin-demo-guide.md).
+See [marketplace listing draft](marketplace-listing-draft.md) and [buyer due diligence](buyer-readiness.md) for detailed evidence and blockers.

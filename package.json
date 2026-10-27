@@ -13,6 +13,11 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "test": "node --test",
+    "test:coverage": "node --experimental-test-coverage --test",
+    "test:e2e": "node scripts/playwright.mjs test",
+    "test:e2e:install": "node scripts/playwright.mjs install",
+    "audit:licenses": "node scripts/audit-dependency-licenses.mjs",
+    "audit:history-secrets": "node scripts/scan-git-history-secrets.mjs",
     "preview": "vite preview",
     "smoke:demo": "node scripts/smoke-demo.mjs"
   },
@@ -70,6 +75,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",

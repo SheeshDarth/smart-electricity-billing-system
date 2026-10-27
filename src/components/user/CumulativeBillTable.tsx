@@ -57,7 +57,7 @@ const CumulativeBillTable: React.FC<CumulativeBillTableProps> = ({
           onClick={onDownloadPDF}
         >
           <DownloadIcon className="h-4 w-4" />
-          Download PDF Bill
+          Download demo estimate PDF
         </button>
       )}
     </div>

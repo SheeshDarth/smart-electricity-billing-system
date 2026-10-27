@@ -15,9 +15,9 @@ This is a narrower extension of the existing billing prototype than a broad ener
 - A browser demo with synthetic site and meter scenarios.
 - Domain code validates measurement kinds and units, normalizes supported units, deduplicates event IDs, quarantines unproven cumulative-register resets, and rejects missing intervals instead of treating them as zero.
 - Deterministic flat-rate and time-of-use estimates include tariff version, effective window, currency, timezone, and an interval breakdown.
-- An additive Supabase schema covers organizations, sites, meters, readings, tariffs, billing runs, insights, and interventions. [default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240) passed the clean local migration, database lint, 27 pgTAP assertions, and disposable stack cleanup. Hosted security and full CRUD coverage remain unverified.
+- An additive Supabase schema covers organizations, sites, meters, readings, tariffs, billing runs, insights, and interventions. The existing main-branch CI passed local migration, database lint, and pgTAP. The current branch expands the role/table and cross-organization matrix; its result is pending CI. No hosted database has been reviewed or migrated.
 - A browser workflow and synthetic evidence snapshot. Legacy login/admin/user billing screens, bill document, and payment flag are not the new product workflow.
-- The repository includes a versioned JSON archive validator/serializer and dedicated tests as a portability foundation; it is not a database importer or UI export feature.
+- The repository includes a versioned JSON archive with synthetic export and local whole-file validation summary. It checks IDs and known cross-record references and does not write imported records to the database.
 
 All demo records and outcomes are synthetic. Passing local tests does not establish live support, tariff correctness, or production readiness.
 
@@ -26,14 +26,14 @@ All demo records and outcomes are synthetic. Passing local tests does not establ
 | Capability | Minimum acceptance evidence | Current status |
 |---|---|---|
 | Organization, site, meter inventory | Navigate multiple sites and assign imports to a meter and timezone. | Relational schema foundation; no complete persisted workflow. |
-| Reading import and source mapping | Preview CSV; map timestamp/value/unit/meter; validate before save; report accepted, duplicate, rejected, and missing rows; retain input reference. | Not implemented; digital twin only. |
+| Reading import and source mapping | Preview CSV; map timestamp/value/unit/meter; validate before save; report accepted, duplicate, rejected, and missing rows; retain input reference. | Local CSV preview/estimate exists; it does not persist readings or retain cross-session records. |
 | Data quality and provenance | Show measured time, source, conversion, quality, freshness, and quarantine reason; keep missing data missing. | Domain checks and synthetic workflow; no live monitoring. |
 | Versioned tariff configuration | Store effective-dated tariff, currency, timezone, calculation version, and rounding with each estimate. | Flat and time-of-use logic exists; jurisdiction charges absent. |
 | Cost estimate drill-down | Trace reading IDs, coverage, gaps, conversions, tariff components, and totals. | The e-bill UI shows coverage, accepted interval count, energy total, flat rate, and calculated charge; per-row cost drill-down and persistence remain incomplete. |
 | Supplier bill comparison | Enter a supplier-stated amount and period; show usage and cost variance with coverage, without claiming diagnosis. | A local manual amount and estimate-minus-stated-total variance are included only after same-period confirmation. Document parsing and persistent reconciliation history are not implemented. |
 | Exception review and audit trail | Reviewer records status, note, actor, and timestamp for each data or bill exception. | Synthetic intervention story/schema only. |
-| Tenant and role boundaries | Test allowed and denied CRUD by role and tenant, including membership changes. | Local migration and 27 pgTAP assertions pass; coverage is representative. |
-| Portable data | Parse/export an archive preserving IDs, timestamps, units, quality, tariff versions, and provenance. | Contract implemented; no full UI or database export/import. |
+| Tenant and role boundaries | Test allowed and denied table access by role and tenant, including cross-organization writes and membership changes. | Expanded pgTAP matrix is on the current branch; CI result pending. |
+| Portable data | Parse/export an archive preserving IDs, timestamps, units, quality, tariff versions, and provenance. | Synthetic archive export and local validation/round-trip download exist; no database export/import. |
 | Estimate and bill semantics | Label estimates, supplier amounts, and authoritative charges distinctly. | Demo estimate labeled; legacy payment flow unsuitable. |
 
 ## Proposed build order
