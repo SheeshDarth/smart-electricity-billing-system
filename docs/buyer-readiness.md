@@ -27,7 +27,7 @@ The branch contains a synthetic browser twin, measurement/tariff domain logic, a
 ## Evidence safe to describe
 
 - [x] Automated lint, typecheck, domain tests, production build, and demo HTTP packaging smoke pass in default-branch CI run.
-- [x] Local disposable Supabase migration, database lint, pgTAP, and cleanup pass in PR CI run 57.
+- [x] Local disposable Supabase migration, database lint, pgTAP, and cleanup pass in [default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240).
 - [x] The browser twin runs without a seller-owned Supabase project; it uses synthetic records.
 - [x] The repository documents supported flows and known limits in the [README](../README.md), [demo guide](digital-twin-demo-guide.md), and [feature matrix](feature-status.md).
 - [ ] Browser interaction flows have not been verified by an automated end-to-end test in this PR.
