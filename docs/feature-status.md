@@ -1,6 +1,6 @@
 # Feature and readiness matrix
 
-Status snapshot: 27 October 2026, on branch `codex/archive-demo-readiness` in open PR #5. These changes are not yet on the default `main` branch. “Implemented” means code exists in this branch; it does not mean deployed, certified, validated with live equipment, or ready for customer data.
+Status snapshot: 27 October 2026, default branch `main`, after PR #5 merged. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data.
 
 ## Product capability status
 
@@ -16,7 +16,7 @@ Status snapshot: 27 October 2026, on branch `codex/archive-demo-readiness` in op
 | Human review and outcome | Synthetic workflow | The browser demonstrates a local decision and simulated verification. It does not create a persistent intervention or prove savings. |
 | Energy archive schema v1 | Implemented domain utility; CI tested | `src/domain/energyArchive.mjs` validates the envelope and basic measurement fields, preserves unknown fields, and enforces a 10 MiB limit. Dedicated parser/serializer tests pass in PR CI. There is no entity relation check, UI/database integration, or transactional import/export. |
 | Supabase multi-tenant schema | CI validated locally | Additive migrations and 27 pgTAP assertions pass on a clean local stack, covering tenant reads and representative role write boundaries. No hosted database has been migrated. |
-| Database lint and cleanup | CI validated | Local schema lint and always-run Supabase stack cleanup pass in [PR CI run 57](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39590374920). |
+| Database lint and cleanup | CI validated | Local schema lint and always-run Supabase stack cleanup pass in [default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240). |
 | Demo packaging | CI smoke checked | Built HTML shell and JavaScript bundle are served without Supabase credentials. This is an HTTP packaging check, not browser interaction coverage. |
 | Test coverage percentage | Not measured | Automated tests exist and pass, but coverage instrumentation/reporting is not configured. Do not claim a percentage. |
 | Authentication and authorization | Not production validated | RLS tests are not a complete CRUD/policy audit. Legacy UI routes retain old application assumptions. |
@@ -40,7 +40,7 @@ Do not claim production authorization, live interoperability, jurisdiction-ready
 ## Current listing blockers
 
 1. GitHub reports the repository as **public**. DataVendor's codebase estimator says public repositories do not qualify for its private-supply quote. Complete the approved visibility change and re-run the estimator before choosing a price.
-2. PR #5 is open, not merged. Use the intended branch/commit when assessing these new tests and smoke check; they are not in `main` yet.
+2. No customer pilot or buyer interviews have validated the multi-site property/business hypothesis.
 3. Git history, checked-in records, external backend state, ownership, contributor rights, generated content, and dependency licenses have not been fully reviewed.
 4. The external Supabase project's data and configuration are unknown from this repository review.
 5. Coverage percentage is not measured. Report passing tests and CI; do not enter a guessed coverage number.
