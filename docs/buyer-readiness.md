@@ -4,7 +4,7 @@ Preparation notes for a possible codebase marketplace listing. This is not a val
 
 ## Current snapshot
 
-PR #6 (documentation) and PR #7 (local CSV-to-e-bill workflow) are merged into `main`. PR #8 adds the browser test, broader domain coverage, archive UI validation, a larger RLS matrix, dependency updates, and these due-diligence reports. Its latest [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40489575623) passed Node 22/24, Chromium, database migration/lint, and pgTAP.
+PR #6 (documentation) and PR #7 (local CSV-to-e-bill workflow) are merged into `main`. PR #8 remains an open draft and adds the browser test, broader domain coverage, archive UI validation, a larger RLS matrix, dependency updates, and these due-diligence reports. Its latest [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40490158841) passed Node 22/24, Chromium, database migration/lint, and pgTAP.
 
 Locally, 47 domain tests passed and Node measured 91.47% line, 77.34% branch, and 98.90% function coverage across four domain modules. Two Playwright tests passed through CSV upload, row validation, estimate, supplier-period confirmation, comparison, and the invalid-row rejection path. Screenshots are included in the [browser walkthrough](ebill-browser-walkthrough.md). The local Supabase CLI could not start in this environment; the expanded database suite passed in PR #8 CI.
 
@@ -15,11 +15,11 @@ The e-bill flow remains a local estimate workflow. The archive UI validates file
 - [ ] **Repository privacy:** The repository is still public. Do not change visibility until the external project and rights reviews below are complete. Before listing, make the intended snapshot private, verify access, then refresh DataVendor's [estimator](https://datavendor.ai/estimator); public repositories do not qualify for its private-supply quote.
 - [ ] **External Supabase project:** The history scan found a public `anon` client key whose project reference matched its historical URL. Review that project's users, rows, RLS, grants, storage, functions, logs, backups, and retention. The current local RLS tests are synthetic and do not inspect hosted state.
 - [ ] **Ownership and contributor rights:** Verify contributions, generated code, any Lovable relationship, fonts/icons/assets, training-data provenance, and third-party work. GitHub has no repository license metadata; establish the project license and seller authority.
-- [ ] **Dependency terms and security:** The lockfile inventory has declared license metadata for 497 packages; perform a human compatibility/attribution review. `npm audit` still reports 9 advisories (7 moderate, 2 high) after safe semver updates. Review the remaining major-version migrations before transfer.
+- [ ] **Dependency terms and security:** The current lockfile inventory has declared license metadata for 469 package records, with no missing declarations. The 27 October 2026 `npm audit` reports zero known vulnerabilities after targeted upgrades and removal of unused packages. Perform a human compatibility/attribution review and re-run the audit before transfer.
 - [ ] **History and private data:** The targeted pattern scan found one historical Supabase anon key, no current working-tree matches, and no service-role-key pattern. This is not a comprehensive secret scanner or a private-data audit. Review GitHub issues/attachments and external backend state too.
-- [ ] **Buyer validation:** Conduct 3–5 operator conversations using the [interview guide](buyer-validation-interview-guide.md). No operators have been contacted and no product-market evidence is claimed.
+- [ ] **Buyer validation:** Three short research notes were sent on 27 October 2026 to publicly listed property/facility operations business contacts. Replies and interviews are pending; this is outreach only, not product-market evidence. Continue with 3–5 operator conversations using the [interview guide](buyer-validation-interview-guide.md).
 - [ ] **Price and terms:** Re-run the estimate only after privacy and rights checks. Decide license versus transfer, exclusivity, AI use, derivatives, onward licensing, support, data retention, and handover scope. Get qualified advice for the agreement.
-- [x] **Current-branch CI:** PR #8 run passed Node 22/24, Chromium, migration, database lint, and expanded pgTAP.
+- [x] **Current-branch CI:** PR #8 run 40490158841 passed Node 22/24, Chromium, migration, database lint, and expanded pgTAP.
 
 ## Evidence safe to describe now
 

@@ -31,7 +31,7 @@ The application includes synthetic browser scenarios, measurement and tariff dom
 
 ### Exit gate
 
-Current status: PR #6 and PR #7 are merged; PR #8's CI passed. The branch locally passes 47 domain tests and two Playwright tests; measured coverage is 91.47% lines, 77.34% branches, and 98.90% functions across four domain modules. Repository history screening found a historical Supabase anonymous key; hosted project review, ownership/license review, and buyer validation remain open.
+Current status: PR #6 and PR #7 are merged; PR #8 remains an open draft and its CI passed. The branch locally passes 47 domain tests and two Playwright tests; measured coverage is 91.47% lines, 77.34% branches, and 98.90% functions across four domain modules. Repository history screening found a historical Supabase anonymous key. Three initial operator research notes were sent on 27 October 2026; replies and interviews are pending. Hosted project review, ownership/license review, and buyer validation remain open.
 
 ## P1 — Validate buyer, data access, and first scenario
 

@@ -29,7 +29,7 @@ Status snapshot: 27 October 2026. “Implemented” means code exists in the rep
 
 ## Target and non-target
 
-The initial buyer hypothesis is multi-site property or business operators who need a trustworthy view of usage, reading quality, and bill variance. It has not been validated through interviews or a live pilot. The [interview guide](buyer-validation-interview-guide.md) is prepared; no operator outreach has happened.
+The initial buyer hypothesis is multi-site property or business operators who need a trustworthy view of usage, reading quality, and bill variance. It has not been validated through interviews or a live pilot. Three short research notes were sent to publicly listed property/facility operations business contacts on 27 October 2026; replies and interviews are pending. See the [interview guide](buyer-validation-interview-guide.md).
 
 The prototype is not a utility AMI/DISCOM replacement, smart-home controller, payment system, industrial optimization suite, or AI-savings product. The Schneider-linked concept was rejected. Schneider Electric appears only as a competitor; industrial demo records are illustrative.
 
@@ -45,6 +45,6 @@ Do not claim production authorization, live interoperability, jurisdiction-ready
 2. The pattern-based history scan found one historical Supabase anonymous client key matching its historical project URL. The external project has not been reviewed.
 3. Ownership/contributor rights, project license, third-party asset rights, and full legal license compatibility review are incomplete.
 4. No operator interviews or customer pilot have validated the buyer hypothesis.
-5. The current npm audit reports 9 advisories (7 moderate, 2 high) after safe semver updates.
+5. The 27 October 2026 npm audit reports zero known vulnerabilities after the dependency updates; re-run the audit before listing because advisories change.
 
 See [marketplace listing draft](marketplace-listing-draft.md) and [buyer due diligence](buyer-readiness.md) for detailed evidence and blockers.
