@@ -1,48 +1,59 @@
 # Buyer due-diligence checklist
 
-This checklist is for preparing the energy prototype for a codebase marketplace. It does not assert that the asset is private, security-audited, transferable, or worth a particular amount.
+Preparation notes for a possible codebase marketplace listing. This checklist does not assert ownership clearance, private-data status, production readiness, or a guaranteed sale value.
 
-## Current branch evidence
+## Current snapshot
 
-- The feature branch adds a synthetic browser twin, source-to-verification workflow, canonical measurement and tariff functions, a Node test suite, CI configuration, environment-based Supabase setup, an additive SQL schema draft, and setup/product documentation.
-- The root demo does not need a seller-owned database. Legacy /login, /admin, and /user screens still depend on the old schema and are not covered by the new migration.
-- Pull-request CI passed on Node 22 and 24 in [run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978), including lint, typecheck, domain tests, build, local Supabase migration, database lint, pgTAP, and disposable stack cleanup. It does not prove hosted production security.
-- The migration is not applied or audited against a hosted service.
+As of 27 October 2026, PR #5 (`codex/archive-demo-readiness`) is open and unmerged. Its [CI run 57](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39590374920) passed:
 
-## Repository and ownership
+- Node 22 and 24: locked install, lint, typecheck, domain tests, production build, and no-credentials HTTP smoke check.
+- Disposable local Supabase: migration, database lint, pgTAP, and stack cleanup.
 
-- [ ] Verify the repository's GitHub visibility and access list. GitHub currently reports this repository as public; this differs from the earlier DataVendor screenshot, which showed the asset as private.
-- [ ] Review branch protection, commit history, all contributors, forks, PRs, tags, and any generated-code or Lovable project relationship.
-- [ ] Confirm ownership and transfer rights for all source, screenshots, datasets, fonts, assets, generated code, and dependencies.
-- [ ] Review npm dependency licenses, transitive licenses, notices, and vulnerable packages; preserve the lockfile.
-- [ ] Decide whether buyer receives the GitHub repository, domain, deployment, database, support, and/or an exclusive license. Do not promise exclusivity until rights are documented.
-- [ ] Review all historical commits for credentials and data. Removing a value from the current file does not remove it from Git history. Rotate a credential only if the owner confirms it is sensitive and the affected service is identified.
+The smoke check confirms the built HTML shell and JavaScript bundle are served without Supabase credentials. It is not a browser interaction test. Database checks run locally in a disposable stack, not on a hosted project.
 
-## Data and backend
+The branch contains a synthetic browser twin, measurement/tariff domain logic, archive parser/serializer and tests, GitHub Actions workflow, additive SQL schema, database tests, and product/setup documentation. The energy archive utility is not connected to the UI or database.
 
-- [ ] Inspect the external Supabase project for personal, customer, meter, billing, authentication, logs, backups, storage objects, functions, and service-role credentials.
-- [ ] Verify each table's RLS policy using separate tenant users and roles. Browser visibility of a route is not access control.
-- [ ] Confirm data-controller/processor terms, retention, deletion, export, and transfer rights before handing over any customer or telemetry records.
-- [ ] Keep the buyer evaluation fixture synthetic; do not export seller data as a demo dataset.
-- [ ] Apply and test the new migration only in a disposable buyer-owned project first. It does not replace the old billing schema.
-- [ ] Ensure no Supabase service-role key or other server credential is added to Vite/browser code or checked into Git.
+## Listing blockers to resolve
 
-## Technical evidence for the marketplace listing
+- [ ] **Repository privacy:** GitHub currently reports the repository as public. DataVendor's [estimator](https://datavendor.ai/estimator) says public repositories do not qualify for a private-supply quote. The visibility change was approved, but still requires an authenticated GitHub session and verification.
+- [ ] **Default branch:** PR #5 is open and unmerged. Merge only after review; verify the intended listing snapshot points to the resulting commit.
+- [ ] **Ownership and rights:** Review commit history, contributors, generated code, third-party work, fonts, icons, datasets, dependency licenses, and any Lovable relationship. GitHub reports no repository license metadata.
+- [ ] **History and secrets:** Review all commits and branches, not only the current tree, for credentials, personal/customer information, and material you cannot license.
+- [ ] **External backend:** Inspect any Supabase project for tables, users, logs, backups, storage, functions, secrets, and data retention. Its state is unknown from this repository review.
+- [ ] **Price and terms:** Re-run the estimate after privacy changes. Decide whether the offer is a license or transfer, and define AI use, derivative works, onward licensing, exclusivity, retention, and support. Get qualified advice on the agreement.
+- [ ] **Test coverage field:** Tests pass, but no coverage percentage is generated. Do not enter a percentage without a coverage report.
+- [ ] **Private-data field:** Demo values in this branch are synthetic; this does not establish that Git history or an external backend contains no private data.
 
-- [x] Run npm ci, npm run lint, npm run typecheck, npm test, and npm run build on clean CI checkouts: [run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978).
-- [x] Save the successful pull-request CI run and test output before claiming CI or test coverage: [CI run 48](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39563511978).
-- [ ] Verify a clean install and browser demo using no seller credentials.
-- [ ] Record exact supported Node, browser, database, and deployment versions; avoid long-lived hardware or vendor guarantees.
-- [ ] Label the digital twin, site records, scenarios, tariff, cost, and verification outcome as synthetic or simulated.
-- [ ] Document unsupported live meter integrations, AI inference, payments, official bills, regulation, and device control.
-- [ ] If tests are not run against live multi-tenant RLS, state that clearly instead of describing the system as production secure.
+## Evidence safe to describe
 
-## DataVendor fields
+- [x] Automated lint, typecheck, domain tests, production build, and demo HTTP packaging smoke pass in PR CI run 57.
+- [x] Local disposable Supabase migration, database lint, pgTAP, and cleanup pass in PR CI run 57.
+- [x] The browser twin runs without a seller-owned Supabase project; it uses synthetic records.
+- [x] The repository documents supported flows and known limits in the [README](../README.md), [demo guide](digital-twin-demo-guide.md), and [feature matrix](feature-status.md).
+- [ ] Browser interaction flows have not been verified by an automated end-to-end test in this PR.
+- [ ] Hosted authorization, hosted deployment, live meters, production tariffs, bill comparison, and payment handling are not verified or implemented.
 
-Fill domain, asking price, test coverage, CI-on-PRs, and private-data fields only after checking them directly. The earlier screenshot showed an estimate of $5,381–$6,624 and an incomplete asset with no test files and missing metadata. That estimate is a platform calculation, not a buyer offer or guaranteed sale price. The branch changes may affect the estimate only after DataVendor re-scans the repo; do not reuse the old numbers as a valuation claim.
+## DataVendor field notes
 
-For the private-data question, review both current Git content and the external backend. The GitHub repo itself is currently public. A public/anon Supabase key is designed for browser use, but access safety depends on database policies and must be tested. The external project state is unknown from this repository review.
+| Field | Evidence today | What to enter after verification |
+|---|---|---|
+| Domain | Electricity/energy software, tariff estimates, data-quality workflow | Select the closest available energy/software category; do not claim utility-grade AMI. |
+| Asking price | Seller price not selected; prior estimate is not refreshed for the current private snapshot | Re-run estimator after private-repository and rights checks, then choose a price and license scope. |
+| Tests/coverage | Automated tests pass in PR CI | State that tests pass. Leave any coverage percentage blank unless a coverage tool reports it. |
+| CI on PRs | GitHub Actions PR run 57 passed on the branch | Mark CI present only for the branch/commit containing these workflow changes. |
+| Private code supply | Repository is currently public | Do not claim private eligibility until the visibility change is applied and DataVendor re-scans it. |
+| Private data | Synthetic demo records; Git history and external backend not audited | Keep unconfirmed until both are reviewed. |
 
-## Listing language that is supportable today
+The earlier DataVendor screenshot estimate is historical, not a current valuation or buyer offer. Its estimator describes ranges as advisory. See the [marketplace listing draft](marketplace-listing-draft.md) for factual copy prepared from verified capabilities.
 
-Describe this as a synthetic cross-sector energy intelligence prototype with a browser digital twin, transparent data-quality handling, a deterministic estimate module, an industrial energy-per-good-unit example, and an additive schema draft. Do not describe it as a utility AMI product, a deployed AI platform, an audited billing system, a real savings case, or a production-ready multi-tenant service.
+## Data and backend safeguards
+
+- Keep buyer evaluation fixtures synthetic; do not export seller data as a demo dataset.
+- Confirm controller/processor terms, retention, deletion, export, and transfer rights before handing over customer or telemetry records.
+- Apply the additive migration only to a disposable buyer-owned project first; it does not replace legacy billing tables.
+- Never add a Supabase service-role key or other server credential to browser code or Git.
+- Test each RLS policy with separate tenant users and roles. The existing 27 pgTAP assertions are representative, not a complete authorization audit.
+
+## Claims to avoid
+
+Do not describe this as a deployed monitoring service, utility billing system, payment processor, certified meter platform, production-secure multi-tenant SaaS, live interoperable meter product, trained AI system, or verified energy-savings product. Do not promise exclusivity or clean title until rights are reviewed.
