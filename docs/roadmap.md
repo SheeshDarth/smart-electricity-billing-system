@@ -16,7 +16,7 @@ Core rules:
 
 ## Current baseline
 
-The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. PRs #6 and #7 are merged. The e-bill slice validates interval-energy rows, calculates a flat tariff, supports a manually entered same-period supplier amount, and generates a PDF estimate. Files and bills are not persisted, and the PDF is not an official utility invoice. The current readiness branch adds Playwright coverage, broader domain cases, archive import/export validation, and RLS matrix tests; its CI checks still need to pass. Live ingestion, supplier-document parsing, transactional archive import, and supported production deployment remain unimplemented.
+The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. PRs #6 and #7 are merged; PR #8 adds Playwright coverage, broader domain cases, archive import/export validation, and expanded RLS matrix tests. Its Node 22/24, browser, database migration/lint, and pgTAP CI jobs passed. The e-bill slice validates interval-energy rows, calculates a flat tariff, supports a manually entered same-period supplier amount, and generates a PDF estimate. Files and bills are not persisted, and the PDF is not an official utility invoice. Live ingestion, supplier-document parsing, transactional archive import, and supported production deployment remain unimplemented.
 
 ## P0 — Keep evaluation safe and reproducible
 
@@ -31,7 +31,7 @@ The application includes synthetic browser scenarios, measurement and tariff dom
 
 ### Exit gate
 
-Current status: PR #6 and PR #7 are merged and their CI passed. The current branch locally passes 47 domain tests and two Playwright tests; measured coverage is 91.47% lines, 77.34% branches, and 98.90% functions across four domain modules. The current expanded pgTAP matrix still needs a branch CI run. Repository history screening found a historical Supabase anonymous key; hosted project review, ownership/license review, and buyer validation remain open.
+Current status: PR #6 and PR #7 are merged; PR #8's CI passed. The branch locally passes 47 domain tests and two Playwright tests; measured coverage is 91.47% lines, 77.34% branches, and 98.90% functions across four domain modules. Repository history screening found a historical Supabase anonymous key; hosted project review, ownership/license review, and buyer validation remain open.
 
 ## P1 — Validate buyer, data access, and first scenario
 

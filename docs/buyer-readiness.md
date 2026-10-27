@@ -4,9 +4,9 @@ Preparation notes for a possible codebase marketplace listing. This is not a val
 
 ## Current snapshot
 
-PR #6 (documentation) and PR #7 (local CSV-to-e-bill workflow) are merged into `main`. The existing PR #7 run passed Node 22/24 checks and the disposable Supabase suite. The current `codex/remaining-readiness` branch adds the browser test, broader domain coverage, archive UI validation, a larger RLS matrix, dependency updates, and these due-diligence reports. **The current branch still needs its own CI run before its new checks can be claimed as CI-passing.**
+PR #6 (documentation) and PR #7 (local CSV-to-e-bill workflow) are merged into `main`. PR #8 adds the browser test, broader domain coverage, archive UI validation, a larger RLS matrix, dependency updates, and these due-diligence reports. Its latest [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40489575623) passed Node 22/24, Chromium, database migration/lint, and pgTAP.
 
-Locally, 47 domain tests passed and Node measured 91.47% line, 77.34% branch, and 98.90% function coverage across four domain modules. Two Playwright tests passed through CSV upload, row validation, estimate, supplier-period confirmation, comparison, and the invalid-row rejection path. Screenshots are included in the [browser walkthrough](ebill-browser-walkthrough.md). The local Supabase CLI could not start in this environment, so the expanded database suite still needs the branch CI result.
+Locally, 47 domain tests passed and Node measured 91.47% line, 77.34% branch, and 98.90% function coverage across four domain modules. Two Playwright tests passed through CSV upload, row validation, estimate, supplier-period confirmation, comparison, and the invalid-row rejection path. Screenshots are included in the [browser walkthrough](ebill-browser-walkthrough.md). The local Supabase CLI could not start in this environment; the expanded database suite passed in PR #8 CI.
 
 The e-bill flow remains a local estimate workflow. The archive UI validates files and summarizes record counts but does not persist imports. The old payment-entry modal has been removed; legacy paid flags and downloads are labeled simulated. No real tariff compliance, payment processing, live meter adapter, or official bill issuance is claimed.
 
@@ -19,7 +19,7 @@ The e-bill flow remains a local estimate workflow. The archive UI validates file
 - [ ] **History and private data:** The targeted pattern scan found one historical Supabase anon key, no current working-tree matches, and no service-role-key pattern. This is not a comprehensive secret scanner or a private-data audit. Review GitHub issues/attachments and external backend state too.
 - [ ] **Buyer validation:** Conduct 3–5 operator conversations using the [interview guide](buyer-validation-interview-guide.md). No operators have been contacted and no product-market evidence is claimed.
 - [ ] **Price and terms:** Re-run the estimate only after privacy and rights checks. Decide license versus transfer, exclusivity, AI use, derivatives, onward licensing, support, data retention, and handover scope. Get qualified advice for the agreement.
-- [ ] **Current-branch CI:** Run Node 22/24, Playwright, and disposable Supabase jobs on this branch and fix failures before citing the pipeline as passing.
+- [x] **Current-branch CI:** PR #8 run passed Node 22/24, Chromium, migration, database lint, and expanded pgTAP.
 
 ## Evidence safe to describe now
 
@@ -28,7 +28,7 @@ The e-bill flow remains a local estimate workflow. The archive UI validates file
 - [x] Domain coverage is measured and scoped to the four tested JavaScript domain modules: 91.47% lines, 77.34% branches, and 98.90% functions on the recorded run.
 - [x] A local archive export and whole-file validation summary exist; no partial database import is performed.
 - [x] The dependency inventory and history-screening results are documented with their limits.
-- [ ] Current readiness branch CI has not yet passed; wait for its run before describing the new browser/RLS checks as CI-verified.
+- [x] New browser and RLS checks passed in the PR #8 workflow run.
 - [ ] External Supabase review, ownership clearance, full legal license review, operator interviews, and private-data determination remain open.
 
 ## DataVendor field notes
@@ -38,7 +38,7 @@ The e-bill flow remains a local estimate workflow. The archive UI validates file
 | Domain | Electricity data quality and estimate workflow | Choose the closest energy/software category; do not claim utility-grade AMI. |
 | Asking price | No seller price selected; existing estimate predates this work | Refresh the estimator after privacy and rights checks, then choose license scope and asking terms. |
 | Tests/coverage | 47 local domain tests pass; measured coverage is scoped to four modules | State the scope and values, not whole-repository coverage. Refresh after changes. |
-| CI on PRs | Existing merged CI passed; this branch adds Playwright and wider database checks | Mark the new checks present only after this branch's CI passes. |
+| CI on PRs | PR #8 Node 22/24, browser, migration/lint, and pgTAP jobs passed | Describe the jobs and scope; hosted security remains separate. |
 | Private code supply | GitHub repository remains public | Do not claim private eligibility until the final snapshot is private and re-scanned by the platform. |
 | Private data | Current demo is synthetic; historical anonymous project key and external backend are under review | Keep unconfirmed until hosted project and all data sources are reviewed. |
 

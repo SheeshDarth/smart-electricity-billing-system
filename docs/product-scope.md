@@ -15,7 +15,7 @@ This is a narrower extension of the existing billing prototype than a broad ener
 - A browser demo with synthetic site and meter scenarios.
 - Domain code validates measurement kinds and units, normalizes supported units, deduplicates event IDs, quarantines unproven cumulative-register resets, and rejects missing intervals instead of treating them as zero.
 - Deterministic flat-rate and time-of-use estimates include tariff version, effective window, currency, timezone, and an interval breakdown.
-- An additive Supabase schema covers organizations, sites, meters, readings, tariffs, billing runs, insights, and interventions. The existing main-branch CI passed local migration, database lint, and pgTAP. The current branch expands the role/table and cross-organization matrix; its result is pending CI. No hosted database has been reviewed or migrated.
+- An additive Supabase schema covers organizations, sites, meters, readings, tariffs, billing runs, insights, and interventions. PR #8 CI passed the expanded role/table and cross-organization matrix, local migration, and database lint. No hosted database has been reviewed or migrated.
 - A browser workflow and synthetic evidence snapshot. Legacy login/admin/user billing screens, bill document, and payment flag are not the new product workflow.
 - The repository includes a versioned JSON archive with synthetic export and local whole-file validation summary. It checks IDs and known cross-record references and does not write imported records to the database.
 
@@ -32,7 +32,7 @@ All demo records and outcomes are synthetic. Passing local tests does not establ
 | Cost estimate drill-down | Trace reading IDs, coverage, gaps, conversions, tariff components, and totals. | The e-bill UI shows coverage, accepted interval count, energy total, flat rate, and calculated charge; per-row cost drill-down and persistence remain incomplete. |
 | Supplier bill comparison | Enter a supplier-stated amount and period; show usage and cost variance with coverage, without claiming diagnosis. | A local manual amount and estimate-minus-stated-total variance are included only after same-period confirmation. Document parsing and persistent reconciliation history are not implemented. |
 | Exception review and audit trail | Reviewer records status, note, actor, and timestamp for each data or bill exception. | Synthetic intervention story/schema only. |
-| Tenant and role boundaries | Test allowed and denied table access by role and tenant, including cross-organization writes and membership changes. | Expanded pgTAP matrix is on the current branch; CI result pending. |
+| Tenant and role boundaries | Test allowed and denied table access by role and tenant, including cross-organization writes and membership changes. | Expanded pgTAP matrix passed in PR #8 CI against disposable organizations. |
 | Portable data | Parse/export an archive preserving IDs, timestamps, units, quality, tariff versions, and provenance. | Synthetic archive export and local validation/round-trip download exist; no database export/import. |
 | Estimate and bill semantics | Label estimates, supplier amounts, and authoritative charges distinctly. | Demo estimate labeled; legacy payment flow unsuitable. |
 
