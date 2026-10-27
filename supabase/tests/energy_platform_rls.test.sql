@@ -212,10 +212,20 @@ select throws_ok($$insert into public.tariffs (organization_id, site_id, name, v
 select throws_ok($$insert into public.billing_runs (organization_id, site_id, tariff_id, period_start, period_end, calculation_version, status, energy_kwh, total_amount, currency, reading_count) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', '90000000-0000-0000-0000-000000000001', '2026-10-19T10:00:00Z', '2026-10-19T10:15:00Z', 'test-v1', 'complete', 0.5, 4, 'INR', 1)$$, '42501', null, 'tenant B cannot write tenant A billing runs');
 select throws_ok($$insert into public.insights (organization_id, site_id, source_type, rule_or_model_version, window_start, window_end, evidence) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'rule', 'test-v1', '2026-10-19T10:00:00Z', '2026-10-19T10:15:00Z', '{}'::jsonb)$$, '42501', null, 'tenant B cannot write tenant A insights');
 select throws_ok($$insert into public.interventions (organization_id, site_id, decision) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'investigate')$$, '42501', null, 'tenant B cannot write tenant A interventions');
-select is((with changed as (update public.organization_members set role = 'operator' where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000002' returning 1) select count(*)::integer from changed), 0, 'tenant B cannot change a tenant A member role');
-select is((with removed as (delete from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000002' returning 1) select count(*)::integer from removed), 0, 'tenant B cannot remove a tenant A member');
-select is((with changed as (update public.sites set name = 'Cross-tenant changed' where id = '30000000-0000-0000-0000-000000000001' returning 1) select count(*)::integer from changed), 0, 'tenant B cannot update a tenant A site');
-select is((with removed as (delete from public.meters where id = '60000000-0000-0000-0000-000000000001' returning 1) select count(*)::integer from removed), 0, 'tenant B cannot delete a tenant A meter');
+update public.organization_members set role = 'operator' where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000002';
+delete from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000002';
+update public.sites set name = 'Cross-tenant changed' where id = '30000000-0000-0000-0000-000000000001';
+delete from public.interventions where id = 'c0000000-0000-0000-0000-000000000001';
+
+set local request.jwt.claim.sub = '10000000-0000-0000-0000-000000000001';
+set local request.jwt.claims = '{"sub":"10000000-0000-0000-0000-000000000001","role":"authenticated"}';
+select is((select role from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000002'), 'admin', 'tenant B cannot change a tenant A member role');
+select is((select count(*)::integer from public.organization_members where organization_id = '20000000-0000-0000-0000-000000000001' and user_id = '10000000-0000-0000-0000-000000000002'), 1, 'tenant B cannot remove a tenant A member');
+select is((select name from public.sites where id = '30000000-0000-0000-0000-000000000001'), 'Site A', 'tenant B cannot update a tenant A site');
+select is((select count(*)::integer from public.interventions where id = 'c0000000-0000-0000-0000-000000000001'), 1, 'tenant B cannot delete a tenant A intervention');
+
+set local request.jwt.claim.sub = '10000000-0000-0000-0000-000000000005';
+set local request.jwt.claims = '{"sub":"10000000-0000-0000-0000-000000000005","role":"authenticated"}';
 select lives_ok($$insert into public.assets (organization_id, site_id, name, asset_type) values ('20000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000002', 'Tenant B operator asset', 'machine')$$, 'tenant B owner retains write access within tenant B');
 
 select * from finish();
