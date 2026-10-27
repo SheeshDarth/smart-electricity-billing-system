@@ -59,3 +59,32 @@ test("invalid CSV rows are reported and block bill generation", async ({ page })
   await expect(page.getByText(/explicit UTC offset/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Generate e-bill PDF" })).toBeDisabled();
 });
+
+test("replacing a CSV clears the previous supplier-period confirmation", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "E-bill", exact: true }).click();
+
+  const fileInput = page.locator('[aria-label="Choose energy readings CSV"]');
+  await fileInput.setInputFiles(sampleCsv);
+  const supplierTotal = page.getByLabel("Supplier-stated bill total (optional)");
+  const confirmation = page.getByLabel("I confirmed that the supplier-stated amount covers the same period shown above.");
+  await supplierTotal.fill("25.00");
+  await confirmation.check();
+  await expect(confirmation).toBeChecked();
+
+  await fileInput.setInputFiles({
+    name: "different-period.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from([
+      "timestamp,meter_id,energy_kwh,interval_start,event_id",
+      "2026-10-17T08:15:00+05:30,MTR-DEMO-041,0.50,2026-10-17T08:00:00+05:30,NEXT-0001",
+      "",
+    ].join("\n")),
+  });
+
+  await expect(page.getByText("different-period.csv")).toBeVisible();
+  await expect(supplierTotal).toHaveValue("");
+  await expect(confirmation).not.toBeChecked();
+  await expect(confirmation).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Generate e-bill PDF" })).toBeEnabled();
+});
