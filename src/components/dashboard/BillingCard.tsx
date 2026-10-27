@@ -61,7 +61,7 @@ const BillingCard = ({
       <CardFooter>
         <Button className="w-full" onClick={onDownloadBill}>
           <Download className="mr-2 h-4 w-4" />
-          Download PDF Bill
+          Download demo estimate PDF
         </Button>
       </CardFooter>
     </Card>

@@ -48,8 +48,8 @@ const BillHandler: React.FC<BillHandlerProps> = ({
         setTimeout(() => {
           link.remove();
           toast({
-            title: "Bill downloaded",
-            description: "Your energy bill has been downloaded successfully.",
+            title: "Legacy estimate downloaded",
+            description: "This simulated flat-rate PDF is a demo estimate, not an official utility bill.",
           });
         }, 100);
       } catch (error) {

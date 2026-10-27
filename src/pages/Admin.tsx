@@ -76,6 +76,7 @@ const Admin = () => {
           <CardTitle>Admin Panel</CardTitle>
         </CardHeader>
         <CardContent>
+          <p role="note" className="mb-4 rounded-md border border-amber-500/40 bg-amber-50 p-3 text-sm text-amber-900">Legacy billing demo. Flat-rate totals and paid/unpaid flags are simulated records; they do not represent official invoices or payments.</p>
           <div className="flex gap-2 mb-4">
             <Input
               placeholder="Enter Socket Number"
@@ -95,7 +96,7 @@ const Admin = () => {
                 <ul className="list-disc ml-5 mt-2">
                   {socketInfo.billing?.map((bill) => (
                     <li key={bill.id}>
-                      {bill.period}: ₹{bill.amount.toFixed(2)} (Paid: {bill.paid ? "Yes" : "No"})
+                      {bill.period}: ₹{bill.amount.toFixed(2)} (Demo status: {bill.paid ? "marked paid" : "unpaid"})
                     </li>
                   ))}
                 </ul>

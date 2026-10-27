@@ -5,6 +5,7 @@ import {
   ENERGY_ARCHIVE_FORMAT,
   ENERGY_ARCHIVE_SCHEMA_VERSION,
   MAX_ENERGY_ARCHIVE_BYTES,
+  inspectEnergyArchive,
   parseEnergyArchive,
 } from "../src/domain/energyArchive.mjs";
 
@@ -36,7 +37,12 @@ function measurement(overrides = {}) {
 }
 
 function rawArchive(overrides = {}) {
-  return JSON.stringify({ ...emptyArchive(), ...overrides });
+  const hasMeasurements = Array.isArray(overrides.measurements) && overrides.measurements.length > 0;
+  return JSON.stringify({
+    ...emptyArchive(),
+    ...(hasMeasurements ? { sites: [{ id: "site-1" }], meters: [{ id: "meter-1" }] } : {}),
+    ...overrides,
+  });
 }
 
 function assertInvalid(text, pattern) {
@@ -58,6 +64,7 @@ test("round-trips record data and preserves extra source fields", () => {
   const input = {
     exportedAt: "2026-10-20T12:00:00+05:30",
     sites: [{ id: "site-1", name: "Synthetic office" }],
+    meters: [{ id: "meter-1", siteId: "site-1", name: "Synthetic meter" }],
     measurements: [measurement({ sourceMetadata: { adapter: "twin", sequence: 7 } })],
   };
   const parsed = parseEnergyArchive(createEnergyArchive(input));
@@ -136,6 +143,32 @@ test("requires interval timestamps in increasing order", () => {
   assertInvalid(rawArchive({ measurements: [measurement({ intervalStart: "2026-10-20T12:00:00" })] }), /intervalStart must include an explicit timezone offset/);
   assertInvalid(rawArchive({ measurements: [measurement({ intervalStart: "2026-10-20T12:15:00Z" })] }), /intervalStart must be before intervalEnd/);
   assertInvalid(rawArchive({ measurements: [measurement({ intervalStart: "2026-10-20T12:20:00Z" })] }), /intervalStart must be before intervalEnd/);
+});
+
+test("collects all validation problems in one complete failure report", () => {
+  const text = rawArchive({ measurements: [
+    measurement({ value: "not numeric" }),
+    measurement({ eventId: "event-2", measuredAt: "2026-10-20T12:15:00" }),
+  ] });
+  const report = inspectEnergyArchive(text);
+  assert.equal(report.valid, false);
+  assert.equal(report.archive, null);
+  assert.ok(report.issues.some((issue) => /measurements\[0\] value must be finite/.test(issue)));
+  assert.ok(report.issues.some((issue) => /measurements\[1\] measuredAt/.test(issue)));
+  assert.deepEqual(report.counts.measurements, 2);
+});
+
+test("rejects duplicate record identifiers and dangling cross-record references", () => {
+  const archive = emptyArchive();
+  archive.sites = [{ id: "site-1" }, { id: "site-1" }];
+  archive.meters = [{ id: "meter-1", siteId: "missing-site" }];
+  archive.measurements = [measurement({ siteId: "missing-site" })];
+  const report = inspectEnergyArchive(JSON.stringify(archive));
+  assert.equal(report.valid, false);
+  assert.ok(report.issues.some((issue) => /sites\[1\] duplicates identifier site-1/.test(issue)));
+  assert.ok(report.issues.some((issue) => /meters\[0\] references unknown site missing-site/.test(issue)));
+  assert.ok(report.issues.some((issue) => /measurements\[0\] references unknown site missing-site/.test(issue)));
+  assert.throws(() => parseEnergyArchive(JSON.stringify(archive)), /duplicates identifier/);
 });
 
 test("enforces the 10 MiB UTF-8 limit while parsing and creating", () => {

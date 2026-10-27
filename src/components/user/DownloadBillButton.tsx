@@ -43,8 +43,8 @@ const DownloadBillButton: React.FC<DownloadBillButtonProps> = ({
       setTimeout(() => {
         link.remove();
         toast({
-          title: "Bill downloaded",
-          description: "Your energy bill has been downloaded successfully.",
+          title: "Legacy estimate downloaded",
+          description: "This simulated flat-rate PDF is a demo estimate, not an official utility bill.",
         });
       }, 100);
     } catch (error) {
@@ -61,10 +61,10 @@ const DownloadBillButton: React.FC<DownloadBillButtonProps> = ({
     <button
       className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition w-fit"
       onClick={handleDownloadPDF}
-      title={`Download your complete bill with all daily usage and cumulative totals (₹${currentBill.toFixed(2)})`}
+      title={`Download legacy demo estimate only (₹${currentBill.toFixed(2)}); not an official utility bill`}
     >
       <DownloadIcon className="h-4 w-4" />
-      Download Cumulative Bill (₹{currentBill.toFixed(2)})
+      Download demo estimate (₹{currentBill.toFixed(2)})
     </button>
   );
 };
