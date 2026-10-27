@@ -4,9 +4,9 @@ Preparation notes for a possible codebase marketplace listing. This is not a val
 
 ## Current snapshot
 
-PR #6 (documentation) and PR #7 (local CSV-to-e-bill workflow) are merged into `main`. PR #8 remains an open draft and adds the browser test, broader domain coverage, archive UI validation, a larger RLS matrix, dependency updates, and these due-diligence reports. Its latest [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40494161969) passed Node 22/24, Chromium, database migration/lint, and pgTAP.
+PR #6 (documentation) and PR #7 (local CSV-to-e-bill workflow) are merged into `main`. PR #8 remains an open draft and adds the browser test, broader domain coverage, archive UI validation, a larger RLS matrix, dependency updates, and these due-diligence reports. Its latest [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40494987844) passed Node 22/24, Chromium, database migration/lint, and pgTAP.
 
-Locally, 47 domain tests passed and Node measured 91.47% line, 77.34% branch, and 98.90% function coverage across four domain modules. PR #8 run 40494161969 passed the two Chromium tests for CSV upload, row validation, estimate, supplier-period confirmation, comparison, and invalid-row rejection. The current branch adds checks for the downloaded PDF's filename, content, estimate, variance, and disclosure; these await the next CI run. Screenshots are included in the [browser walkthrough](ebill-browser-walkthrough.md). The database migration, lint, and expanded pgTAP suite passed against a disposable CI stack, not a hosted project.
+Locally, 47 domain tests passed and Node measured 91.47% line, 77.34% branch, and 98.90% function coverage across four domain modules. PR #8 run 40494987844 passed the two Chromium tests for CSV upload, row validation, estimate, supplier-period confirmation, comparison, invalid-row rejection, and downloaded PDF filename/content checks. Screenshots are included in the [browser walkthrough](ebill-browser-walkthrough.md). The database migration, lint, and expanded pgTAP suite passed against a disposable CI stack, not a hosted project.
 
 The e-bill flow remains a local estimate workflow. The archive UI validates files and summarizes record counts but does not persist imports. The old payment-entry modal has been removed; legacy paid flags and downloads are labeled simulated. No real tariff compliance, payment processing, live meter adapter, or official bill issuance is claimed.
 
@@ -19,7 +19,7 @@ The e-bill flow remains a local estimate workflow. The archive UI validates file
 - [ ] **History and private data:** The targeted pattern scan found one historical Supabase anon key, no current working-tree matches, and no service-role-key pattern. This is not a comprehensive secret scanner or a private-data audit. Review GitHub issues/attachments and external backend state too.
 - [ ] **Buyer validation:** Three short research notes were sent on 27 October 2026 to publicly listed property/facility operations business contacts. Replies and interviews are pending; this is outreach only, not product-market evidence. Continue with 3–5 operator conversations using the [interview guide](buyer-validation-interview-guide.md).
 - [ ] **Price and terms:** Re-run the estimate only after privacy and rights checks. Decide license versus transfer, exclusivity, AI use, derivatives, onward licensing, support, data retention, and handover scope. Get qualified advice for the agreement.
-- [x] **Current-branch CI:** PR #8 run 40494161969 passed Node 22/24, Chromium, migration, database lint, and expanded pgTAP.
+- [x] **Current-branch CI:** PR #8 run 40494987844 passed Node 22/24, Chromium, migration, database lint, and expanded pgTAP.
 
 ## Evidence safe to describe now
 

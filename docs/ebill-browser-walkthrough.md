@@ -20,7 +20,7 @@ The Playwright end-to-end test creates these screenshots from the production bui
 2. [Estimate and supplier comparison](assets/ebill-walkthrough/02-estimate-comparison.png)
 3. [Generated estimate and variance](assets/ebill-walkthrough/03-bill-variance.png)
 
-The current branch adds a browser check for the downloaded file's name, `%PDF-1.4` header, estimated charge, supplier-total variance, and estimate-only disclosure; the next CI run will verify it. Separate domain tests already check the PDF cross-reference structure and required scope disclosures. It is an estimate only; no payment is collected.
+The browser test downloads the generated file and checks its name, `%PDF-1.4` header, estimated charge, supplier-total variance, and estimate-only disclosure. Those checks passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40494987844). Separate domain tests also check the PDF cross-reference structure and required scope disclosures. It is an estimate only; no payment is collected.
 
 ## Run it locally
 
