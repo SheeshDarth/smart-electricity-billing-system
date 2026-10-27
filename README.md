@@ -40,7 +40,7 @@ npm run build
 npm run smoke:demo
 ```
 
-The demo smoke check serves the built site locally without Supabase credentials and verifies that the HTML shell and JavaScript bundle respond. It is an HTTP packaging check, not an automated browser interaction test. The GitHub Actions workflow also starts a disposable local Supabase stack, applies migrations, runs database tests and lint, then stops the stack. These checks do not validate a hosted database or production deployment. [PR CI run 57](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/39590374920) passed on Node 22 and 24 and passed the disposable database checks.
+The demo smoke check serves the built site locally without Supabase credentials and verifies that the HTML shell and JavaScript bundle respond. It is an HTTP packaging check, not an automated browser interaction test. The GitHub Actions workflow also starts a disposable local Supabase stack, applies migrations, runs database tests and lint, then stops the stack. These checks do not validate a hosted database or production deployment. [default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240) passed on Node 22 and 24 and passed the disposable database checks.
 
 ## Optional Supabase configuration
 
@@ -60,7 +60,7 @@ The new migration is additive and does not convert the legacy billing tables. Re
 - [Buyer due-diligence checklist](docs/buyer-readiness.md)
 - [Marketplace listing copy draft and readiness gates](docs/marketplace-listing-draft.md)
 
-The listing document is factual draft copy only. The repository is currently public, the external Supabase state and full rights position are unverified, and PR #5 is not merged to `main`. Complete those checks and use the intended private snapshot before publishing any marketplace offer or setting its price.
+The listing document is factual draft copy only. PR #5 merged into `main` on 27 October 2026, and its tests and smoke check are in the default branch. The repository is still public; external Supabase state and the full rights position are unverified. Complete those checks and use the intended private snapshot before publishing an offer or setting its price.
 
 Schneider Electric is included in the market landscape as an established competitor. A previously explored Schneider-linked concept was rejected and is not the product direction. The industrial site in the browser remains synthetic demonstration content only.
 
