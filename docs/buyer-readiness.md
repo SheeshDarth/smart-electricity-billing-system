@@ -4,19 +4,19 @@ Preparation notes for a possible codebase marketplace listing. This checklist do
 
 ## Current snapshot
 
-As of 27 October 2026, PR #5 merged into `main`. The [default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240) passed:
+As of 27 October 2026, PR #6 merged into `main`. The [default-branch CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240) passed:
 
 - Node 22 and 24: locked install, lint, typecheck, domain tests, production build, and no-credentials HTTP smoke check.
 - Disposable local Supabase: migration, database lint, pgTAP, and stack cleanup.
 
 The smoke check confirms the built HTML shell and JavaScript bundle are served without Supabase credentials. It is not a browser interaction test. Database checks run locally in a disposable stack, not on a hosted project.
 
-The branch contains a synthetic browser twin, measurement/tariff domain logic, archive parser/serializer and tests, GitHub Actions workflow, additive SQL schema, database tests, and product/setup documentation. The energy archive utility is not connected to the UI or database.
+The default branch contains a synthetic browser twin, measurement/tariff domain logic, archive parser/serializer and tests, GitHub Actions workflow, additive SQL schema, database tests, and product/setup documentation. The current development branch also adds the local CSV-to-e-bill estimate workflow; its local checks pass, and pull-request CI remains the merge gate. The energy archive utility is not connected to the UI or database.
 
 ## Listing blockers to resolve
 
-- [ ] **Repository privacy:** GitHub currently reports the repository as public. DataVendor's [estimator](https://datavendor.ai/estimator) says public repositories do not qualify for a private-supply quote. The visibility change was approved, but still requires an authenticated GitHub session and verification.
-- [x] **Default branch:** PR #5 is merged. The archive tests, demo smoke check, listing draft, and package metadata update are on `main`.
+- [ ] **Repository privacy:** GitHub currently reports the repository as public. It will stay public while improvements are in progress. Before listing, make the intended snapshot private, verify access, and re-run DataVendor's [estimator](https://datavendor.ai/estimator); public repositories do not qualify for its private-supply quote.
+- [x] **Default branch:** PR #6 is merged. The archive tests, demo smoke check, listing draft, and package metadata update are on `main`.
 - [ ] **Ownership and rights:** Review commit history, contributors, generated code, third-party work, fonts, icons, datasets, dependency licenses, and any Lovable relationship. GitHub reports no repository license metadata.
 - [ ] **History and secrets:** Review all commits and branches, not only the current tree, for credentials, personal/customer information, and material you cannot license.
 - [ ] **External backend:** Inspect any Supabase project for tables, users, logs, backups, storage, functions, secrets, and data retention. Its state is unknown from this repository review.
@@ -38,10 +38,10 @@ The branch contains a synthetic browser twin, measurement/tariff domain logic, a
 | Field | Evidence today | What to enter after verification |
 |---|---|---|
 | Domain | Electricity/energy software, tariff estimates, data-quality workflow | Select the closest available energy/software category; do not claim utility-grade AMI. |
-| Asking price | Seller price not selected; prior estimate is not refreshed for the current private snapshot | Re-run estimator after private-repository and rights checks, then choose a price and license scope. |
+| Asking price | Seller price not selected; prior estimate is not refreshed for the intended private snapshot | Re-run estimator after private-repository and rights checks, then choose a price and license scope. |
 | Tests/coverage | Automated tests pass in PR CI | State that tests pass. Leave any coverage percentage blank unless a coverage tool reports it. |
-| CI on PRs | Default-branch CI passed after PR #5 merged | Mark CI present; the current `main` branch contains the workflow changes. |
-| Private code supply | Repository is currently public | Do not claim private eligibility until the visibility change is applied and DataVendor re-scans it. |
+| CI on PRs | Default-branch CI passed after PR #6 merged; current e-bill changes pass local checks and await PR CI | Mark CI present for the default branch; report the e-bill changes as verified only after their PR CI completes. |
+| Private code supply | Repository is intentionally public during improvement work | Do not claim private eligibility until the final snapshot is private and DataVendor re-scans it. |
 | Private data | Synthetic demo records; Git history and external backend not audited | Keep unconfirmed until both are reviewed. |
 
 The earlier DataVendor screenshot estimate is historical, not a current valuation or buyer offer. Its estimator describes ranges as advisory. See the [marketplace listing draft](marketplace-listing-draft.md) for factual copy prepared from verified capabilities.

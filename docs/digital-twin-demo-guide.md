@@ -4,7 +4,7 @@
 
 The browser twin is synthetic content for reviewing the current electricity usage, validation, tariff estimate, and reviewer workflow. It requires no board, physical meter, gateway, Supabase credentials, or AI service. The industrial example is illustrative only; industrial optimization and the rejected Schneider-linked idea are not product requirements.
 
-This is not operational monitoring, utility billing, bill reconciliation, payment processing, or a production meter platform.
+The digital twin itself is not operational monitoring or a production meter platform. The app also includes a separate local E-bill workspace that generates a clearly labelled estimate PDF; it is not an official utility invoice, payment processor, or production billing service.
 
 ## Start locally
 
@@ -24,6 +24,19 @@ Open the Vite URL shown in the terminal. The browser twin works without an envir
 5. Check accepted, duplicate, rejected, or quarantined counts before interpreting totals.
 6. Record an operator review decision. It stays in local demo state and does not change a physical device or create a persisted customer record.
 7. Use the evidence JSON control to download a synthetic scenario snapshot. The file contains selected demo context; it is not a full reading-history export, database backup, or the new schema-v1 energy archive.
+8. Open E-bill to load a separate synthetic interval CSV or import a local CSV, review the row outcomes, configure a flat tariff, and generate a PDF estimate.
+
+## Generate an e-bill estimate
+
+1. Select E-bill in the navigation and choose Load synthetic sample or Choose CSV. CSV contents are parsed locally in the browser and are not uploaded.
+2. Map the interval-end timestamp and energy-value columns. Map meter ID, unit, interval start, and event ID when present. If there is no interval-start column, choose the interval duration used to derive it.
+3. Use timestamps with an explicit UTC offset, such as 2026-10-16T08:15:00+05:30 or 2026-10-16T02:45:00Z. Select a meter if the file contains more than one.
+4. Review accepted rows, identical duplicates, and rejected rows. Conflicting values for the same meter interval are rejected. Any rejected row blocks PDF generation. Gaps or overlaps make the estimate incomplete rather than treating missing energy as zero.
+5. Set the currency, IANA timezone, tariff version, and flat rate. The estimate uses the selected meter's validated interval energy and the date window covered by those readings.
+6. Optionally enter a supplier-stated amount and confirm that it covers the same period. The displayed variance is the estimate minus that manually entered amount.
+7. Generate and download the PDF. It is marked as an estimate and states that taxes, fixed/demand charges, arrears, and export credits are excluded. It has no payment action and is not an amount officially due.
+
+The builder supports interval-energy CSV values in Wh or kWh. Cumulative-register deltas, time-of-use billing in the CSV workflow, supplier invoice upload/parsing, taxes, fixed charges, persistence, and official utility billing are outside this implementation.
 
 ## Scenarios
 
@@ -42,18 +55,18 @@ These are deterministic injected conditions, not evidence that real equipment wi
 ## Interpret metrics
 
 - Energy values come from synthetic records and depend on selected site/scenario.
-- Cost is a deterministic estimate from accepted records and the demo tariff. It is not an invoice or an amount due.
+- Cost is a deterministic estimate from accepted records and the selected flat tariff. The generated PDF is not an official invoice or an amount due.
 - Quality and freshness describe generated sample records, not a live device fleet or service-level objective.
 - Industrial energy-per-good-unit context, if visible, is sample data only. It does not represent a supported industrial product feature or measured saving.
 - Keep synthetic, calculated, estimated, unavailable, and simulated labels attached when showing or exporting results.
 
 ## Limits and next product step
 
-- There is no CSV importer, supplier bill comparison, live adapter, production alert, or persisted human-review workflow yet.
+- The CSV import and e-bill workflow is local-only and does not persist readings or bill records. Supplier comparison is manually entered; there is no supplier-document parser, live adapter, production alert, or persisted human-review workflow.
 - The energy archive parser/serializer in src/domain/energyArchive.mjs is a domain utility only; this UI does not call it.
 - No DLMS/COSEM, OPC UA, MQTT, vendor API, or gateway connector is implemented.
 - No physical control, AI/LLM inference, or GPU workload is present.
 - INR, tariffs, timestamps, sites, and readings are synthetic and not jurisdiction-specific.
 - Legacy login/admin/user billing routes are separate and remain dependent on an older schema.
 
-The proposed next user-evaluable feature is a read-only file-import preview, followed by transparent estimate-to-bill variance review only after buyer interviews confirm that need. See [product scope](product-scope.md), [feature readiness](feature-status.md), and [architecture](architecture.md).
+See the [e-bill workflow guide](ebill-generation.md), [product scope](product-scope.md), [feature readiness](feature-status.md), and [architecture](architecture.md). Buyer demand and production tariff requirements still need validation.
