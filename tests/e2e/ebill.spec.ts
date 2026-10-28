@@ -6,6 +6,41 @@ import { dirname, resolve } from "node:path";
 const screenshots = resolve("docs/assets/ebill-walkthrough");
 const sampleCsv = resolve("public/sample-energy-readings.csv");
 
+test("interactive workflow plays through its evidence stages and honors reduced motion", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Workflow", exact: true }).click();
+
+  await expect(page.getByRole("region", { name: "Interactive energy workflow" })).toBeVisible();
+  await expect(page.getByText("Step 1 of 7: Virtual source")).toBeVisible();
+  await page.getByRole("button", { name: "Play workflow", exact: true }).click();
+  await expect(page.getByText("Step 2 of 7: Local ingestion")).toBeVisible({ timeout: 4000 });
+  await expect(page.getByRole("button", { name: "Pause workflow" })).toBeVisible();
+  await expect(page.getByText("Step 6 of 7: Human review")).toBeVisible({ timeout: 10000 });
+  const nextStep = page.getByRole("button", { name: "Next workflow step" });
+  await expect(nextStep).toBeDisabled();
+  const investigate = page.getByRole("button", { name: "Record review decision: Investigate" });
+  await investigate.click();
+  await expect(investigate).toHaveAttribute("aria-pressed", "true");
+  await expect(nextStep).toBeEnabled();
+  await nextStep.click();
+  await expect(page.getByText("Step 7 of 7: Simulated verification")).toBeVisible();
+
+  const screenshotPath = resolve(screenshots, "05-interactive-workflow.png");
+  mkdirSync(dirname(screenshotPath), { recursive: true });
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+
+  await page.getByRole("button", { name: "Play workflow", exact: true }).click();
+  await expect(page.getByText("Step 1 of 7: Virtual source")).toBeVisible();
+  await page.getByRole("button", { name: "Pause workflow" }).click();
+  await page.getByRole("button", { name: "Replay workflow" }).click();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.getByText("Step 1 of 7: Virtual source")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Play workflow", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Advance one workflow step; reduced motion is enabled" }).click();
+  await expect(page.getByText("Step 2 of 7: Local ingestion")).toBeVisible();
+});
+
 test("CSV upload → validation → estimate → comparison → PDF download", async ({ page }) => {
   page.clock.setFixedTime(new Date("2026-10-16T12:00:00.000Z"));
   await page.setViewportSize({ width: 1440, height: 1000 });

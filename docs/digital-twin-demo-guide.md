@@ -20,7 +20,7 @@ Open the Vite URL shown in the terminal. The browser twin works without an envir
 1. Choose a synthetic site and meter in the portfolio.
 2. Select a scenario to add normal or faulty sample readings.
 3. Review the site view and open View data lineage for source, event time, interval meaning, quality, tariff, and calculation context.
-4. Open Workflow and inspect the path from generated event to validation outcome, estimate, reviewer choice, and simulated outcome.
+4. Open Workflow and use Play to watch its seven stages advance from virtual source through local validation, estimate, human review, and simulated verification. Playback pauses at Human review until you choose Accept, Investigate, or Defer. Pause, replay, select any unlocked stage, or use Next/Previous to inspect it at your own pace.
 5. Check accepted, duplicate, rejected, or quarantined counts before interpreting totals.
 6. Record an operator review decision. It stays in local demo state and does not change a physical device or create a persisted customer record.
 7. Use the evidence JSON control to download a synthetic scenario snapshot. The file contains selected demo context; it is not a full reading-history export, database backup, or the new schema-v1 energy archive.
@@ -51,6 +51,8 @@ The builder supports interval-energy CSV values in Wh or kWh. Its two-band time-
 | Tariff change | A different versioned time-of-use sample tariff is selected | The estimate allocates energy by elapsed time across local-hour rate boundaries; rates are illustrative. |
 
 These are deterministic injected conditions, not evidence that real equipment will generate or recover from faults this way.
+
+The workflow is a small in-app animation, not a recorded video. It explains the synthetic path and does not animate a live ingestion service, persistent review, or physical intervention. The review choice exists in browser memory only. When the operating system requests reduced motion, playback becomes manual step-by-step navigation. See the [interactive workflow walkthrough](interactive-workflow-walkthrough.md) and its screenshot.
 
 ## Interpret metrics
 
