@@ -1,6 +1,6 @@
 # Implementation roadmap and release gates
 
-Status snapshot: 27 October 2026. This roadmap replaces the earlier broad energy-intelligence direction with a focused electricity visibility and bill-evidence hypothesis. Buyer demand and willingness to pay have not been validated. No customer data or hosted Supabase project has been used in this work.
+Status snapshot: 28 October 2026. This roadmap replaces the earlier broad energy-intelligence direction with a focused electricity visibility and bill-evidence hypothesis. Buyer demand and willingness to pay have not been validated. No customer data or hosted Supabase project has been used in this work.
 
 ## Product outcome
 
@@ -16,7 +16,7 @@ Core rules:
 
 ## Current baseline
 
-The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. PRs #6 and #7 are merged; PR #8 adds Playwright coverage, broader domain cases, archive import/export validation, and expanded RLS matrix tests. Its Node 22/24, browser, database migration/lint, and pgTAP CI jobs passed. The e-bill slice validates interval-energy rows, calculates a flat tariff, supports a manually entered same-period supplier amount, and generates a PDF estimate. Files and bills are not persisted, and the PDF is not an official utility invoice. Live ingestion, supplier-document parsing, transactional archive import, and supported production deployment remain unimplemented.
+The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. PRs #6 and #7 are merged; PR #8 adds Playwright coverage, broader domain cases, archive import/export validation, and expanded RLS matrix tests. Its latest known Node 22/24, browser, database migration/lint, and pgTAP CI run passed before the current local changes. The e-bill slice validates interval-energy rows, calculates a flat tariff, exports full calculation evidence, supports a manually entered same-period supplier amount, and generates a PDF estimate. Files and bills are not persisted, and the PDF is not an official utility invoice. Live ingestion, supplier-document parsing, transactional archive import, and supported production deployment remain unimplemented.
 
 ## P0 — Keep evaluation safe and reproducible
 
@@ -31,7 +31,7 @@ The application includes synthetic browser scenarios, measurement and tariff dom
 
 ### Exit gate
 
-Current status: PR #6 and PR #7 are merged; PR #8 remains an open draft and its latest [CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40499896507) passed. The branch locally passes 47 domain tests; CI covers the browser workflow, including PDF download and comparison reset when source data changes. Measured coverage is 91.47% lines, 77.34% branches, and 98.90% functions across four domain modules. Repository history screening found a historical Supabase anonymous key. Hosted project review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
+Current status: PR #6 and PR #7 are merged; PR #8 remains an open draft and its latest known [CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40500322202) passed before the current local changes. The branch locally passes 49 Node tests; measured coverage is 91.80% lines, 77.45% branches, and 98.98% functions across four domain modules. The updated browser workflow has not run locally because Playwright is missing from installed dependencies. Repository history screening found a historical Supabase anonymous key. Hosted project review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
 
 ## P1 — Validate buyer, data access, and first scenario
 
@@ -66,13 +66,13 @@ A second upload of the same file adds no duplicate energy; changed mappings are 
 
 ## P3 — Deliver transparent estimate and bill-variance review
 
-Current implementation: a single-meter e-bill PDF estimate uses validated interval-energy records and a user-configured flat tariff. It can include a reviewer-entered supplier total after same-period confirmation. Time-of-use tariffs in this workflow, supplier-document parsing, official invoice semantics, jurisdiction-specific components, and persistent review history remain open.
+Current implementation: a single-meter e-bill PDF estimate uses validated interval-energy records and a user-configured flat tariff. The workspace shows an expandable source-row calculation view for up to 12 intervals and exports all interval calculations plus an estimate summary as CSV. It can include a reviewer-entered supplier total after same-period confirmation. Time-of-use tariffs in this workflow, supplier-document parsing, official invoice semantics, jurisdiction-specific components, and persistent review history remain open.
 
 ### Work
 
 1. Use effective-dated tariffs with currency, timezone, billing period, calculation version, and explicit components. Begin with flat and time-of-use examples only.
 2. Define billing cutoffs and supported interval cadence with the pilot user; split intervals across tariff boundaries only when the allocation assumption is displayed.
-3. Show estimate drill-down: source rows and accepted coverage, conversions, missing/quarantined rows, tariff component, rounding, subtotal, and total.
+3. Continue the estimate drill-down: flat-rate source-row details and a full interval CSV export are implemented. Extend the evidence to explain tariff-component changes, missing/quarantined coverage, and a persistent reproducible calculation record.
 4. Let the reviewer enter the bill period and supplier-stated amount manually for the first pilot. Add file parsing only after document privacy, retention, access, and error-correction needs are agreed.
 5. Compare estimate and bill as a variance with clear sign and units. Never claim a cause automatically; route differences to a review queue with evidence and user notes.
 6. Preserve source reading, tariff, calculation version, reviewer identity, timestamp, and correction history. Do not overwrite imported data silently.

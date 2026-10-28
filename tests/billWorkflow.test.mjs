@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   createEnergyBill,
+  createEnergyCalculationCsv,
   inspectEnergyCsv,
   parseEnergyCsv,
   suggestEnergyCsvMapping,
@@ -43,7 +44,20 @@ test("inspects a BOM CSV and maps offset timestamps to normalized interval readi
   assert.equal(result.readings[0].meterId, "MTR-1");
   assert.equal(result.readings[0].value, 0.5);
   assert.equal(result.readings[0].unit, "kWh");
+  assert.equal(result.readings[0].sourceUnitOrigin, "configured-default");
   assert.equal(result.readings[0].intervalStart, "2026-10-16T02:30:00.000Z");
+
+  const explicitUnit = [
+    "timestamp,meter_id,value,unit,interval_start,event_id",
+    "2026-10-16T08:15:00+05:30,MTR-1,500,Wh,2026-10-16T08:00:00+05:30,WH-1",
+    "",
+  ].join("\n");
+  const explicit = parse(explicitUnit).readings[0];
+  assert.equal(explicit.sourceValue, 500);
+  assert.equal(explicit.sourceUnit, "Wh");
+  assert.equal(explicit.sourceUnitOrigin, "csv-column");
+  assert.equal(explicit.value, 0.5);
+  assert.equal(explicit.unit, "kWh");
 });
 
 test("supports quoted CSV fields and reports an explicit mapping error", () => {
@@ -144,6 +158,31 @@ test("builds a traceable e-bill estimate and includes variance only for a confir
   });
   assert.equal(unconfirmed.supplierBillAmount, null);
   assert.equal(unconfirmed.variance, null);
+});
+
+test("exports every calculation interval with source lineage and an estimate-only summary", () => {
+  const duplicateRow = "2026-10-16T08:15:00+05:30,MTR-1,0.5,2026-10-16T08:00:00+05:30,E-3";
+  const result = parse([validCsv, duplicateRow].join("\n"));
+  const estimate = estimateEnergyCost(result.readings, tariff);
+  const csv = createEnergyCalculationCsv(result.readings, estimate, { duplicatesIgnored: result.summary.duplicates });
+  const content = csv.replace(/^\uFEFF/, "");
+
+  assert.match(csv, /^\uFEFF"record_type","source_record_ref"/);
+  assert.match(content, /"interval","csv-row:2","E-1","MTR-1"/);
+  assert.match(content, /"0\.5","kWh","configured-default","0\.500000"/);
+  assert.match(content, /"interval","csv-row:3","E-2","MTR-1"/);
+  assert.match(content, /"summary".*"INR".*"tariff-estimate-v2".*"8\.00".*"1\.000".*"2".*"1".*"true"/);
+  assert.throws(() => createEnergyCalculationCsv(result.readings, { status: "incomplete" }), /completed estimate/);
+});
+
+test("prefixes spreadsheet formula markers in user-provided text cells", () => {
+  const formulaCsv = validCsv.replaceAll("MTR-1", "=1+1").replace("E-1", "@SUM(A1)");
+  const result = parse(formulaCsv);
+  const estimate = estimateEnergyCost(result.readings, tariff);
+  const csv = createEnergyCalculationCsv(result.readings, estimate);
+
+  assert.match(csv, /"'=1\+1"/);
+  assert.match(csv, /"'@SUM\(A1\)"/);
 });
 
 test("keeps one generated e-bill scoped to a single site and meter", () => {

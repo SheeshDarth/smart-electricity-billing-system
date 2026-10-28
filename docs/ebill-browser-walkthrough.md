@@ -1,6 +1,6 @@
 # Browser walkthrough: CSV to e-bill estimate
 
-This walkthrough documents the current browser-tested path. It uses `public/sample-energy-readings.csv`, which contains synthetic 15-minute interval readings. The file is parsed in the browser and is not uploaded.
+This walkthrough documents the browser-test path. It uses `public/sample-energy-readings.csv`, which contains synthetic 15-minute interval readings. The file is parsed in the browser and is not uploaded.
 
 ```mermaid
 flowchart LR
@@ -20,7 +20,7 @@ The Playwright end-to-end test creates these screenshots from the production bui
 2. [Estimate and supplier comparison](assets/ebill-walkthrough/02-estimate-comparison.png)
 3. [Generated estimate and variance](assets/ebill-walkthrough/03-bill-variance.png)
 
-The browser test downloads the generated file and checks its name, `%PDF-1.4` header, estimated charge, supplier-total variance, and estimate-only disclosure. Those checks passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40499896507). Separate domain tests also check the PDF cross-reference structure and required scope disclosures. It is an estimate only; no payment is collected.
+The Playwright walkthrough is configured to expand the calculation detail, check that the first interval links to its CSV source row, and download the complete calculation CSV with every interval and its summary. It then downloads the generated PDF and checks its name, `%PDF-1.4` header, estimated charge, supplier-total variance, and estimate-only disclosure. Screenshots are refreshed by a successful Playwright run; the checked-in screenshots predate the new calculation-detail view. It is an estimate only; no payment is collected.
 
 ## Run it locally
 

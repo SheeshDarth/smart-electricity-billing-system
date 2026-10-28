@@ -9,7 +9,7 @@ This repository is a synthetic demonstration, not a deployed monitoring service,
 - A React/TypeScript browser portfolio of synthetic sites and meters, with scenario controls for spikes, stale data, duplicates, counter resets, invalid units, and tariff changes.
 - Shared measurement validation that distinguishes interval energy from cumulative registers, normalizes supported units, detects duplicate event IDs in a batch, quarantines unverified counter resets, and does not turn missing intervals into zero.
 - A deterministic flat-rate and time-of-use cost estimator with effective dates, timezone context, and visible assumptions. Results are estimates, not official bills.
-- An E-bill workspace that imports interval-energy CSV files locally, maps columns, validates each row, calculates an explicit flat tariff estimate, optionally compares a reviewer-entered supplier-stated total for a confirmed matching period, and downloads a PDF estimate.
+- An E-bill workspace that imports interval-energy CSV files locally, maps columns, validates each row, calculates an explicit flat tariff estimate, exposes a source-row-to-charge calculation detail, exports the complete interval calculation CSV, optionally compares a reviewer-entered supplier-stated total for a confirmed matching period, and downloads a PDF estimate.
 - A synthetic sample CSV that lets a buyer generate an e-bill without a seller account, database, meter, or customer file.
 - A workflow view tracing sample events through validation, site summaries, a signal, human review, and simulated verification.
 - A JSON snapshot of the selected synthetic walkthrough. It is not a complete measurement-history export or migration package.
