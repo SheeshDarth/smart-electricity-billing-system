@@ -20,9 +20,6 @@ const server = spawn(
     cwd: root,
     env: {
       ...process.env,
-      VITE_SUPABASE_URL: "",
-      VITE_SUPABASE_ANON_KEY: "",
-      VITE_SUPABASE_PUBLISHABLE_KEY: "",
     },
     stdio: ["ignore", "pipe", "pipe"],
   },
@@ -73,7 +70,7 @@ try {
   assert.match(script.headers.get("content-type") || "", /javascript/i);
   await script.arrayBuffer();
 
-  console.log("Built demo HTTP smoke check passed without Supabase credentials.");
+  console.log("Built demo HTTP smoke check passed.");
 } catch (error) {
   const output = logs.join("").trim();
   if (output) error.message += "\nVite preview output:\n" + output;

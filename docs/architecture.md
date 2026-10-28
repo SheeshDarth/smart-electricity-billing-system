@@ -14,8 +14,7 @@ The first release should be read-only for physical data sources. It must not con
 |---|---|
 | Browser portfolio and digital-twin scenarios | Synthetic demo; no live source |
 | Measurement normalization and tariff estimates | Domain module with deterministic tests |
-| Supabase multi-tenant migration and RLS tests | Additive migration; expanded role/table and cross-organization pgTAP suite passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40494161969). Not applied to a hosted project. |
-| Database lint and local-stack cleanup | Passed in PR #8 CI | Disposable migration, schema lint, and always-run stack cleanup passed; hosted projects are not involved |
+| Authentication, persistence, and tenant authorization | Not included | The current application is a local browser prototype; it has no backend or server-side authorization. |
 | Versioned JSON energy archive | Local synthetic export and validated preview; duplicate IDs and known cross-record references are checked; no database persistence or transactional production import. |
 | Authenticated ingestion API, persistent production dashboards, live meter adapters | Not implemented |
 | Official utility invoices, payment processing, device control, AI inference | Not implemented |
@@ -43,7 +42,7 @@ flowchart LR
 
 ## Canonical measurement envelope
 
-The migration and domain module describe energy data independently of a specific board or vendor. The core fields are:
+The domain module describes energy data independently of a specific board or vendor. The core fields are:
 
 - Organization, site, optional area/asset, meter, and optional adapter identifiers define hierarchy and ownership.
 - Schema version, stable event ID, and optional source sequence/reference support reproducibility and duplicate detection.
@@ -68,11 +67,11 @@ The current utility exports and revalidates a JSON document with format identifi
 
 This is an early serialization boundary, not a complete interchange specification: entity-specific schemas and relationships are not fully checked; there is no import transaction, database mapping, migration path, cryptographic signature, or dedicated test suite yet. Before external use, document field semantics and compatibility policy, add round-trip and malformed-input tests, protect sensitive bill data, and decide how forward-compatible unknown fields are handled.
 
-## Tenant and access model
+## Persistence and access boundary
 
-The additive Supabase migration defines organizations, memberships, sites, areas, assets, meters, source adapters, measurements, tariffs, billing runs, insights, and interventions. It defines organization-scoped access and role-specific policies. The original 27-assertion suite passed in [default-branch CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40476121240); the expanded role/table, cross-organization, and membership checks passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40494161969). These disposable tests do not inspect a hosted project and are not a production security audit.
+The current application has no user accounts, database, server-side authorization, or persistent records. CSV readings, estimates, and review decisions remain in the browser session. The former account pages, database client, schema, migrations, and role-policy tests were removed from the active project.
 
-This is not a production security audit. Expand role/table CRUD tests, validate membership changes and owner recovery, review storage and API access, check every write path, exercise rollback/upgrade and backup/restore, and validate against a buyer-owned environment before real data. The client must never contain a service-role credential. Legacy billing routes and their tables are not converted by this migration.
+Before a production pilot, select a buyer-approved backend and identity provider, define tenant and role boundaries, then implement and independently test every read and write path, migration/rollback, backup/restore, storage access, and owner recovery. The current UI must not be treated as proof of a secure multi-tenant service.
 
 ## Replaceability and longevity
 
@@ -82,8 +81,8 @@ Monitoring, historical calculations, exports, and cost estimates should remain u
 
 ## Security and operational limits
 
-- The root browser demo requires no seller-owned backend credentials.
-- The GitHub repository is currently public; changing this branch does not change visibility or external Supabase state.
+- The browser demo has no backend credentials or connected production service.
+- A historical anonymous backend key remains in earlier public Git revisions; removing the integration from the current tree does not revoke that key or inspect/delete its hosted project. See [history scan](history-secret-scan.md).
 - No physical control, payment processor, production invoice, or live adapter is connected.
 - Real readings or bills require access controls, retention/deletion rules, encryption, audit logs, incident response, and customer-approved hosting before a pilot.
-- The repository still needs history, checked-in-data, contributor ownership, dependency license, external backend, and transfer review before sale claims.
+- The repository still needs history, checked-in-data, contributor ownership, dependency license, historical backend project, and transfer review before sale claims.

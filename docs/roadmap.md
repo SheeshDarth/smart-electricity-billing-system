@@ -1,6 +1,6 @@
 # Implementation roadmap and release gates
 
-Status snapshot: 28 October 2026. This roadmap replaces the earlier broad energy-intelligence direction with a focused electricity visibility and bill-evidence hypothesis. Buyer demand and willingness to pay have not been validated. No customer data or hosted Supabase project has been used in this work.
+Status snapshot: 28 October 2026. This roadmap replaces the earlier broad energy-intelligence direction with a focused electricity visibility and bill-evidence hypothesis. Buyer demand and willingness to pay have not been validated. No customer records or hosted backend have been used in this work.
 
 ## Product outcome
 
@@ -16,22 +16,22 @@ Core rules:
 
 ## Current baseline
 
-The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. Current code commit `ab6da4a` extends the e-bill screen from flat tariffs to a two-band time-of-use schedule, source-linked price segments, full calculation export, and a PDF tariff schedule. It passed [CI run 40633652147](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147), including the browser workflow. Files and bills are not persisted, and the PDF is not an official utility invoice. Live ingestion, supplier-document parsing, transactional archive import, jurisdiction-specific tariff rules, and supported production deployment remain unimplemented.
+The application includes synthetic browser scenarios, measurement and tariff domain logic, a local CSV-to-e-bill estimate workflow, and a browser-only demo. Current code commit `ab6da4a` extends the e-bill screen from flat tariffs to a two-band time-of-use schedule, source-linked price segments, full calculation export, and a PDF tariff schedule. It passed [CI run 40633652147](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147), including the browser workflow. Files and bills are not persisted, and the PDF is not an official utility invoice. Live ingestion, authentication, supplier-document parsing, transactional archive import, jurisdiction-specific tariff rules, and supported production deployment remain unimplemented.
 
 ## P0 — Keep evaluation safe and reproducible
 
 ### Work
 
-1. Keep the root demo independent of seller-owned Supabase credentials and ensure a clean checkout can start from documented prerequisites.
-2. Keep the inherited login/admin/user flows labeled as legacy until they are migrated separately or removed by an explicit decision.
-3. Require npm install from lockfile, lint, typecheck, unit tests, production build, local Supabase migration, pgTAP, database lint, and always-run local stack cleanup on pull requests.
+1. Keep the root demo backend-free and ensure a clean checkout can start from documented prerequisites.
+2. Keep the product boundary explicit: no authentication, database, or persisted customer records are included.
+3. Require npm install from lockfile, lint, typecheck, unit tests, production build, HTTP smoke check, and browser workflow in pull-request CI.
 4. Add focused tests for the energy archive parser and serializer: valid minimal archive; bad format/version; missing collections; malformed measurement; missing timezone; invalid interval range; non-finite values; oversize input; round-trip preservation of fields.
 5. Keep all screenshots and demo content labeled synthetic; verify the UI cannot imply that a simulated decision changed a real device.
-6. Complete the repository sale-readiness review separately: Git history, checked-in data, dependency licenses, ownership/contributor rights, current repository visibility, Lovable terms, and external Supabase project state.
+6. Complete the repository sale-readiness review separately: Git history, checked-in data, dependency licenses, ownership/contributor rights, current repository visibility, Lovable terms, and the former hosted backend project/key.
 
 ### Exit gate
 
-Current status: PR #6 and PR #7 are merged; PR #8 remains an open draft. Current code commit `ab6da4a` passed Node 22/24, browser, database migration/lint, and pgTAP in run 40633652147. The branch locally passes 51 Node tests; measured coverage is 91.79% lines, 77.43% branches, and 99.05% functions across four domain modules. The [current browser screenshots](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679) are available as a CI artifact. Repository history screening found a historical Supabase anonymous key. Hosted project review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
+Current status: PR #6 and PR #7 are merged; PR #8 remains an open draft. The previous code commit `ab6da4a` passed Node 22/24, browser, and database checks in run 40633652147. This branch removes the database integration and its CI job; rerun CI before claiming it passes. The branch previously measured 91.79% lines, 77.43% branches, and 99.05% functions across four domain modules. The [browser screenshots](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679) remain available as a CI artifact. Repository history screening found a historical anonymous client key. Hosted project/key review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
 
 ## P1 — Validate buyer, data access, and first scenario
 

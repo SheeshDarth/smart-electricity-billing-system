@@ -91,7 +91,7 @@ export default function EnergyArchiveWorkspace() {
     <section className="grid gap-4 xl:grid-cols-2">
       <div className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-5">
         <h3 className="flex items-center gap-2 text-sm font-semibold"><Download size={16} className="text-cyan-200" />Export</h3>
-        <p className="mt-2 text-xs leading-relaxed text-slate-500">Download a synthetic archive with linked organization, site, meter, adapter, reading, tariff, bill run, insight, and intervention records. No customer or Supabase records are included.</p>
+        <p className="mt-2 text-xs leading-relaxed text-slate-500">Download a synthetic archive with linked organization, site, meter, adapter, reading, tariff, bill run, insight, and intervention records. The app stores no customer records.</p>
         <button onClick={exportSynthetic} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-cyan-300 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-cyan-200"><Download size={14} />Export synthetic archive</button>
       </div>
 
