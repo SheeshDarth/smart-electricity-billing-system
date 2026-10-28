@@ -51,7 +51,7 @@ All demo records and outcomes are synthetic. Passing local tests does not establ
 1. Add CSV import with dry-run preview, reusable source mapping, timezone/unit selection, duplicate handling, and row-level errors.
 2. Persist source reference, original and normalized values/units, quality, received time, and schema version. Never archive secrets.
 3. Build a site timeline for usage, freshness, missing intervals, invalid readings, and estimates from the same stored readings.
-4. Configure flat and time-of-use tariffs. Keep tax, demand, fixed, export, and netting charges disabled until reviewed for the pilot jurisdiction.
+4. Configure flat and illustrative two-band time-of-use tariffs. The current CSV workflow repeats bands by local clock time each day; keep weekday, holiday, seasonal, tax, demand, fixed, export, and netting charges disabled until reviewed for a pilot jurisdiction.
 5. Let a reviewer enter or import a supplier bill total and period. Present variance as reconciliation aid, not an official bill or payment request.
 6. Add an exception queue for stale sources, missing intervals, unusual changes, estimate/bill variance, and invalid rows. Show evidence and preserve unknown cause.
 7. Record review status, notes, actor, timestamp, and correction events. Do not silently alter source readings or control equipment.

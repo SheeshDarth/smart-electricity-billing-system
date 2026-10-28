@@ -4,9 +4,9 @@ Preparation notes for a possible codebase marketplace listing. This is not a val
 
 ## Current snapshot
 
-PR #6 (documentation) and PR #7 (local CSV-to-e-bill workflow) are merged into `main`. PR #8 remains an open draft and adds browser coverage, broader domain coverage, archive UI validation, a larger RLS matrix, dependency updates, and these due-diligence reports. Its current-head [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40631754083) passed Node 22/24, Chromium, database migration/lint, and pgTAP, including the new calculation CSV walkthrough.
+PRs #6 and #7 are merged into `main`. PR #8 remains an open draft. Its last completed [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40631754083) passed Node 22/24, Chromium, database migration/lint, and pgTAP before the current time-of-use UI changes; the new branch changes still need remote CI verification.
 
-Locally, 49 Node tests pass and Node measured 91.80% line, 77.45% branch, and 98.98% function coverage across four domain modules. PR #8 run 40631754083 passed the current Chromium walkthrough, including calculation detail and full CSV export, alongside Node 22/24, database migration/lint, and pgTAP. Database checks ran against a disposable CI stack, not a hosted project. The checked-in screenshots predate the new calculation-detail view; CI does not publish its regenerated images.
+Locally, 51 Node tests pass and Node measured 91.79% line, 77.43% branch, and 99.05% function coverage across four domain modules. Local lint, type-check, build, and Playwright could not be run because the dependency install was blocked by a Windows filesystem `EPERM`; CI must verify the current branch. Prior database checks ran against a disposable stack, not a hosted project. The time-of-use screenshots await a successful CI artifact.
 
 The e-bill flow remains a local estimate workflow. The archive UI validates files and summarizes record counts but does not persist imports. The old payment-entry modal has been removed; legacy paid flags and downloads are labeled simulated. No real tariff compliance, payment processing, live meter adapter, or official bill issuance is claimed.
 
@@ -19,16 +19,16 @@ The e-bill flow remains a local estimate workflow. The archive UI validates file
 - [ ] **History and private data:** The targeted pattern scan found one historical Supabase anon key, no current working-tree matches, and no service-role-key pattern. This is not a comprehensive secret scanner or a private-data audit. Review GitHub issues/attachments and external backend state too.
 - [ ] **Buyer validation:** No operator interviews, customer evidence, or live pilot have validated the buyer hypothesis. Use the [interview guide](buyer-validation-interview-guide.md) before claiming product demand or expanding scope.
 - [ ] **Price and terms:** Re-run the estimate only after privacy and rights checks. Decide license versus transfer, exclusivity, AI use, derivatives, onward licensing, support, data retention, and handover scope. Get qualified advice for the agreement.
-- [x] **Latest remote PR CI:** PR #8 run 40631754083 passed Node 22/24, Chromium, migration, database lint, and expanded pgTAP on current head.
+- [ ] **Current branch CI:** the prior PR #8 run passed Node 22/24, Chromium, migration, database lint, and expanded pgTAP; this branch's time-of-use changes are pending.
 
 ## Evidence safe to describe now
 
-- [x] The prototype has a local CSV-to-estimate flow with row validation, explicit flat-rate assumptions, optional same-period supplier comparison, and a PDF estimate generator.
-- [x] The CI browser suite passed upload, accepted/rejected validation, estimate, calculation CSV, variance, PDF-download, and stale-confirmation reset workflows; checked-in screenshots remain stale for the new calculation detail.
-- [x] Domain coverage is measured and scoped to the four tested JavaScript domain modules: 91.80% lines, 77.45% branches, and 98.98% functions on the 28 October local run.
+- [x] The prototype has a local CSV-to-estimate flow with row validation, flat and two-band local-hour tariff assumptions, optional same-period supplier comparison, and a PDF estimate generator.
+- [ ] The current browser suite includes a local tariff-boundary scenario, per-band calculation export, PDF schedule assertion, and screenshot artifact; current branch CI is pending.
+- [x] Domain coverage is measured and scoped to four JavaScript domain modules: 91.79% lines, 77.43% branches, and 99.05% functions on the 28 October local run.
 - [x] A local archive export and whole-file validation summary exist; no partial database import is performed.
 - [x] The dependency inventory and history-screening results are documented with their limits.
-- [x] New browser and RLS checks passed in the PR #8 workflow run.
+- [x] RLS checks passed in PR #8 run 40631754083; that run predates the current UI and tariff changes.
 - [ ] External Supabase review, ownership clearance, full legal license review, operator interviews, and private-data determination remain open.
 
 ## DataVendor field notes
@@ -37,8 +37,8 @@ The e-bill flow remains a local estimate workflow. The archive UI validates file
 |---|---|---|
 | Domain | Electricity data quality and estimate workflow | Choose the closest energy/software category; do not claim utility-grade AMI. |
 | Asking price | No seller price selected; existing estimate predates this work | Refresh the estimator after privacy and rights checks, then choose license scope and asking terms. |
-| Tests/coverage | 49 local Node tests pass; measured coverage is scoped to four modules | State the scope and values, not whole-repository coverage. Refresh after changes. |
-| CI on PRs | PR #8 Node 22/24, browser, migration/lint, and pgTAP jobs passed | Describe the jobs and scope; hosted security remains separate. |
+| Tests/coverage | 51 local Node tests pass; measured coverage is scoped to four modules | State the scope and values, not whole-repository coverage. Refresh after changes. |
+| CI on PRs | Prior PR #8 Node 22/24, browser, migration/lint, and pgTAP jobs passed; current branch run pending | Describe the jobs and scope after the new workflow run completes; hosted security remains separate. |
 | Private code supply | GitHub repository remains public | Do not claim private eligibility until the final snapshot is private and re-scanned by the platform. |
 | Private data | Current demo is synthetic; historical anonymous project key and external backend are under review | Keep unconfirmed until hosted project and all data sources are reviewed. |
 

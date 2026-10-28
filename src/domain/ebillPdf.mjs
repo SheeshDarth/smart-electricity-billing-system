@@ -30,6 +30,23 @@ function clipped(value, limit = 76) {
   return text.length > limit ? text.slice(0, limit - 3) + "..." : text;
 }
 
+function tariffHour(hour) {
+  return String(hour).padStart(2, "0") + ":00";
+}
+
+function tariffDescription(bill) {
+  if (bill.tariffMode !== "time-of-use") {
+    return "Energy charge at " + Number(bill.ratePerKwh).toFixed(4) + " " + pdfAscii(bill.currency) + "/kWh";
+  }
+  return "Energy charge by time-of-use tariff";
+}
+
+function tariffScheduleLine(component, currency) {
+  const name = component.name || (tariffHour(component.startHour) + "-" + tariffHour(component.endHour));
+  return name + " " + tariffHour(component.startHour) + "-" + tariffHour(component.endHour)
+    + " @ " + pdfAscii(currency) + " " + Number(component.ratePerKwh).toFixed(4) + "/kWh";
+}
+
 export function createEnergyBillPdf(bill) {
   if (!bill || bill.documentType !== "wattwise-energy-estimate" || bill.estimatedOnly !== true) {
     throw new TypeError("A Wattwise estimated e-bill is required");
@@ -38,6 +55,10 @@ export function createEnergyBillPdf(bill) {
   const start = new Date(bill.periodStart).toISOString();
   const end = new Date(bill.periodEnd).toISOString();
   const generated = new Date(bill.generatedAt).toISOString();
+  const tariffSchedule = bill.tariffMode === "time-of-use"
+    ? (Array.isArray(bill.tariffComponents) ? bill.tariffComponents : []).map((component) => tariffScheduleLine(component, currency))
+    : [];
+  const scopeStartY = 176 - (tariffSchedule.length * 16);
   const content = [
     "0.04 0.15 0.19 rg 0 742 595 100 re f\n",
     drawText("WATTWISE", 48, 802, 22, true, "1 1 1"),
@@ -67,7 +88,7 @@ export function createEnergyBillPdf(bill) {
     drawText(String(bill.duplicatesIgnored), 390, 418, 10, true),
     drawRule(398),
     drawText("ESTIMATED CHARGES", 48, 374, 8, true, "0.39 0.48 0.51"),
-    drawText("Energy charge at " + Number(bill.ratePerKwh).toFixed(4) + " " + currency + "/kWh", 48, 350, 10),
+    drawText(tariffDescription(bill), 48, 350, 10),
     drawText(formatMoney(currency, bill.energyCharge), 390, 350, 12, true),
     drawRule(334),
     drawText("Estimated energy total", 48, 310, 11, true),
@@ -81,13 +102,13 @@ export function createEnergyBillPdf(bill) {
     drawRule(238),
     drawText("CALCULATION AND SCOPE", 48, 214, 8, true, "0.39 0.48 0.51"),
     drawText("Tariff: " + clipped(bill.tariffVersion, 42) + "  |  Calculation: " + clipped(bill.calculationVersion, 32), 48, 194, 8),
-    drawText("This estimate uses only the validated interval readings shown above.", 48, 176, 8),
-    drawText("Taxes, fixed/demand charges, arrears, and export credits are excluded.", 48, 160, 8),
-    drawText("A supplier bill may include items that this estimate does not calculate.", 48, 144, 8),
-    drawText("No payment is collected and no amount is represented as officially due.", 48, 128, 8),
-    drawRule(106),
-    drawText("Generated locally by Wattwise from the selected CSV and tariff assumptions.", 48, 84, 8, false, "0.39 0.48 0.51"),
-    drawText("Classification: " + clipped(bill.classification, 54), 48, 68, 8, false, "0.39 0.48 0.51"),
+    ...tariffSchedule.map((line, index) => drawText("Tariff band: " + clipped(line, 92), 48, 176 - (index * 16), 8)),
+    drawText("This estimate uses only the validated interval readings shown above.", 48, scopeStartY, 8),
+    drawText("Taxes, fixed/demand charges, arrears, and export credits are excluded.", 48, scopeStartY - 16, 8),
+    drawText("No payment is collected; this is not an official amount due.", 48, scopeStartY - 32, 8),
+    drawRule(scopeStartY - 52),
+    drawText("Generated locally by Wattwise from the selected CSV and tariff assumptions.", 48, scopeStartY - 72, 8, false, "0.39 0.48 0.51"),
+    drawText("Classification: " + clipped(bill.classification, 54), 48, scopeStartY - 88, 8, false, "0.39 0.48 0.51"),
   ].join("");
 
   const objects = [

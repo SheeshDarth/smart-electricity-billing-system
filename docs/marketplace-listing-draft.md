@@ -8,7 +8,7 @@ Wattwise — electricity data-quality and tariff-estimation prototype
 
 ## Short description
 
-A TypeScript browser prototype for synthetic electricity scenarios and local CSV-to-e-bill estimates. It validates interval-energy readings, applies a configurable flat tariff, supports a manually entered same-period supplier-total comparison, and generates a clearly labelled PDF estimate. Includes domain tests, pull-request CI, an additive Supabase schema, and setup documentation. No live meter or production billing service is included.
+A TypeScript browser prototype for synthetic electricity scenarios and local CSV-to-e-bill estimates. It validates interval-energy readings, applies a configurable flat or two-band local-hour time-of-use tariff, supports a manually entered same-period supplier-total comparison, exports calculation lineage, and generates a clearly labelled PDF estimate. Includes domain tests, pull-request CI, an additive Supabase schema, and setup documentation. No live meter or production billing service is included.
 
 ## Longer description
 
@@ -16,7 +16,7 @@ Wattwise is an early-stage browser prototype exploring how a small multi-site op
 
 The browser digital twin uses synthetic site and meter records. Its scenarios demonstrate usage spikes, stale data, duplicate events, counter resets, invalid units, and tariff changes. The shared domain code validates measurement types, normalizes supported units, handles batch duplicate IDs, quarantines unproven cumulative-register resets, and rejects missing intervals instead of treating them as zero. A deterministic estimator supports illustrative flat and time-of-use tariffs with effective dates and timezone context. A workflow view shows event validation, a signal, a human review, and simulated verification.
 
-The repository includes a local CSV validation and estimate workflow with a synthetic sample file, source-row calculation detail and complete calculation CSV export, PDF e-bill generator, a versioned energy-archive format with a browser validation/export workspace, focused automated tests, an additive Supabase schema, database tests, CI, and product/setup documentation. A clean local demo does not require a seller-owned Supabase project. Archive files are validated and exported locally; transactional import into the application database is not implemented.
+The repository includes a local CSV validation and estimate workflow with a synthetic sample file, source-linked priced segments, a complete calculation CSV export, flat and two-band time-of-use tariff examples, a PDF e-bill generator, a versioned energy-archive format with a browser validation/export workspace, focused automated tests, an additive Supabase schema, database tests, CI, and product/setup documentation. A clean local demo does not require a seller-owned Supabase project. Time-of-use bands use local clock hours and do not model weekday, holiday, seasonal, or jurisdiction-specific exceptions. Archive files are validated and exported locally; transactional import into the application database is not implemented.
 
 This is a software codebase with synthetic demonstration content. It is not a deployed energy service, official billing system, payment processor, live meter integration, or AI product. No real savings or production outcomes are claimed.
 
@@ -73,7 +73,7 @@ npm run build
 npm run smoke:demo
 ```
 
-PRs #6 and #7 are merged. PR #7's default-branch CI run passed its Node 22/24 checks and disposable database job. PR #8 remains an open draft; current-head [GitHub Actions run 40631754083](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40631754083) passed Node 22/24, browser E2E, database migration/lint, and expanded pgTAP, including source-row details and the full calculation CSV. Locally, 49 Node tests passed and measured coverage is 91.80% lines, 77.45% branches, and 98.98% functions across four JavaScript domain modules only. Database checks run against a disposable CI stack, not a hosted project. The checked-in screenshots still predate the calculation-detail view.
+PRs #6 and #7 are merged. PR #8 remains an open draft. Its last completed [GitHub Actions run 40631754083](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40631754083) passed Node 22/24, browser E2E, database migration/lint, and expanded pgTAP before the current time-of-use UI changes. The current branch has 51 passing Node tests and measured coverage of 91.79% lines, 77.43% branches, and 99.05% functions across four JavaScript domain modules only. Current branch CI and a refreshed screenshot artifact are pending. Database checks run against a disposable CI stack, not a hosted project.
 
 See the [digital-twin demo guide](digital-twin-demo-guide.md), [e-bill workflow guide](ebill-generation.md), and [visual browser walkthrough](ebill-browser-walkthrough.md) for the steps and screenshots. The sample file is synthetic; uploaded files are handled locally in the browser. The Chromium walkthrough checks the downloaded PDF filename, header, estimate, supplier variance, and estimate-only disclosure. Domain tests separately check the PDF structure.
 
@@ -84,9 +84,9 @@ See the [digital-twin demo guide](digital-twin-demo-guide.md), [e-bill workflow 
 | Asset type | One software repository | Choose the codebase/repository asset type. Do not describe it as a dataset or taskset. |
 | Domain | Electricity/energy software and billing examples | Choose the closest available energy or software domain tags; avoid utility-grade or IoT claims. |
 | Asking price | No current seller price selected | Refresh the platform estimate after privacy changes, then choose a price and rights scope. A platform estimate is advisory, not a buyer offer. |
-| Tests and coverage | Local run: 49 Node tests; measured coverage across four domain modules | State the run and exact scope: 91.80% lines, 77.45% branches, 98.98% functions. Do not report this as whole-repository or UI/SQL coverage. |
-| Browser walkthrough | PR #8 run 40631754083 passed Chromium workflows, including full calculation CSV, PDF download, and comparison reset | Describe the validated CSV, source-row calculation detail, summary export, estimate, comparison, variance, PDF, invalid-row, and source-change reset paths. Refresh checked-in screenshots before listing. |
-| CI on pull requests | PR #8 Node 22/24, browser, database migration/lint, and pgTAP jobs passed | CI is present; describe the tested checks and keep hosted security separate. |
+| Tests and coverage | Local run: 51 Node tests; measured coverage across four domain modules | State the run and exact scope: 91.79% lines, 77.43% branches, 99.05% functions. Do not report this as whole-repository or UI/SQL coverage. |
+| Browser walkthrough | Existing CI passed the prior flat workflow; current time-of-use walkthrough pending | After CI passes, describe the validated source interval split, priced segments, full CSV, PDF tariff schedule, comparison, and screenshot artifact. |
+| CI on pull requests | Prior PR #8 Node 22/24, browser, database migration/lint, and pgTAP jobs passed | Verify current branch jobs before making a current-head CI claim; hosted security remains separate. |
 | Private code supply | GitHub currently reports this repository as public while improvements are in progress | Do not claim a private-supply quote or publish until the intended final snapshot is private and DataVendor re-scans it. |
 | Private/personal data | Targeted local/history scan found no configured-pattern secrets in the worktree and found a historical Supabase anonymous client key in 24 commits; external Supabase state is unreviewed | Keep this field unconfirmed until the hosted project, generated assets, and remaining data exposure are reviewed. An anonymous key is intended for client use but still relies on correct backend access policies. |
 

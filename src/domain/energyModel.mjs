@@ -135,11 +135,22 @@ function nextLocalHourBoundary(timestamp, formatter) {
   return timestamp + elapsed;
 }
 
-function getRateAt(timestamp, tariff, formatter) {
-  if (!Array.isArray(tariff.timeOfUse) || tariff.timeOfUse.length === 0) return tariff.ratePerKwh;
+function hourLabel(hour) {
+  return String(hour).padStart(2, "0") + ":00";
+}
+
+function getTariffAt(timestamp, tariff, formatter) {
+  if (!Array.isArray(tariff.timeOfUse) || tariff.timeOfUse.length === 0) {
+    return { ratePerKwh: tariff.ratePerKwh, period: "Flat" };
+  }
   const { hour } = localTimeParts(timestamp, formatter);
   const period = tariff.timeOfUse.find((item) => periodCoversHour(item, hour));
-  return period ? period.ratePerKwh : null;
+  return period ? {
+    ratePerKwh: period.ratePerKwh,
+    period: typeof period.name === "string" && period.name.trim()
+      ? period.name.trim()
+      : hourLabel(period.startHour) + "-" + hourLabel(period.endHour),
+  } : null;
 }
 
 function validateTariff(tariff) {
@@ -258,10 +269,11 @@ export function estimateEnergyCost(readings, tariff, options = {}) {
     const duration = intervalEnd - intervalStart;
     let cursor = intervalStart;
     while (cursor < intervalEnd) {
-      const rate = getRateAt(cursor, tariff, hourFormatter);
-      if (!Number.isFinite(rate)) {
+      const tariffComponent = getTariffAt(cursor, tariff, hourFormatter);
+      if (!Number.isFinite(tariffComponent?.ratePerKwh)) {
         return { status: "incomplete", reason: "no tariff component covers an interval segment", duplicatesIgnored: deduped.duplicates.length };
       }
+      const rate = tariffComponent.ratePerKwh;
       const nextBoundary = tariff.timeOfUse?.length ? nextLocalHourBoundary(cursor, hourFormatter) : intervalEnd;
       const segmentEnd = Math.min(intervalEnd, nextBoundary);
       if (!Number.isFinite(segmentEnd) || segmentEnd <= cursor) {
@@ -275,6 +287,7 @@ export function estimateEnergyCost(readings, tariff, options = {}) {
         end: new Date(segmentEnd).toISOString(),
         energyKwh: Math.round((segmentEnergy + Number.EPSILON) * 1_000_000) / 1_000_000,
         ratePerKwh: rate,
+        tariffPeriod: tariffComponent.period,
         cost: Math.round((segmentCost + Number.EPSILON) * 1_000_000) / 1_000_000,
       });
       energyKwh += segmentEnergy;
