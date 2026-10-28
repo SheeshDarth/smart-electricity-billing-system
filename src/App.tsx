@@ -8,9 +8,6 @@ import { lazy, Suspense } from "react";
 
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const Login = lazy(() => import("./pages/Login"));
-const Admin = lazy(() => import("./pages/Admin"));
-const User = lazy(() => import("./pages/User"));
 
 const queryClient = new QueryClient();
 
@@ -23,9 +20,6 @@ const App = () => (
         <Suspense fallback={<div role="status" className="grid min-h-screen place-items-center bg-[#0a1115] text-sm text-slate-400">Loading page…</div>}>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/user" element={<User />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

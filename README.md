@@ -13,9 +13,8 @@ This repository is a synthetic demonstration, not a deployed monitoring service,
 - A synthetic sample CSV that lets a buyer generate an e-bill without a seller account, database, meter, or customer file.
 - A workflow view tracing sample events through validation, site summaries, a signal, human review, and simulated verification.
 - A JSON snapshot of the selected synthetic walkthrough. It is not a complete measurement-history export or migration package.
-- A versioned energy archive exporter and local import validator with a 10 MiB limit, duplicate-ID and cross-reference checks, a complete validation report, and no partial database writes.
-- An additive Supabase schema for organizations, roles, sites, meters, readings, tariffs, billing runs, insights, and interventions. It has not been applied to any hosted project.
-- Pull-request CI for Node checks and measured domain coverage, a Playwright walkthrough against the built browser app, local Supabase migration/RLS tests, database lint, and stack cleanup.
+- A versioned energy archive exporter and local import validator with a 10 MiB limit, duplicate-ID and cross-reference checks, and a complete validation report. Imported records are not applied to app state.
+- Pull-request CI for Node checks and measured domain coverage, plus a Playwright walkthrough against the built browser app.
 
 All readings and outcomes are synthetic. INR rates and tariff IDs are illustrative. No real savings, AI diagnosis, live hardware interoperability, or regulatory compliance is claimed.
 
@@ -45,13 +44,11 @@ npm run test:e2e:install -- chromium
 npm run test:e2e
 ```
 
-The demo smoke check verifies that the built HTML shell and JavaScript bundle respond. The Playwright suite exercises CSV upload, accepted/rejected-row validation, flat and time-of-use estimates, a local-hour tariff-boundary split, same-period supplier comparison, complete calculation CSV export, and PDF generation on Chromium. CI stores the four browser walkthrough screenshots as a 30-day artifact. Node coverage reports line, branch, and function coverage for the exercised domain modules; it does not measure the React UI or SQL. The GitHub Actions workflow also starts a disposable local Supabase stack, applies migrations, runs the role and tenant RLS tests and database lint, then stops the stack. These checks do not validate a hosted database or production deployment.
+The demo smoke check verifies that the built HTML shell and JavaScript bundle respond. The Playwright suite exercises CSV upload, accepted/rejected-row validation, flat and time-of-use estimates, a local-hour tariff-boundary split, same-period supplier comparison, complete calculation CSV export, and PDF generation on Chromium. CI stores the four browser walkthrough screenshots as a 30-day artifact. Node coverage reports line, branch, and function coverage for the exercised domain modules; it does not measure the React UI. CI does not verify a production backend or deployment.
 
-## Optional Supabase configuration
+## Backend boundary
 
-The browser twin runs without Supabase. The inherited `/login`, `/admin`, and `/user` routes are legacy billing screens and are not part of the current demo flow; they still expect the old application tables. To exercise them, configure a buyer-owned Supabase project with the appropriate schema and environment variables. Never place a service-role key in browser code or this repository.
-
-The new migration is additive and does not convert the legacy billing tables. Repository history and any external backend still require separate review before transfer or sale.
+The current product is a local browser prototype. It has no authentication, database, hosted backend, or environment-specific credentials, and does not persist uploaded readings or bills. The inherited `/login`, `/admin`, and `/user` billing routes and their database integration have been removed. A future backend should be selected and threat-modeled only after a buyer and deployment requirement are validated.
 
 ## Product and engineering notes
 
@@ -61,7 +58,6 @@ The new migration is additive and does not convert the legacy billing tables. Re
 - [Feature and readiness matrix](docs/feature-status.md)
 - [Local e-bill workflow and CSV contract](docs/ebill-generation.md)
 - [Energy archive format and browser workflow](docs/energy-archive.md)
-- [RLS role/table access matrix](docs/rls-access-matrix.md)
 - [Measured domain coverage](docs/domain-coverage.md)
 - [Dependency vulnerability and license review](docs/dependency-risk-review.md)
 - [History secret-scan report](docs/history-secret-scan.md)
@@ -71,7 +67,7 @@ The new migration is additive and does not convert the legacy billing tables. Re
 - [Buyer due-diligence checklist](docs/buyer-readiness.md)
 - [Marketplace listing copy draft and readiness gates](docs/marketplace-listing-draft.md)
 
-The listing document is factual draft copy only. PRs #6 and #7 are merged into `main`; this readiness work is being prepared separately. The repository remains public while improvements and due diligence continue. External Supabase state, contributor/ownership evidence, dependency license rights, history scan results, and operator interview feedback must be resolved before a private listing snapshot or sale claims are prepared.
+The listing document is factual draft copy only. PRs #6 and #7 are merged into `main`; this readiness work is being prepared separately. The repository remains public while improvements and due diligence continue. A historical anonymous backend key and its external project, contributor/ownership evidence, dependency license rights, history scan results, and operator interview feedback must be resolved before a private listing snapshot or sale claims are prepared.
 
 Schneider Electric is included in the market landscape as an established competitor. A previously explored Schneider-linked concept was rejected and is not the product direction. The industrial site in the browser remains synthetic demonstration content only.
 
@@ -82,8 +78,8 @@ Schneider Electric is included in the market landscape as an established competi
 - The rule signal is deterministic. No trained AI model, LLM service, or GPU workload is included.
 - The generated e-bill is a locally calculated estimate, not an official invoice or amount due. The current builder supports interval-energy CSV and flat or two-band local-hour time-of-use examples; weekday, holiday, seasonal, jurisdiction-specific rates, and production billing rules remain unsupported.
 - Supplier comparison is manual and included only after the reviewer confirms the entered amount covers the same reading period. Supplier document parsing, payment processing, persistent bill records, and official invoices are not implemented.
-- The new schema has local CI coverage, but hosted deployment, complete authorization review, recovery, and production readiness remain open.
-- Legacy paid flags and old bill-document flows remain simulated. The unused simulated card-entry modal was removed; the new PDF estimate is a separate local workflow and collects no payment.
+- No authentication, database, persistence, or server-side authorization is included. The current local demo has no customer records or connected backend.
+- Legacy account, payment, and bill-document routes were removed; the current PDF estimate is a separate local workflow and collects no payment.
 - GitHub currently reports this repository as public and has no license metadata. Repository history, checked-in records, external backend state, ownership, licenses, and contributor rights need review before marketplace claims or transfer.
 - Automated tests run in CI. Coverage is measured only for the four JavaScript domain modules; see the [coverage report](docs/domain-coverage.md).
 

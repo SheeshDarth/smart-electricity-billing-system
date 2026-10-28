@@ -4,22 +4,22 @@ Preparation notes for a possible codebase marketplace listing. This is not a val
 
 ## Current snapshot
 
-PRs #6 and #7 are merged into `main`. PR #8 remains an open draft. Current code commit `ab6da4a` passed all checks in [GitHub Actions run 40633652147](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147): Node 22/24 lint, type-check, tests/coverage, build, smoke check; four Chromium workflows; and disposable database migration, lint, pgTAP, and cleanup.
+PRs #6 and #7 are merged into `main`. PR #8 remains an open draft. Previous commit `ab6da4a` passed Node 22/24 checks and four Chromium workflows in [GitHub Actions run 40633652147](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147). The current branch removes the database integration and CI job; its updated checks are pending.
 
-Locally, 51 Node tests pass and Node measured 91.79% line, 77.43% branch, and 99.05% function coverage across four domain modules. Local lint, type-check, build, and Playwright could not be run because the dependency install was blocked by a Windows filesystem `EPERM`; current branch CI passed those jobs. The database ran against a disposable stack, not a hosted project. CI published the four current walkthrough screenshots in the [run artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679); checked-in PNGs still need a local refresh.
+Locally, 51 Node tests passed and Node measured 91.79% line, 77.43% branch, and 99.05% function coverage across four domain modules before this change. Coverage should be refreshed after the current code changes. Local lint, type-check, build, and Playwright previously could not be run because dependency installation was blocked by a Windows filesystem `EPERM`. CI published four walkthrough screenshots in the [run artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679); checked-in PNGs still need a local refresh.
 
-The e-bill flow remains a local estimate workflow. The archive UI validates files and summarizes record counts but does not persist imports. The old payment-entry modal has been removed; legacy paid flags and downloads are labeled simulated. No real tariff compliance, payment processing, live meter adapter, or official bill issuance is claimed.
+The e-bill flow remains a local estimate workflow. The archive UI validates files and summarizes record counts but does not persist imports. The legacy payment and bill routes have been removed. No real tariff compliance, payment processing, live meter adapter, or official bill issuance is claimed.
 
 ## Listing blockers to resolve
 
 - [ ] **Repository privacy:** The repository is still public. Do not change visibility until the external project and rights reviews below are complete. Before listing, make the intended snapshot private, verify access, then refresh DataVendor's [estimator](https://datavendor.ai/estimator); public repositories do not qualify for its private-supply quote.
-- [ ] **External Supabase project:** The history scan found a public `anon` client key whose project reference matched its historical URL. Review that project's users, rows, RLS, grants, storage, functions, logs, backups, and retention. The current local RLS tests are synthetic and do not inspect hosted state.
+- [ ] **Historical backend project and key:** The application integration, config, schema, and tests have been removed from the current tree. A historical anonymous client key remains in earlier Git history. Review the matching project's users, rows, policies, grants, storage, functions, logs, backups, keys, and retention; safely decommission the project or keep it under owner control and rotate/revoke the old key as appropriate.
 - [ ] **Ownership and contributor rights:** Verify contributions, generated code, any Lovable relationship, fonts/icons/assets, training-data provenance, and third-party work. GitHub has no repository license metadata; establish the project license and seller authority.
-- [ ] **Dependency terms and security:** The current lockfile inventory has declared license metadata for 469 package records, with no missing declarations. The 27 October 2026 `npm audit` reports zero known vulnerabilities after targeted upgrades and removal of unused packages. Perform a human compatibility/attribution review and re-run the audit before transfer.
-- [ ] **History and private data:** The targeted pattern scan found one historical Supabase anon key, no current working-tree matches, and no service-role-key pattern. This is not a comprehensive secret scanner or a private-data audit. Review GitHub issues/attachments and external backend state too.
+- [ ] **Dependency terms and security:** The current lockfile inventory has 461 package records; four records have unknown license metadata. The 27 October 2026 `npm audit` reported zero known vulnerabilities before this dependency removal. Resolve the license metadata and re-run the audit before transfer.
+- [ ] **History and private data:** The targeted pattern scan found one historical anonymous client key, no current working-tree match, and no service-role-key pattern. This is not a comprehensive secret scanner or private-data audit. Review GitHub issues/attachments and the historical hosted project too.
 - [ ] **Buyer validation:** No operator interviews, customer evidence, or live pilot have validated the buyer hypothesis. Use the [interview guide](buyer-validation-interview-guide.md) before claiming product demand or expanding scope.
 - [ ] **Price and terms:** Re-run the estimate only after privacy and rights checks. Decide license versus transfer, exclusivity, AI use, derivatives, onward licensing, support, data retention, and handover scope. Get qualified advice for the agreement.
-- [x] **Current branch CI:** run 40633652147 passed Node 22/24, four Chromium workflows, migration, database lint, expanded pgTAP, and cleanup.
+- [x] **Previous baseline CI:** run 40633652147 passed Node 22/24, four Chromium workflows, and the then-existing disposable database checks. This branch changes CI and must pass a fresh run before the evidence is current.
 
 ## Evidence safe to describe now
 
@@ -28,8 +28,8 @@ The e-bill flow remains a local estimate workflow. The archive UI validates file
 - [x] Domain coverage is measured and scoped to four JavaScript domain modules: 91.79% lines, 77.43% branches, and 99.05% functions on the 28 October local run.
 - [x] A local archive export and whole-file validation summary exist; no partial database import is performed.
 - [x] The dependency inventory and history-screening results are documented with their limits.
-- [x] Current RLS checks passed in run 40633652147 against a disposable CI database; hosted state is still unreviewed.
-- [ ] External Supabase review, ownership clearance, full legal license review, operator interviews, and private-data determination remain open.
+- [x] The current source tree no longer includes authentication or a database integration; the demo is local-only.
+- [ ] Historical backend project/key review, ownership clearance, full legal license review, operator interviews, and private-data determination remain open.
 
 ## DataVendor field notes
 
@@ -38,20 +38,19 @@ The e-bill flow remains a local estimate workflow. The archive UI validates file
 | Domain | Electricity data quality and estimate workflow | Choose the closest energy/software category; do not claim utility-grade AMI. |
 | Asking price | No seller price selected; existing estimate predates this work | Refresh the estimator after privacy and rights checks, then choose license scope and asking terms. |
 | Tests/coverage | 51 local Node tests pass; measured coverage is scoped to four modules | State the scope and values, not whole-repository coverage. Refresh after changes. |
-| CI on PRs | Run 40633652147 passed Node 22/24, browser, migration/lint, and pgTAP jobs | Describe the tested workflows and scope; hosted security remains separate. |
+| CI on PRs | Run 40633652147 passed Node 22/24 and browser workflows before removal of the database job | Refresh after the next branch CI run; do not claim backend security coverage. |
 | Private code supply | GitHub repository remains public | Do not claim private eligibility until the final snapshot is private and re-scanned by the platform. |
-| Private data | Current demo is synthetic; historical anonymous project key and external backend are under review | Keep unconfirmed until hosted project and all data sources are reviewed. |
+| Private data | Current demo is synthetic and has no backend; historical anonymous key and matching hosted project remain under review | Keep unconfirmed until the historical project is reviewed and the key is revoked or otherwise accounted for, and all data sources are reviewed. |
 
 DataVendor's screenshot estimate is historical and advisory, not a buyer offer or current value. See the [marketplace listing draft](marketplace-listing-draft.md) for factual capability wording.
 
 ## Backend and transfer safeguards
 
 - Keep buyer demo fixtures synthetic. Do not export seller or customer data.
-- Keep the Supabase anonymous client key out of private-data claims; it is designed for client use, but RLS and project state still need review.
+- Removing the old integration from current source does not remove the anonymous key from Git history or revoke it. Keep private-data claims unconfirmed until the former hosted project is reviewed.
 - Never commit a service-role key or other privileged credential.
 - Confirm controller/processor terms, retention, deletion, export, and transfer rights before handing over customer or telemetry records.
-- Apply the additive database migration to a disposable buyer-owned project first; it does not replace legacy billing tables.
-- Use the [role/table access matrix](rls-access-matrix.md) as a policy expectation, not proof of hosted security.
+- Select and review a buyer-owned backend before any real customer records are stored; no database schema or authorization system is included today.
 
 ## Claims to avoid
 

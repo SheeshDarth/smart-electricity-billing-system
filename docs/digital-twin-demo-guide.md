@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The browser twin is synthetic content for reviewing the current electricity usage, validation, tariff estimate, and reviewer workflow. It requires no board, physical meter, gateway, Supabase credentials, or AI service. The industrial example is illustrative only; industrial optimization and the rejected Schneider-linked idea are not product requirements.
+The browser twin is synthetic content for reviewing the current electricity usage, validation, tariff estimate, and reviewer workflow. It requires no board, physical meter, gateway, remote backend, or AI service. The industrial example is illustrative only; industrial optimization and the rejected Schneider-linked idea are not product requirements.
 
 The digital twin itself is not operational monitoring or a production meter platform. The app also includes a separate local E-bill workspace that generates a clearly labelled estimate PDF; it is not an official utility invoice, payment processor, or production billing service.
 
@@ -67,6 +67,6 @@ These are deterministic injected conditions, not evidence that real equipment wi
 - No DLMS/COSEM, OPC UA, MQTT, vendor API, or gateway connector is implemented.
 - No physical control, AI/LLM inference, or GPU workload is present.
 - INR, tariffs, timestamps, sites, and readings are synthetic and not jurisdiction-specific.
-- Legacy login/admin/user billing routes are separate and remain dependent on an older schema.
+- Authentication, backend persistence, and legacy login/admin/user billing routes are not included.
 
 See the [e-bill workflow guide](ebill-generation.md), [product scope](product-scope.md), [feature readiness](feature-status.md), and [architecture](architecture.md). Buyer demand and production tariff requirements still need validation.

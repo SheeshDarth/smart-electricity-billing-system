@@ -4,7 +4,7 @@
 
 The E-bill workspace turns validated interval-energy readings into a downloadable PDF estimate. It gives a reviewer a concrete way to check the chain from source rows through unit normalization and a selected tariff to the estimated energy charge.
 
-The PDF is a Wattwise estimate, not an official utility bill, invoice, statement of account, or amount due. It does not collect payment or certify a tariff. The workflow is a local browser feature and does not require Supabase credentials.
+The PDF is a Wattwise estimate, not an official utility bill, invoice, statement of account, or amount due. It does not collect payment or certify a tariff. The workflow runs locally in the browser and has no backend connection.
 
 ## User flow
 
@@ -60,7 +60,7 @@ The estimate excludes taxes, fixed charges, demand charges, arrears, export cred
 
 ## Operational boundary
 
-The workspace runs without a board, physical meter, gateway, remote database, or payment rail. It does not change the legacy login/admin/user billing screens. Its PDF generation is separate from the legacy demo bill document and payment flag.
+The workspace runs without a board, physical meter, gateway, remote database, or payment rail. The old login/admin/user billing screens and their simulated payment and bill-document flows have been removed.
 
 Before using customer data, validate file formats, tariff inputs, period alignment, retention, access, and deletion requirements with a buyer. Before representing a generated document as an official invoice, implement and independently validate applicable tariff components, tax rules, rounding, corrections, audit retention, authorization, and jurisdiction-specific requirements.
 

@@ -1,6 +1,6 @@
 # Energy archive format v1
 
-The energy archive is a portable JSON snapshot format for Wattwise's canonical energy records. The implementation is in `src/domain/energyArchive.mjs`; the **Archive** view in the browser app now exports a synthetic archive and validates a selected JSON file locally. A valid file can be downloaded as a normalized copy. The demo does not write imported records to Supabase or merge them into application state.
+The energy archive is a portable JSON snapshot format for Wattwise's canonical energy records. The implementation is in `src/domain/energyArchive.mjs`; the **Archive** view in the browser app now exports a synthetic archive and validates a selected JSON file locally. A valid file can be downloaded as a normalized copy. The demo has no database and does not merge imported records into application state.
 
 ## Envelope
 

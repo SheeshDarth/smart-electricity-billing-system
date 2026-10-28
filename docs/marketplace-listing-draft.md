@@ -8,7 +8,7 @@ Wattwise — electricity data-quality and tariff-estimation prototype
 
 ## Short description
 
-A TypeScript browser prototype for synthetic electricity scenarios and local CSV-to-e-bill estimates. It validates interval-energy readings, applies a configurable flat or two-band local-hour time-of-use tariff, supports a manually entered same-period supplier-total comparison, exports calculation lineage, and generates a clearly labelled PDF estimate. Includes domain tests, pull-request CI, an additive Supabase schema, and setup documentation. No live meter or production billing service is included.
+A TypeScript browser prototype for synthetic electricity scenarios and local CSV-to-e-bill estimates. It validates interval-energy readings, applies a configurable flat or two-band local-hour time-of-use tariff, supports a manually entered same-period supplier-total comparison, exports calculation lineage, and generates a clearly labelled PDF estimate. Includes domain tests, pull-request CI, and setup documentation. No authentication, persistent backend, live meter, or production billing service is included.
 
 ## Longer description
 
@@ -16,7 +16,7 @@ Wattwise is an early-stage browser prototype exploring how a small multi-site op
 
 The browser digital twin uses synthetic site and meter records. Its scenarios demonstrate usage spikes, stale data, duplicate events, counter resets, invalid units, and tariff changes. The shared domain code validates measurement types, normalizes supported units, handles batch duplicate IDs, quarantines unproven cumulative-register resets, and rejects missing intervals instead of treating them as zero. A deterministic estimator supports illustrative flat and time-of-use tariffs with effective dates and timezone context. A workflow view shows event validation, a signal, a human review, and simulated verification.
 
-The repository includes a local CSV validation and estimate workflow with a synthetic sample file, source-linked priced segments, a complete calculation CSV export, flat and two-band time-of-use tariff examples, a PDF e-bill generator, a versioned energy-archive format with a browser validation/export workspace, focused automated tests, an additive Supabase schema, database tests, CI, and product/setup documentation. A clean local demo does not require a seller-owned Supabase project. Time-of-use bands use local clock hours and do not model weekday, holiday, seasonal, or jurisdiction-specific exceptions. Archive files are validated and exported locally; transactional import into the application database is not implemented.
+The repository includes a local CSV validation and estimate workflow with a synthetic sample file, source-linked priced segments, a complete calculation CSV export, flat and two-band time-of-use tariff examples, a PDF e-bill generator, a versioned energy-archive format with a browser validation/export workspace, focused automated tests, CI, and product/setup documentation. The demo is intentionally backend-free; it does not include accounts or persistent storage. Time-of-use bands use local clock hours and do not model weekday, holiday, seasonal, or jurisdiction-specific exceptions. Archive files are validated and exported locally; transactional import into an application database is not implemented.
 
 This is a software codebase with synthetic demonstration content. It is not a deployed energy service, official billing system, payment processor, live meter integration, or AI product. No real savings or production outcomes are claimed.
 
@@ -31,7 +31,7 @@ The code may be useful to teams evaluating software-engineering examples involvi
 - PDF document construction and explicit estimated-versus-authoritative semantics
 - Validation, duplicate handling, missing intervals, and quarantined readings
 - Synthetic anomaly scenarios and human-review workflow
-- Node test patterns, GitHub Actions CI, and local Supabase migration/RLS checks
+- Node test patterns, GitHub Actions CI, and a Chromium browser walkthrough
 
 Position this as a compact, domain-specific engineering codebase. The repository does not include a private operational dataset or a generated taskset.
 
@@ -41,13 +41,12 @@ Position this as a compact, domain-specific engineering codebase. The repository
 - Measurement and tariff-estimate domain modules
 - Local interval-energy CSV preview, flat-tariff e-bill estimate, synthetic sample, and supplier-total comparison
 - Energy archive format v1 validator and browser-based validated export workspace
-- GitHub Actions checks for lint, typecheck, measured Node domain coverage, production build, HTTP smoke check, Playwright Chromium walkthrough, local Supabase migration, database lint, and pgTAP
-- Additive Supabase schema and database tests
+- GitHub Actions checks for lint, typecheck, measured Node domain coverage, production build, HTTP smoke check, and Playwright Chromium walkthrough
 - Setup, architecture, demo, adapter, market, readiness, and archive documentation
 
 ## Not included
 
-- Seller-owned Supabase project, credentials, hosted database, or deployment
+- Authentication service, application database, hosted backend, credentials, or deployment
 - Customer, household, employee, or live meter records
 - Live meter, gateway, DLMS/COSEM, OPC UA, MQTT, or vendor integrations
 - Production alert delivery, supplier bill upload/parsing, authoritative bills, payment processing, or device control
@@ -73,7 +72,7 @@ npm run build
 npm run smoke:demo
 ```
 
-PRs #6 and #7 are merged. PR #8 remains an open draft. Current code commit `ab6da4a` passed Node 22/24, browser E2E, database migration/lint, and expanded pgTAP in [CI run 40633652147](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147). The branch has 51 passing Node tests and measured coverage of 91.79% lines, 77.43% branches, and 99.05% functions across four JavaScript domain modules only. All four browser walkthrough screenshots are available in a [30-day artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679). Database checks run against a disposable CI stack, not a hosted project.
+PRs #6 and #7 are merged. PR #8 remains an open draft. The prior baseline CI run passed Node 22/24 and browser E2E. The branch has 51 passing Node tests and measured coverage of 91.79% lines, 77.43% branches, and 99.05% functions across four JavaScript domain modules only. Four browser walkthrough screenshots are available in a [30-day artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679). The database integration and its local checks have since been removed; current CI must pass again after this change.
 
 See the [digital-twin demo guide](digital-twin-demo-guide.md), [e-bill workflow guide](ebill-generation.md), and [visual browser walkthrough](ebill-browser-walkthrough.md) for the steps and screenshots. The sample file is synthetic; uploaded files are handled locally in the browser. The Chromium walkthrough checks the downloaded PDF filename, header, estimate, supplier variance, and estimate-only disclosure. Domain tests separately check the PDF structure.
 
@@ -86,17 +85,17 @@ See the [digital-twin demo guide](digital-twin-demo-guide.md), [e-bill workflow 
 | Asking price | No current seller price selected | Refresh the platform estimate after privacy changes, then choose a price and rights scope. A platform estimate is advisory, not a buyer offer. |
 | Tests and coverage | Local run: 51 Node tests; measured coverage across four domain modules | State the run and exact scope: 91.79% lines, 77.43% branches, 99.05% functions. Do not report this as whole-repository or UI/SQL coverage. |
 | Browser walkthrough | Run 40633652147 passed four Chromium workflows, including tariff-boundary allocation, full calculation CSV, PDF schedule, and comparison reset | The four updated PNGs are available in the linked CI artifact. Hosted product behavior remains unverified. |
-| CI on pull requests | Run 40633652147 passed Node 22/24, browser, database migration/lint, and pgTAP | Describe those checks and scope; hosted security remains separate. |
+| CI on pull requests | Previous run 40633652147 passed Node 22/24 and browser workflows; this change removes the database job | Refresh this evidence from the next branch CI run. |
 | Private code supply | GitHub currently reports this repository as public while improvements are in progress | Do not claim a private-supply quote or publish until the intended final snapshot is private and DataVendor re-scans it. |
-| Private/personal data | Targeted local/history scan found no configured-pattern secrets in the worktree and found a historical Supabase anonymous client key in 24 commits; external Supabase state is unreviewed | Keep this field unconfirmed until the hosted project, generated assets, and remaining data exposure are reviewed. An anonymous key is intended for client use but still relies on correct backend access policies. |
+| Private/personal data | The active application has no backend or customer data. A historical anonymous client key remains in 24 earlier commits; its external project is unreviewed | Keep this field unconfirmed until the old hosted project and key are reviewed, the project is safely decommissioned or retained under owner control, and remaining data exposure is reviewed. Removing source integration does not revoke the historical key. |
 
 DataVendor's [codebase estimator](https://datavendor.ai/estimator) describes its range as advisory and says public repositories do not qualify for a private-supply quote. Its [source-code listing guide](https://datavendor.ai/blog/sell-source-code-to-ai-companies) recommends explaining included material, runnability, history, tests, and rights. Confirm current listing rules and transaction terms before publishing.
 
 ## Publish-readiness gates
 
 1. Finish the planned repository improvements, review their branch CI results, and only then make the intended GitHub snapshot private and re-run DataVendor's checks against that snapshot.
-2. Review the targeted [history-secret scan](history-secret-scan.md) finding and generated assets. The scan is pattern-based, not proof that all credentials or personal/customer data are absent; rotate/revoke any exposed key if the hosted project review indicates it is needed.
-3. Review the external Supabase project, including tables, authentication users, logs, backups, storage, functions, policies, and credentials; its state is not known from this repository.
+2. Review the targeted [history-secret scan](history-secret-scan.md) finding and generated assets. The scan is pattern-based, not proof that all credentials or personal/customer data are absent. Removing the integration from this branch does not erase the historical key or revoke it.
+3. Review the former hosted backend project, including tables, authentication users, logs, backups, storage, functions, policies, keys, and retention. Decide whether to safely decommission it or retain it under owner control; its state is not known from this repository.
 4. Confirm ownership and transfer/licensing rights for all contributors, generated code, fonts, icons, dependencies, and third-party material. GitHub currently reports no repository license metadata.
 5. Decide the exact license or sale scope, including AI training/use, derivative works, onward licensing, exclusivity, retention, and buyer access, with qualified advice where needed.
 6. Re-scan the intended repository snapshot and use its dated estimate as one input to the asking-price decision. Do not treat the prior screenshot estimate as current or guaranteed.

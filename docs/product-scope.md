@@ -15,8 +15,7 @@ This is a narrower extension of the existing billing prototype than a broad ener
 - A browser demo with synthetic site and meter scenarios.
 - Domain code validates measurement kinds and units, normalizes supported units, deduplicates event IDs, quarantines unproven cumulative-register resets, and rejects missing intervals instead of treating them as zero.
 - Deterministic flat-rate and time-of-use estimates include tariff version, effective window, currency, timezone, and an interval breakdown.
-- An additive Supabase schema covers organizations, sites, meters, readings, tariffs, billing runs, insights, and interventions. PR #8 CI passed the expanded role/table and cross-organization matrix, local migration, and database lint. No hosted database has been reviewed or migrated.
-- A browser workflow and synthetic evidence snapshot. Legacy login/admin/user billing screens, bill document, and payment flag are not the new product workflow.
+- A browser workflow and synthetic evidence snapshot. Authentication, backend storage, persistence, and legacy login/admin/user billing screens are not included.
 - The repository includes a versioned JSON archive with synthetic export and local whole-file validation summary. It checks IDs and known cross-record references and does not write imported records to the database.
 
 All demo records and outcomes are synthetic. Passing local tests does not establish live support, tariff correctness, or production readiness.
@@ -25,16 +24,16 @@ All demo records and outcomes are synthetic. Passing local tests does not establ
 
 | Capability | Minimum acceptance evidence | Current status |
 |---|---|---|
-| Organization, site, meter inventory | Navigate multiple sites and assign imports to a meter and timezone. | Relational schema foundation; no complete persisted workflow. |
+| Organization, site, meter inventory | Navigate multiple sites and assign imports to a meter and timezone. | Synthetic site views only; no accounts or persisted inventory. |
 | Reading import and source mapping | Preview CSV; map timestamp/value/unit/meter; validate before save; report accepted, duplicate, rejected, and missing rows; retain input reference. | Local CSV preview/estimate exists; it does not persist readings or retain cross-session records. |
 | Data quality and provenance | Show measured time, source, conversion, quality, freshness, and quarantine reason; keep missing data missing. | Domain checks and synthetic workflow; no live monitoring. |
 | Versioned tariff configuration | Store effective-dated tariff, currency, timezone, calculation version, and rounding with each estimate. | Flat and time-of-use logic exists; jurisdiction charges absent. |
 | Cost estimate drill-down | Trace reading IDs, coverage, gaps, conversions, tariff components, and totals. | The e-bill UI shows an expandable 12-interval preview and exports a full source-row calculation CSV with a summary. Full tariff-component history, persistent audit records, and broader missing-data reconciliation remain incomplete. |
 | Supplier bill comparison | Enter a supplier-stated amount and period; show usage and cost variance with coverage, without claiming diagnosis. | A local manual amount and estimate-minus-stated-total variance are included only after same-period confirmation. Document parsing and persistent reconciliation history are not implemented. |
-| Exception review and audit trail | Reviewer records status, note, actor, and timestamp for each data or bill exception. | Synthetic intervention story/schema only. |
-| Tenant and role boundaries | Test allowed and denied table access by role and tenant, including cross-organization writes and membership changes. | Expanded pgTAP matrix passed in PR #8 CI against disposable organizations. |
+| Exception review and audit trail | Reviewer records status, note, actor, and timestamp for each data or bill exception. | Local simulated decision only; no persistent audit trail. |
+| Tenant and role boundaries | Test allowed and denied access by role and tenant, including cross-organization writes and membership changes. | Not implemented; there is no backend or authentication layer. |
 | Portable data | Parse/export an archive preserving IDs, timestamps, units, quality, tariff versions, and provenance. | Synthetic archive export and local validation/round-trip download exist; no database export/import. |
-| Estimate and bill semantics | Label estimates, supplier amounts, and authoritative charges distinctly. | Demo estimate labeled; legacy payment flow unsuitable. |
+| Estimate and bill semantics | Label estimates, supplier amounts, and authoritative charges distinctly. | Demo estimate labeled; no payment flow or authoritative charge exists. |
 
 ## Proposed build order
 
@@ -42,9 +41,9 @@ All demo records and outcomes are synthetic. Passing local tests does not establ
 
 1. Keep a modular application; do not split into microservices until workload or team ownership requires it.
 2. Keep the digital twin as a deterministic demo source. Route future imports and adapters through the same canonical measurement contract.
-3. Require Node lint, type-check, domain tests, build, local migration, database lint, and pgTAP in pull-request CI.
+3. Require Node lint, type-check, domain tests, build, and browser walkthrough in pull-request CI.
 4. Implement the versioned archive contract now; add a buyer-facing export/import flow with round-trip verification later.
-5. Keep legacy tables and routes isolated, or migrate them as a separately reviewed task. Do not imply they use the new schema.
+5. Keep the prototype local-only until a buyer-backed persistence and authorization requirement is validated.
 
 ### P1 — First buyer-evaluable workflow
 
@@ -62,7 +61,7 @@ All demo records and outcomes are synthetic. Passing local tests does not establ
 1. Select one real source only after a buyer supplies sample exports, meter details, access approval, and expected cadence. Implement only that adapter.
 2. Add authenticated ingestion, replay-safe IDs, payload limits, timestamp bounds, retries, and observability before live streams.
 3. Define buyer-owned deployment, backup/restore, retention, export/deletion, incident response, and data access procedures before customer data.
-4. Expand RLS to a role-by-tenant CRUD matrix and check upgrades/rollback in a disposable environment; local CI is not a hosted security audit.
+4. Define tenant/role access tests, migrations, and rollback for the buyer-selected backend before storing real records.
 5. Validate tariffs with the buyer or responsible utility: effective dates, taxes, fees, meter multipliers, netting, daylight changes, and rounding.
 
 ### Later options only after evidence
@@ -116,9 +115,9 @@ Do not set public targets before a pilot baseline. Do not report savings from sy
 |---|---|
 | Buyer and willingness to pay unvalidated | Interview likely multi-site property or business operators; select one buyer. |
 | No live ingestion | Build CSV mapping first using customer-owned sample exports. |
-| Legacy screens assume an older Supabase schema | Isolate and label them, or make migration/removal a separate decision. |
+| Historical backend key/project remains outside the current application | Review and decommission the hosted project and rotate/revoke credentials; current source removal cannot revoke a key or erase Git history. |
 | Tariffs incomplete for real jurisdictions | Label outputs estimates, version inputs, and get domain review before paid use. |
-| Current RLS writes tested representatively | Complete CRUD role/tenant matrix and upgrade/rollback checks. |
+| No authentication, persistence, or tenant security | Design and test only after a buyer and backend are selected; do not use for customer data today. |
 | Archive not connected to UI/database | Add dry-run, counts, integrity checks, and restore verification before customer migration. |
 | No support, backups, or production deployment process | Define one buyer-owned pilot environment and ownership before onboarding. |
 | Product claims can exceed evidence | Date claims and mark capabilities implemented, planned, or untested. |
