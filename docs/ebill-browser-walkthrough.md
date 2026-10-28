@@ -20,7 +20,7 @@ The Playwright end-to-end test creates these screenshots from the production bui
 2. [Estimate and supplier comparison](assets/ebill-walkthrough/02-estimate-comparison.png)
 3. [Generated estimate and variance](assets/ebill-walkthrough/03-bill-variance.png)
 
-The Playwright walkthrough is configured to expand the calculation detail, check that the first interval links to its CSV source row, and download the complete calculation CSV with every interval and its summary. It then downloads the generated PDF and checks its name, `%PDF-1.4` header, estimated charge, supplier-total variance, and estimate-only disclosure. Screenshots are refreshed by a successful Playwright run; the checked-in screenshots predate the new calculation-detail view. It is an estimate only; no payment is collected.
+The Playwright walkthrough expands the calculation detail, checks that the first interval links to its CSV source row, and downloads the complete calculation CSV with every interval and its summary. It then downloads the generated PDF and checks its name, `%PDF-1.4` header, estimated charge, supplier-total variance, and estimate-only disclosure. These assertions passed in current-head [PR #8 CI run 40631754083](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40631754083). The checked-in screenshots predate the new calculation-detail view because CI does not publish its regenerated images. It is an estimate only; no payment is collected.
 
 ## Run it locally
 

@@ -31,7 +31,7 @@ The application includes synthetic browser scenarios, measurement and tariff dom
 
 ### Exit gate
 
-Current status: PR #6 and PR #7 are merged; PR #8 remains an open draft and its latest known [CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40500322202) passed before the current local changes. The branch locally passes 49 Node tests; measured coverage is 91.80% lines, 77.45% branches, and 98.98% functions across four domain modules. The updated browser workflow has not run locally because Playwright is missing from installed dependencies. Repository history screening found a historical Supabase anonymous key. Hosted project review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
+Current status: PR #6 and PR #7 are merged; PR #8 remains an open draft and current-head [CI run 40631754083](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40631754083) passed Node 22/24, browser, database migration/lint, and pgTAP. The branch locally passes 49 Node tests; measured coverage is 91.80% lines, 77.45% branches, and 98.98% functions across four domain modules. Repository history screening found a historical Supabase anonymous key. Hosted project review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
 
 ## P1 — Validate buyer, data access, and first scenario
 
