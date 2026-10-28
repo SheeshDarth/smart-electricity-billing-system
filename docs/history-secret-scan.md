@@ -1,6 +1,6 @@
 # Git history and working-tree secret scan
 
-Rechecked 28 October 2026 at 07:44 UTC across all 145 commits reachable from the local heads and remote-tracking refs listed by `git for-each-ref`, plus readable working-tree files, including ignored files. `npm run audit:history-secrets` applies pattern-based checks for AWS access key IDs, GitHub tokens, private-key headers, JWT-like tokens, database URLs containing credentials, and long secret assignments. It reports locations and token metadata only; it never prints matched values. It skips `.git` during the working-tree scan, dependency/browser/build output directories, binary files, and files larger than 50 MiB.
+Rechecked 28 October 2026 at 07:51 UTC across all 147 commits reachable from the local heads and remote-tracking refs listed by `git for-each-ref`, plus readable working-tree files, including ignored files. `npm run audit:history-secrets` applies pattern-based checks for AWS access key IDs, GitHub tokens, private-key headers, JWT-like tokens, database URLs containing credentials, and long secret assignments. It reports locations and token metadata only; it never prints matched values. It skips `.git` during the working-tree scan, dependency/browser/build output directories, binary files, and files larger than 50 MiB.
 
 ## Findings
 
