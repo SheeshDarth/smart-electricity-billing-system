@@ -34,7 +34,7 @@ test("CSV upload → validation → estimate → comparison → PDF download", a
   ]);
   expect(calculationDownload.suggestedFilename()).toBe("wattwise-energy-calculation.csv");
   const calculationCsv = (await readFile(await calculationDownload.path(), "utf8")).replace(/^\uFEFF/, "");
-  expect(calculationCsv).toContain('"interval","csv-row:2","DEMO-0001"');
+  expect(calculationCsv).toContain('"calculation_segment","csv-row:2","DEMO-0001"');
   expect(calculationCsv).toContain('"0.28","kWh","configured-default","0.280000"');
   expect(calculationCsv).toContain('"summary"');
   expect(calculationCsv).toContain('"21.76","2.720","8","0"');
@@ -62,6 +62,56 @@ test("CSV upload → validation → estimate → comparison → PDF download", a
   expect(pdfText).toContain("INR -3.24");
   expect(pdfText).toContain("NOT AN OFFICIAL UTILITY INVOICE");
   await expect(page.getByRole("status")).toContainText("E-bill PDF downloaded");
+});
+
+test("time-of-use e-bill splits an interval at a local tariff boundary", async ({ page }) => {
+  page.clock.setFixedTime(new Date("2026-10-16T12:00:00.000Z"));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "E-bill", exact: true }).click();
+  await page.addStyleTag({ content: "header { position: static !important; }" });
+  await page.locator('[aria-label="Choose energy readings CSV"]').setInputFiles({
+    name: "crossing-tariff-boundary.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from([
+      "timestamp,meter_id,energy_kwh,interval_start,event_id",
+      "2026-10-16T06:15:00+05:30,MTR-TOU,0.6,2026-10-16T05:45:00+05:30,TOU-1",
+      "",
+    ].join("\n")),
+  });
+
+  await page.getByLabel("Tariff structure").selectOption("time-of-use");
+  await page.getByLabel("Peak rate per kWh (illustrative)").fill("10");
+  await page.getByLabel("Off-peak rate per kWh (illustrative)").fill("5");
+  await expect(page.getByText(/₹\s?4\.50/)).toBeVisible();
+  await page.getByText(/View calculation detail/).click();
+  await expect(page.getByText("Off-peak", { exact: true })).toBeVisible();
+  await expect(page.getByText("Peak", { exact: true })).toBeVisible();
+  await expect(page.getByText("INR 1.500000", { exact: true })).toBeVisible();
+  await expect(page.getByText("INR 3.000000", { exact: true })).toBeVisible();
+  const screenshotPath = resolve(screenshots, "04-time-of-use-breakdown.png");
+  mkdirSync(dirname(screenshotPath), { recursive: true });
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+
+  const [calculationDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Download full calculation CSV" }).click(),
+  ]);
+  const calculationCsv = (await readFile(await calculationDownload.path(), "utf8")).replace(/^\uFEFF/, "");
+  expect(calculationCsv).toContain('"Off-peak"');
+  expect(calculationCsv).toContain('"Peak"');
+  expect(calculationCsv).toContain('"4.50","0.600"');
+
+  await page.getByRole("button", { name: "Generate e-bill PDF" }).click();
+  const [pdfDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Download PDF" }).click(),
+  ]);
+  const pdfText = (await readFile(await pdfDownload.path())).toString("latin1");
+  expect(pdfText).toContain("Energy charge by time-of-use tariff");
+  expect(pdfText).toContain("Peak 06:00-22:00 @ INR 10.0000/kWh");
+  expect(pdfText).toContain("Off-peak 22:00-06:00 @ INR 5.0000/kWh");
+  expect(pdfText).not.toContain("NaN");
 });
 
 test("invalid CSV rows are reported and block bill generation", async ({ page }) => {

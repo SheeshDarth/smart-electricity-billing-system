@@ -12,7 +12,7 @@ The PDF is a Wattwise estimate, not an official utility bill, invoice, statement
 2. Load the synthetic sample or choose a local CSV.
 3. Map the interval end timestamp and energy value. Optionally map meter ID, unit, interval start, and event ID.
 4. Select one meter for the bill, choose a default unit and interval length where needed, and review row outcomes.
-5. Set currency, IANA timezone, tariff version, and a flat per-kWh rate.
+5. Set currency, IANA timezone, and tariff version. Choose a flat rate or a two-band time-of-use schedule with a peak window and peak/off-peak rates.
 6. Review the coverage window, accepted intervals, total kWh, and calculated energy charge. Expand calculation detail to inspect the first 12 lines, or download the complete calculation CSV for every interval and the final estimate summary.
 7. Optionally enter a supplier-stated total. The user must confirm it covers the same reading window before the estimate-minus-statement variance is included.
 8. Generate the e-bill and download the PDF.
@@ -40,21 +40,21 @@ Rows are parsed in the browser and are not posted to an application server. The 
 
 ## Calculation and generated document
 
-For this workflow, the amount is calculated by the existing deterministic energy-cost domain function using the validated interval energy, selected flat rate, currency, tariff timezone, tariff version, and a tariff window covering the imported readings. Gaps, overlaps, invalid rows, malformed intervals, invalid tariff details, and incompatible units withhold generation. A gap is never treated as zero energy.
+For this workflow, the amount is calculated by the deterministic energy-cost domain function using validated interval energy, the selected tariff components, currency, tariff timezone, tariff version, and a tariff window covering the imported readings. A time-of-use schedule applies by local clock hour every day and splits an input reading at rate boundaries. The demo does not model weekdays, holidays, seasonal calendars, demand charges, or jurisdiction-specific rules. Rates shown in the synthetic workflow are illustrative. Gaps, overlaps, invalid rows, malformed intervals, invalid tariff details, and incompatible units withhold generation. A gap is never treated as zero energy.
 
-The estimate workspace also provides an expandable line-item view and a full calculation CSV. Each exported line links a calculated interval to its CSV source-record reference and retains the source value and unit alongside normalized energy, flat tariff rate, and interval charge. It states whether the unit came from a mapped CSV column or the user's configured default. The CSV includes every interval and a summary row with estimated energy, charge, tariff version, calculation version, duplicate count, and estimate-only status. Text cells are quoted and formula-like values are prefixed to reduce spreadsheet formula execution risk. The displayed and exported total is rounded to two decimal places; line-item precision does not imply that the supplier uses the same rounding method. The browser view shows only the first 12 intervals for large imports, while the download includes all validated intervals.
+The estimate workspace also provides an expandable priced-segment view and a full calculation CSV. Each exported segment links to the original CSV source-record reference and includes the source interval bounds, segment bounds, tariff band, source value and unit, normalized segment energy, applied rate, and segment charge. It states whether the unit came from a mapped CSV column or the user's configured default. The CSV includes every segment and a summary row with estimated energy, charge, tariff version, calculation version, duplicate count, allocation assumption, and estimate-only status. Text cells are quoted and formula-like values are prefixed to reduce spreadsheet formula execution risk. The displayed and exported total is rounded to two decimal places; line-item precision does not imply that the supplier uses the same rounding method. The browser view shows only the first 12 priced segments for large imports, while the download includes all validated segments.
 
 The PDF includes:
 
 - bill reference, generation time, site and meter labels;
 - the first accepted interval start and last accepted interval end in UTC;
 - validated energy total, accepted interval count, and duplicate count;
-- selected flat rate, currency, tariff version, and calculation version;
+- flat rate or time-of-use band schedule, currency, tariff version, and calculation version;
 - estimated energy charge;
 - a supplier-stated total and variance only after same-period confirmation;
 - the excluded charge classes and an estimate-only disclosure.
 
-The Chromium walkthrough downloads the full calculation CSV and generated PDF, then verifies source lineage, summary totals, the `.pdf` filename, header, expected estimate and variance, and official-invoice disclaimer. These browser assertions passed in current-head [PR #8 CI run 40631754083](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40631754083). Replacing a CSV or changing its mapping, meter, or interval definition clears the previous supplier comparison. Domain tests separately verify cross-reference structure and additional required disclosures.
+The Chromium walkthrough covers a source interval that crosses a local tariff boundary. It verifies the allocation to the off-peak and peak rates, calculation CSV lineage, both PDF schedule rows, the total, and the estimate-only disclosure. The flat-rate flow separately verifies estimate and supplier-total variance. Replacing a CSV or changing its mapping, meter, tariff, or interval definition clears the previous supplier comparison. CI saves the generated walkthrough screenshots as a 30-day artifact.
 
 The estimate excludes taxes, fixed charges, demand charges, arrears, export credits, corrections, meter multipliers, and jurisdiction-specific rules. No unsupported charge is silently added as zero or inferred from a supplier bill. Supplier amount is entered manually; the app does not upload or parse utility bill documents.
 
