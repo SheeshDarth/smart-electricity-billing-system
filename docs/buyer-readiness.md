@@ -4,9 +4,9 @@ Preparation notes for a possible codebase marketplace listing. This is not a val
 
 ## Current snapshot
 
-PRs #6 and #7 are merged into `main`. PR #8 remains an open draft. Previous commit `ab6da4a` passed Node 22/24 checks and four Chromium workflows in [GitHub Actions run 40633652147](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147). The current branch removes the database integration and CI job; its updated checks are pending.
+PRs #6 and #7 are merged into `main`. PR #8 remains an open draft. After removal of the database integration, PR-head CI run 40635600460 passed Node 22/24 lint, type-check, tests/coverage, build, smoke check, and the four-test Chromium walkthrough. The [four refreshed screenshots](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40635600460/artifacts/12792514571) are checked into the repo and retained as an artifact for 30 days.
 
-Locally, 51 Node tests passed and Node measured 91.79% line, 77.43% branch, and 99.05% function coverage across four domain modules before this change. Coverage should be refreshed after the current code changes. Local lint, type-check, build, and Playwright previously could not be run because dependency installation was blocked by a Windows filesystem `EPERM`. CI published four walkthrough screenshots in the [run artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679); checked-in PNGs still need a local refresh.
+The prior local measurement was 51 Node tests and 91.79% line, 77.43% branch, and 99.05% function coverage across four domain modules. The current CI rerun passes the same domain test suite; percentages remain limited to those modules. The screenshot set is current as of run 40635600460.
 
 The e-bill flow remains a local estimate workflow. The archive UI validates files and summarizes record counts but does not persist imports. The legacy payment and bill routes have been removed. No real tariff compliance, payment processing, live meter adapter, or official bill issuance is claimed.
 
@@ -24,7 +24,7 @@ The e-bill flow remains a local estimate workflow. The archive UI validates file
 ## Evidence safe to describe now
 
 - [x] The prototype has a local CSV-to-estimate flow with row validation, flat and two-band local-hour tariff assumptions, optional same-period supplier comparison, and a PDF estimate generator.
-- [x] The Chromium suite passed flat and time-of-use flows, including a local tariff-boundary split, per-band calculation export, PDF schedule assertion, and four-screenshot artifact.
+- [x] CI run 40635600460 passed the Chromium suite for flat and time-of-use flows, including a local tariff-boundary split, per-band calculation export, PDF schedule assertion, and four-screenshot artifact.
 - [x] Domain coverage is measured and scoped to four JavaScript domain modules: 91.79% lines, 77.43% branches, and 99.05% functions on the 28 October local run.
 - [x] A local archive export and whole-file validation summary exist; no partial database import is performed.
 - [x] The dependency inventory and history-screening results are documented with their limits.
