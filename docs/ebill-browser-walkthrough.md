@@ -21,9 +21,9 @@ The Playwright end-to-end test creates these screenshots from the production bui
 3. [Generated estimate and variance](assets/ebill-walkthrough/03-bill-variance.png)
 4. [Time-of-use boundary allocation](assets/ebill-walkthrough/04-time-of-use-breakdown.png)
 
-All four checked-in screenshots were refreshed from the passing production-build walkthrough in [CI run 40635600460](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40635600460). CI also retains the four-image artifact for 30 days.
+The four e-bill screenshots are generated from the production build by Playwright. They were refreshed in a local five-test Chromium run on 28 October 2026. The older [CI run 40635600460](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40635600460) retains its earlier four-image artifact for 30 days; the new interactive-workflow screenshot is documented separately in the [interactive workflow walkthrough](interactive-workflow-walkthrough.md).
 
-The Playwright walkthrough includes a 30-minute synthetic reading that crosses from off-peak into peak time in Asia/Kolkata. It checks the half-hour energy allocation, both per-band charges, the complete calculation CSV, and PDF schedule. All four browser tests passed in [CI run 40635600460](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40635600460); the screenshots remain available as an artifact for 30 days. The workflow remains an estimate only; no payment is collected.
+The Playwright walkthrough includes a 30-minute synthetic reading that crosses from off-peak into peak time in Asia/Kolkata. It checks the half-hour energy allocation, both per-band charges, the complete calculation CSV, and PDF schedule. The prior four e-bill browser tests passed in [PR #8 CI run 40635970820](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40635970820); all five current browser tests passed locally on 28 October. The new interactive-workflow case still needs a PR CI run. The workflow remains an estimate only; no payment is collected.
 
 ## Run it locally
 
