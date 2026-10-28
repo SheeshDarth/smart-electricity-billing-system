@@ -16,7 +16,7 @@ Core rules:
 
 ## Current baseline
 
-The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. The current readiness branch extends the e-bill screen from flat tariffs to a two-band time-of-use schedule, source-linked price segments, full calculation export, and a PDF tariff schedule; automated browser verification is pending CI. Files and bills are not persisted, and the PDF is not an official utility invoice. Live ingestion, supplier-document parsing, transactional archive import, jurisdiction-specific tariff rules, and supported production deployment remain unimplemented.
+The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. Current code commit `ab6da4a` extends the e-bill screen from flat tariffs to a two-band time-of-use schedule, source-linked price segments, full calculation export, and a PDF tariff schedule. It passed [CI run 40633652147](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147), including the browser workflow. Files and bills are not persisted, and the PDF is not an official utility invoice. Live ingestion, supplier-document parsing, transactional archive import, jurisdiction-specific tariff rules, and supported production deployment remain unimplemented.
 
 ## P0 — Keep evaluation safe and reproducible
 
@@ -31,7 +31,7 @@ The application includes synthetic browser scenarios, measurement and tariff dom
 
 ### Exit gate
 
-Current status: PR #6 and PR #7 are merged; PR #8 remains an open draft. Its last completed CI run passed Node 22/24, browser, database migration/lint, and pgTAP before the current time-of-use changes. The current branch locally passes 51 Node tests; measured coverage is 91.79% lines, 77.43% branches, and 99.05% functions across four domain modules. Full dependency-backed checks and browser artifact generation await current-branch CI. Repository history screening found a historical Supabase anonymous key. Hosted project review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
+Current status: PR #6 and PR #7 are merged; PR #8 remains an open draft. Current code commit `ab6da4a` passed Node 22/24, browser, database migration/lint, and pgTAP in run 40633652147. The branch locally passes 51 Node tests; measured coverage is 91.79% lines, 77.43% branches, and 99.05% functions across four domain modules. The [current browser screenshots](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679) are available as a CI artifact. Repository history screening found a historical Supabase anonymous key. Hosted project review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
 
 ## P1 — Validate buyer, data access, and first scenario
 

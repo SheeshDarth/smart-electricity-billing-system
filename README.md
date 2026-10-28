@@ -45,7 +45,7 @@ npm run test:e2e:install -- chromium
 npm run test:e2e
 ```
 
-The demo smoke check verifies that the built HTML shell and JavaScript bundle respond. The Playwright suite exercises CSV upload, accepted/rejected-row validation, flat and time-of-use estimates, a local-hour tariff-boundary split, same-period supplier comparison, complete calculation CSV export, and PDF generation on Chromium. Node coverage reports line, branch, and function coverage for the exercised domain modules; it does not measure the React UI or SQL. The GitHub Actions workflow also starts a disposable local Supabase stack, applies migrations, runs the role and tenant RLS tests and database lint, then stops the stack. These checks do not validate a hosted database or production deployment.
+The demo smoke check verifies that the built HTML shell and JavaScript bundle respond. The Playwright suite exercises CSV upload, accepted/rejected-row validation, flat and time-of-use estimates, a local-hour tariff-boundary split, same-period supplier comparison, complete calculation CSV export, and PDF generation on Chromium. CI stores the four browser walkthrough screenshots as a 30-day artifact. Node coverage reports line, branch, and function coverage for the exercised domain modules; it does not measure the React UI or SQL. The GitHub Actions workflow also starts a disposable local Supabase stack, applies migrations, runs the role and tenant RLS tests and database lint, then stops the stack. These checks do not validate a hosted database or production deployment.
 
 ## Optional Supabase configuration
 
