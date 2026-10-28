@@ -29,4 +29,4 @@ When the browser or operating system requests reduced motion, automatic playback
 
 ## Browser check and screenshot
 
-The Playwright test `interactive workflow plays through its evidence stages and honors reduced motion` checks the stage progression, decision gate, and manual reduced-motion control. It generates `docs/assets/ebill-walkthrough/05-interactive-workflow.png` from the production build. The current local run passed on 28 October 2026; the next PR CI run still needs to confirm the updated browser test.
+The Playwright test `interactive workflow plays through its evidence stages and honors reduced motion` checks the stage progression, decision gate, replay, and manual reduced-motion control. It generates `docs/assets/ebill-walkthrough/05-interactive-workflow.png` from the production build. All five Chromium tests passed locally and in [PR #9 CI run 40652238258](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40652238258). The [five-image artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40652238258/artifacts/12800421573) is retained for 30 days.
