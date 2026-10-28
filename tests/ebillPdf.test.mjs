@@ -46,3 +46,20 @@ test("rejects a document that could be mistaken for an official or non-estimated
   assert.throws(() => createEnergyBillPdf({ ...bill, estimatedOnly: false }), /estimated e-bill is required/);
   assert.throws(() => createEnergyBillPdf({ ...bill, documentType: "official-utility-bill" }), /estimated e-bill is required/);
 });
+
+test("prints the two-band tariff schedule in a time-of-use estimate without NaN rates", () => {
+  const bytes = createEnergyBillPdf({
+    ...bill,
+    tariffMode: "time-of-use",
+    ratePerKwh: null,
+    tariffComponents: [
+      { name: "Peak", startHour: 6, endHour: 22, ratePerKwh: 10 },
+      { name: "Off-peak", startHour: 22, endHour: 6, ratePerKwh: 5 },
+    ],
+  });
+  const pdf = new TextDecoder().decode(bytes);
+  assert.match(pdf, /Energy charge by time-of-use tariff/);
+  assert.match(pdf, /Tariff band: Peak 06:00-22:00 @ INR 10\.0000\/kWh/);
+  assert.match(pdf, /Tariff band: Off-peak 22:00-06:00 @ INR 5\.0000\/kWh/);
+  assert.doesNotMatch(pdf, /NaN/);
+});

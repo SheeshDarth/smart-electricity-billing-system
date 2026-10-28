@@ -44,36 +44,45 @@ jobs:
         run: npm run typecheck
 
       - name: Run automated tests
-        run: npm test
+        run: npm run test:coverage
 
       - name: Build production bundle
         run: npm run build
 
-      - name: Smoke-test built demo without seller credentials
+      - name: Smoke-test built demo
         run: npm run smoke:demo
 
-  database:
-    name: Database migration, RLS, and lint
+  browser-e2e:
+    name: Browser walkthrough (CSV to e-bill)
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359 # v3
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          version: 2.121.0
+          node-version: 24
+          cache: npm
 
-      - name: Start disposable Supabase stack and apply migrations
-        run: supabase start
+      - name: Install locked dependencies
+        run: npm ci
 
-      - name: Lint local database schema
-        run: supabase db lint --local --fail-on error
+      - name: Build production demo
+        run: npm run build
 
-      - name: Run pgTAP database and RLS tests
-        run: supabase test db --local
+      - name: Install Playwright Chromium
+        run: npm run test:e2e:install -- --with-deps chromium
 
-      - name: Stop disposable Supabase stack
+      - name: Walk through CSV validation and e-bill generation
+        run: npm run test:e2e
+
+      - name: Save browser walkthrough screenshots
         if: always()
-        run: supabase stop --no-backup
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ebill-walkthrough-screenshots
+          path: docs/assets/ebill-walkthrough/*.png
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,6 +1,6 @@
 # Implementation roadmap and release gates
 
-Status snapshot: 27 October 2026. This roadmap replaces the earlier broad energy-intelligence direction with a focused electricity visibility and bill-evidence hypothesis. Buyer demand and willingness to pay have not been validated. No customer data or hosted Supabase project has been used in this work.
+Status snapshot: 28 October 2026. This roadmap replaces the earlier broad energy-intelligence direction with a focused electricity visibility and bill-evidence hypothesis. Buyer demand and willingness to pay have not been validated. No customer records or hosted backend have been used in this work.
 
 ## Product outcome
 
@@ -16,28 +16,28 @@ Core rules:
 
 ## Current baseline
 
-The application includes synthetic browser scenarios, measurement and tariff domain logic, additive Supabase migrations, a versioned JSON archive utility, a local CSV-to-e-bill estimate workflow, and a no-credentials demo. The e-bill slice validates interval-energy rows, calculates a flat tariff, supports a manually entered same-period supplier amount, and generates a PDF estimate. Files and bills are not persisted, and the PDF is not an official utility invoice. The earlier default-branch CI run passed before this workflow was added; draft [PR #7 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40481467654) passed Node 22/24 and disposable database checks. The PR remains unmerged. Live ingestion, supplier-document parsing, a complete archive importer, and a supported production deployment remain unimplemented.
+The application includes synthetic browser scenarios, measurement and tariff domain logic, a local CSV-to-e-bill estimate workflow, and a browser-only demo. Current code commit `ab6da4a` extends the e-bill screen from flat tariffs to a two-band time-of-use schedule, source-linked price segments, full calculation export, and a PDF tariff schedule. It passed [CI run 40633652147](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147), including the browser workflow. Files and bills are not persisted, and the PDF is not an official utility invoice. Live ingestion, authentication, supplier-document parsing, transactional archive import, jurisdiction-specific tariff rules, and supported production deployment remain unimplemented.
 
 ## P0 — Keep evaluation safe and reproducible
 
 ### Work
 
-1. Keep the root demo independent of seller-owned Supabase credentials and ensure a clean checkout can start from documented prerequisites.
-2. Keep the inherited login/admin/user flows labeled as legacy until they are migrated separately or removed by an explicit decision.
-3. Require npm install from lockfile, lint, typecheck, unit tests, production build, local Supabase migration, pgTAP, database lint, and always-run local stack cleanup on pull requests.
+1. Keep the root demo backend-free and ensure a clean checkout can start from documented prerequisites.
+2. Keep the product boundary explicit: no authentication, database, or persisted customer records are included.
+3. Require npm install from lockfile, lint, typecheck, unit tests, production build, HTTP smoke check, and browser workflow in pull-request CI.
 4. Add focused tests for the energy archive parser and serializer: valid minimal archive; bad format/version; missing collections; malformed measurement; missing timezone; invalid interval range; non-finite values; oversize input; round-trip preservation of fields.
 5. Keep all screenshots and demo content labeled synthetic; verify the UI cannot imply that a simulated decision changed a real device.
-6. Complete the repository sale-readiness review separately: Git history, checked-in data, dependency licenses, ownership/contributor rights, current repository visibility, Lovable terms, and external Supabase project state.
+6. Complete the repository sale-readiness review separately: Git history, checked-in data, dependency licenses, ownership/contributor rights, current repository visibility, Lovable terms, and the former hosted backend project/key.
 
 ### Exit gate
 
-Current status: the Node 22/24 checks and disposable database job passed on main before this e-bill branch. Archive tests and the no-credentials HTTP smoke check are in main. The local CSV/e-bill slice adds focused parser, estimate, and PDF checks, and draft PR #7 CI has passed. Repository history, rights, external backend review, and buyer validation remain open.
+Current status: PR #6 and PR #7 are merged; PR #8 remains an open draft. Previous commit `ab6da4a` passed Node 22/24, browser, and database checks in run 40633652147. After removing the database integration and CI job, the updated branch passed Node 22/24 and browser checks in [run 40635600460](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40635600460). The branch previously measured 91.79% lines, 77.43% branches, and 99.05% functions across four domain modules. The [current four-screenshot artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40635600460/artifacts/12792514571) is also checked into the repo. Repository history screening found a historical anonymous client key. Hosted project/key review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
 
 ## P1 — Validate buyer, data access, and first scenario
 
 ### Work
 
-1. Start with one buyer hypothesis: multi-site property operators or small businesses. Interview 5–8 relevant operators before choosing the segment; include a finance/billing stakeholder where possible.
+1. Start with one buyer hypothesis: multi-site property operators or small businesses. Interview 3–5 relevant operators before choosing the segment; include a finance/billing stakeholder where possible.
 2. Ask participants to walk through a recent unexpected bill or usage variance. Record current tools, decision, time spent, accessible exports, correction process, privacy constraints, buyer, purchase trigger, and acceptable onboarding effort.
 3. Request synthetic or redacted sample formats only with permission. Do not collect account credentials, bank/payment data, or identifiable bill documents for discovery.
 4. Make a dated competitor matrix covering source onboarding, missing-data handling, tariff assumptions, bill comparison, review trail, export, access control, and deployment. Use unknown when public evidence is absent.
@@ -66,13 +66,13 @@ A second upload of the same file adds no duplicate energy; changed mappings are 
 
 ## P3 — Deliver transparent estimate and bill-variance review
 
-Current implementation: a single-meter e-bill PDF estimate uses validated interval-energy records and a user-configured flat tariff. It can include a reviewer-entered supplier total after same-period confirmation. Time-of-use tariffs in this workflow, supplier-document parsing, official invoice semantics, jurisdiction-specific components, and persistent review history remain open.
+Current implementation: a single-meter e-bill PDF estimate uses validated interval-energy records and a user-configured flat or two-band local-hour tariff. The workspace shows up to 12 source-linked priced segments, exports all segments and an estimate summary as CSV, and includes the time-of-use schedule in the PDF. It can include a reviewer-entered supplier total after same-period confirmation. Weekday/holiday/seasonal tariff logic, supplier-document parsing, official invoice semantics, jurisdiction-specific components, and persistent review history remain open.
 
 ### Work
 
 1. Use effective-dated tariffs with currency, timezone, billing period, calculation version, and explicit components. Begin with flat and time-of-use examples only.
 2. Define billing cutoffs and supported interval cadence with the pilot user; split intervals across tariff boundaries only when the allocation assumption is displayed.
-3. Show estimate drill-down: source rows and accepted coverage, conversions, missing/quarantined rows, tariff component, rounding, subtotal, and total.
+3. Extend the estimate drill-down to explain tariff-component changes across tariff versions, missing/quarantined coverage, and a persistent reproducible calculation record. Current exports distinguish source intervals from tariff-priced segments.
 4. Let the reviewer enter the bill period and supplier-stated amount manually for the first pilot. Add file parsing only after document privacy, retention, access, and error-correction needs are agreed.
 5. Compare estimate and bill as a variance with clear sign and units. Never claim a cause automatically; route differences to a review queue with evidence and user notes.
 6. Preserve source reading, tariff, calculation version, reviewer identity, timestamp, and correction history. Do not overwrite imported data silently.

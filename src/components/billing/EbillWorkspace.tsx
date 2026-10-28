@@ -3,7 +3,7 @@ import {
   AlertTriangle, CheckCircle2, Download, FileText, FileUp, Info, Receipt,
 } from "lucide-react";
 import {
-  createEnergyBill, inspectEnergyCsv, MAX_ENERGY_CSV_BYTES, parseEnergyCsv,
+  createEnergyBill, createEnergyCalculationCsv, inspectEnergyCsv, MAX_ENERGY_CSV_BYTES, parseEnergyCsv,
   suggestEnergyCsvMapping,
 } from "@/domain/billWorkflow.mjs";
 import { estimateEnergyCost } from "@/domain/energyModel.mjs";
@@ -84,7 +84,12 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
   const [intervalMinutes, setIntervalMinutes] = useState("15");
   const [defaultUnit, setDefaultUnit] = useState("kWh");
   const [currency, setCurrency] = useState("INR");
+  const [tariffMode, setTariffMode] = useState<"flat" | "time-of-use">("flat");
   const [ratePerKwh, setRatePerKwh] = useState("8");
+  const [peakRatePerKwh, setPeakRatePerKwh] = useState("10");
+  const [offPeakRatePerKwh, setOffPeakRatePerKwh] = useState("6");
+  const [peakStartHour, setPeakStartHour] = useState("6");
+  const [peakEndHour, setPeakEndHour] = useState("22");
   const [tariffVersion, setTariffVersion] = useState("IN-DEMO-1.4");
   const [timezone, setTimezone] = useState("Asia/Kolkata");
   const [supplierAmount, setSupplierAmount] = useState("");
@@ -93,12 +98,18 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
   const [actionMessage, setActionMessage] = useState("");
   const [bill, setBill] = useState<ReturnType<typeof createEnergyBill> | null>(null);
 
+  const resetSupplierComparison = () => {
+    setSupplierAmount("");
+    setSupplierPeriodConfirmed(false);
+  };
+
   useEffect(() => {
     setBill(null);
     setActionMessage("");
   }, [
     csvText, mapping, fallbackMeterId, billSiteName, intervalMinutes, defaultUnit, currency,
-    ratePerKwh, tariffVersion, timezone, supplierAmount, supplierPeriodConfirmed, selectedMeter,
+    tariffMode, ratePerKwh, peakRatePerKwh, offPeakRatePerKwh, peakStartHour, peakEndHour,
+    tariffVersion, timezone, supplierAmount, supplierPeriodConfirmed, selectedMeter,
   ]);
 
   const parsedState = useMemo(() => {
@@ -129,6 +140,10 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
     () => (parsed?.readings ?? []).filter((reading) => reading.meterId === activeMeter),
     [parsed, activeMeter],
   );
+  const sourceRecordByEventId = useMemo(
+    () => new Map((parsed?.readings ?? []).map((reading) => [reading.eventId, reading.sourceRecordRef])),
+    [parsed],
+  );
   const estimateState = useMemo(() => {
     if (!parsed || parsed.summary.rejected > 0 || meterReadings.length === 0) {
       return { estimate: null, tariff: null, reason: parsed?.summary.rejected
@@ -136,8 +151,17 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
         : "Map the required columns and select a meter to calculate an estimate." };
     }
     const ordered = [...meterReadings].sort((left, right) => Date.parse(left.intervalStart) - Date.parse(right.intervalStart));
-    if (!ratePerKwh.trim()) {
+    if (tariffMode === "flat" && !ratePerKwh.trim()) {
       return { estimate: null, tariff: null, reason: "Enter a tariff rate before calculating an e-bill." };
+    }
+    if (tariffMode === "time-of-use" && (!peakRatePerKwh.trim() || !offPeakRatePerKwh.trim())) {
+      return { estimate: null, tariff: null, reason: "Enter both time-of-use rates before calculating an e-bill." };
+    }
+    const peakStart = Number(peakStartHour);
+    const peakEnd = Number(peakEndHour);
+    if (tariffMode === "time-of-use" && (!Number.isInteger(peakStart) || !Number.isInteger(peakEnd)
+      || peakStart < 0 || peakStart > 23 || peakEnd < 0 || peakEnd > 23 || peakStart === peakEnd)) {
+      return { estimate: null, tariff: null, reason: "Peak start and end must be distinct whole hours from 0 through 23." };
     }
     const firstStart = ordered[0].intervalStart;
     const lastEnd = ordered[ordered.length - 1].intervalEnd;
@@ -147,19 +171,28 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
       version: tariffVersion.trim(),
       effectiveFrom: firstStart,
       effectiveTo: new Date(Date.parse(lastEnd) + 1).toISOString(),
-      ratePerKwh: Number(ratePerKwh),
+      ...(tariffMode === "flat" ? { ratePerKwh: Number(ratePerKwh) } : {
+        timeOfUse: [
+          { name: "Peak", startHour: peakStart, endHour: peakEnd, ratePerKwh: Number(peakRatePerKwh) },
+          { name: "Off-peak", startHour: peakEnd, endHour: peakStart, ratePerKwh: Number(offPeakRatePerKwh) },
+        ],
+      }),
     };
     const estimate = estimateEnergyCost(meterReadings, tariff);
     return { estimate, tariff, reason: estimate.status === "estimated" ? "" : estimate.reason };
-  }, [parsed, meterReadings, currency, timezone, tariffVersion, ratePerKwh]);
+  }, [parsed, meterReadings, currency, timezone, tariffVersion, tariffMode, ratePerKwh,
+    peakRatePerKwh, offPeakRatePerKwh, peakStartHour, peakEndHour]);
+  const estimate = estimateState.estimate;
 
   const loadCsv = async (file: File, source: "synthetic-demo" | "user-uploaded-csv") => {
     setFileError("");
     setActionMessage("");
     setBill(null);
+    resetSupplierComparison();
+    setFileName(file.name);
+    setCsvText("");
+    setHeaders([]);
     if (file.size > MAX_ENERGY_CSV_BYTES) {
-      setCsvText("");
-      setHeaders([]);
       setFileError("This file exceeds the 5 MiB import limit.");
       return;
     }
@@ -193,11 +226,15 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
   };
 
   const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) await loadCsv(file, "user-uploaded-csv");
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = "";
+    await loadCsv(file, "user-uploaded-csv");
   };
 
   const updateMapping = (key: keyof CsvMapping, value: string) => {
+    resetSupplierComparison();
     setMapping((current) => ({ ...current, [key]: value }));
   };
 
@@ -222,6 +259,27 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
     }
   };
 
+  const downloadCalculationCsv = () => {
+    if (estimate?.status !== "estimated") return;
+    try {
+      const content = createEnergyCalculationCsv(meterReadings, estimate, {
+        duplicatesIgnored: parsed?.rows.filter((row) => row.status === "duplicate" && row.reading?.meterId === activeMeter).length ?? estimate.duplicatesIgnored,
+      });
+      const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "wattwise-energy-calculation.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setActionMessage("Full calculation CSV downloaded with every validated interval and an estimate summary.");
+    } catch (error) {
+      setActionMessage(error instanceof Error ? error.message : "The calculation CSV could not be generated.");
+    }
+  };
+
   const generateBill = () => {
     if (!parsed || parsed.summary.rejected > 0 || !estimateState.tariff || estimateState.estimate?.status !== "estimated") return;
     try {
@@ -241,7 +299,6 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
     }
   };
 
-  const estimate = estimateState.estimate;
   const estimateReady = Boolean(
     parsed && parsed.summary.rejected === 0 && estimate?.status === "estimated" && estimateState.tariff && billSiteName.trim(),
   );
@@ -253,7 +310,7 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[.14em] text-cyan-200"><Receipt size={15} /> Local bill workspace</div>
           <h2 className="mt-3 text-xl font-semibold sm:text-2xl">Generate an electricity e-bill from meter readings</h2>
           <p className="mt-2 text-sm leading-relaxed text-slate-400">
-            Import interval-energy CSV data, review every row, apply a transparent flat tariff, compare a supplier-stated total, and download a PDF estimate.
+            Import interval-energy CSV data, review every row, apply a transparent flat or two-band time-of-use tariff, compare a supplier-stated total, and download a PDF estimate.
           </p>
         </div>
         <span className="rounded-full border border-amber-300/20 bg-amber-300/[0.07] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-amber-200">Estimate · not official</span>
@@ -297,20 +354,26 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
 
         {csvText && <div className="rounded-2xl border border-white/[0.08] bg-[#10191e] p-5">
           <h3 className="text-sm font-semibold">Reading and bill settings</h3>
-          <p className="mt-1 text-xs text-slate-500">The generated document includes only interval energy and the selected flat tariff.</p>
+          <p className="mt-1 text-xs text-slate-500">The generated document includes interval energy and the selected tariff assumptions.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Site / bill name</span><input value={billSiteName} maxLength={68} onChange={(event) => setBillSiteName(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" />{!billSiteName.trim() && <span className="mt-1 block text-[10px] text-amber-200">Enter a site or bill name to generate the PDF.</span>}</label>
-            <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Default meter ID (used when no meter column is mapped)</span><input value={fallbackMeterId} onChange={(event) => setFallbackMeterId(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
-            <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Interval length when no start column exists</span><div className="flex items-center gap-2"><input type="number" min="1" max="1440" step="1" value={intervalMinutes} onChange={(event) => setIntervalMinutes(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /><span className="text-xs text-slate-500">minutes</span></div></label>
+            <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Default meter ID (used when no meter column is mapped)</span><input value={fallbackMeterId} onChange={(event) => { resetSupplierComparison(); setFallbackMeterId(event.target.value); }} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
+            <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Interval length when no start column exists</span><div className="flex items-center gap-2"><input type="number" min="1" max="1440" step="1" value={intervalMinutes} onChange={(event) => { resetSupplierComparison(); setIntervalMinutes(event.target.value); }} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /><span className="text-xs text-slate-500">minutes</span></div></label>
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Default unit when no unit column exists</span><select value={defaultUnit} onChange={(event) => setDefaultUnit(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50"><option value="kWh">kWh</option><option value="Wh">Wh</option></select></label>
-            {meterOptions.length > 0 && <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Meter for this e-bill</span><select value={activeMeter} onChange={(event) => setSelectedMeter(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50">{meterOptions.map((meter) => <option key={meter} value={meter}>{meter}</option>)}</select></label>}
+            {meterOptions.length > 0 && <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Meter for this e-bill</span><select value={activeMeter} onChange={(event) => { resetSupplierComparison(); setSelectedMeter(event.target.value); }} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50">{meterOptions.map((meter) => <option key={meter} value={meter}>{meter}</option>)}</select></label>}
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Tariff currency</span><input maxLength={3} value={currency} onChange={(event) => setCurrency(event.target.value.toUpperCase())} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm uppercase outline-none focus:border-cyan-300/50" /></label>
-            <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Flat rate per kWh</span><input type="number" min="0" step="0.0001" value={ratePerKwh} onChange={(event) => setRatePerKwh(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
+            <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Tariff structure</span><select aria-label="Tariff structure" value={tariffMode} onChange={(event) => setTariffMode(event.target.value as "flat" | "time-of-use")} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm text-slate-100 outline-none focus:border-cyan-300/50"><option value="flat">Flat rate</option><option value="time-of-use">Time-of-use (two bands)</option></select></label>
+            {tariffMode === "flat" ? <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Flat rate per kWh</span><input type="number" min="0" step="0.0001" value={ratePerKwh} onChange={(event) => setRatePerKwh(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label> : <>
+              <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Peak rate per kWh (illustrative)</span><input type="number" min="0" step="0.0001" value={peakRatePerKwh} onChange={(event) => setPeakRatePerKwh(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
+              <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Off-peak rate per kWh (illustrative)</span><input type="number" min="0" step="0.0001" value={offPeakRatePerKwh} onChange={(event) => setOffPeakRatePerKwh(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
+              <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Peak start hour (local)</span><input type="number" min="0" max="23" step="1" value={peakStartHour} onChange={(event) => setPeakStartHour(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
+              <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Peak end hour (local)</span><input type="number" min="0" max="23" step="1" value={peakEndHour} onChange={(event) => setPeakEndHour(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
+            </>}
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Tariff version</span><input value={tariffVersion} onChange={(event) => setTariffVersion(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-slate-300">Tariff timezone (IANA)</span><input value={timezone} onChange={(event) => setTimezone(event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#0a1115] px-3 py-2.5 text-sm outline-none focus:border-cyan-300/50" /></label>
           </div>
           <div className="mt-4 rounded-lg border border-amber-300/10 bg-amber-300/[0.04] px-3 py-2.5 text-[11px] leading-relaxed text-amber-100/75">
-            Only interval-energy CSV files are supported in this release. Cumulative-register data, taxes, fixed/demand charges, arrears, and export credits are excluded from this estimate.
+            Time-of-use bands repeat by local clock hour every day. Weekday, holiday, seasonal, and jurisdiction-specific rules are not modeled; the displayed sample rates are illustrative. Cumulative-register data, taxes, fixed/demand charges, arrears, and export credits are excluded.
           </div>
         </div>}
       </div>
@@ -356,6 +419,35 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
             <div className="mt-3 rounded-lg border border-white/[0.06] px-3 py-2.5 text-[11px] leading-relaxed text-slate-400">
               Coverage: {displayDate(estimate.breakdown[0].start, timezone)} to {displayDate(estimate.breakdown[estimate.breakdown.length - 1].end, timezone)} · {estimate.readingCount} interval(s) · {estimate.tariffVersion}
             </div>
+            <details className="mt-3 rounded-lg border border-cyan-300/10 bg-cyan-300/[0.03]">
+              <summary className="cursor-pointer px-3 py-2.5 text-xs font-medium text-cyan-100">
+                View calculation detail · {Math.min(estimate.breakdown.length, 12)} of {estimate.breakdown.length} priced segments
+              </summary>
+              <div className="border-t border-white/[0.06] p-3">
+                <p className="mb-3 text-[10px] leading-relaxed text-slate-400">
+                  Each line links a validated CSV source record to a priced segment. Energy is allocated by elapsed time where a source interval crosses a local tariff boundary. Segment charges show six decimal places; the estimate total is rounded to two decimal places.
+                </p>
+                <div className="max-h-64 overflow-auto rounded-lg border border-white/[0.06]">
+                  <table className="w-full min-w-[520px] text-left text-[10px]">
+                    <thead className="sticky top-0 bg-[#172228] text-slate-500"><tr>
+                      <th className="px-2 py-2">Source row</th><th className="px-2 py-2">Priced segment</th><th className="px-2 py-2">Tariff band</th>
+                      <th className="px-2 py-2 text-right">Energy</th><th className="px-2 py-2 text-right">Rate / kWh ({estimate.currency})</th>
+                      <th className="px-2 py-2 text-right">Charge</th>
+                    </tr></thead>
+                    <tbody>{estimate.breakdown.slice(0, 12).map((item, index) => <tr key={`${item.eventId}-${item.start}-${index}`} className="border-t border-white/[0.05]">
+                      <td className="px-2 py-2 text-slate-300">{sourceRecordByEventId.get(item.eventId) ?? item.eventId}</td>
+                      <td className="px-2 py-2 text-slate-400">{displayDate(item.start, timezone)} – {displayDate(item.end, timezone)}</td>
+                      <td className="px-2 py-2 text-slate-300">{item.tariffPeriod ?? "Flat"}</td>
+                      <td className="px-2 py-2 text-right text-slate-300">{item.energyKwh.toFixed(6)} kWh</td>
+                      <td className="px-2 py-2 text-right text-slate-300">{item.ratePerKwh.toFixed(6)}</td>
+                      <td className="px-2 py-2 text-right text-emerald-200">{estimate.currency} {item.cost.toFixed(6)}</td>
+                    </tr>)}</tbody>
+                  </table>
+                </div>
+                {estimate.breakdown.length > 12 && <p className="mt-2 text-[10px] text-slate-500">Showing the first 12 intervals. All validated intervals are included in the estimate.</p>}
+                <button onClick={downloadCalculationCsv} className="mt-3 inline-flex items-center gap-2 rounded-lg border border-cyan-200/20 px-3 py-2 text-[11px] font-medium text-cyan-100 hover:bg-cyan-300/[0.08]"><Download size={13} />Download full calculation CSV</button>
+              </div>
+            </details>
           </div> : <div className="mt-4 rounded-lg border border-amber-300/10 bg-amber-300/[0.04] px-3 py-3 text-xs leading-relaxed text-amber-100/80">{estimateState.reason || parsedState.error || "Estimate is withheld until the data and tariff are valid."}</div>}
 
           {csvText && <div className="mt-4 space-y-3">
