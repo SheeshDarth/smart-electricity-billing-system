@@ -1,6 +1,6 @@
 # Wattwise marketplace listing draft
 
-Status: preparation draft as of 27 October 2026. This is review copy, not a published offer. The repository is currently public, so it does not yet qualify for DataVendor's private-codebase estimate or listing. Recheck eligibility and refresh the estimate after repository privacy and rights reviews.
+Status: preparation draft as of 28 October 2026. This is review copy, not a published offer. The repository is currently public, so it does not yet qualify for DataVendor's private-codebase estimate or listing. Recheck eligibility and refresh the estimate after repository privacy and rights reviews.
 
 ## Suggested listing title
 
@@ -16,7 +16,7 @@ Wattwise is an early-stage browser prototype exploring how a small multi-site op
 
 The browser digital twin uses synthetic site and meter records. Its scenarios demonstrate usage spikes, stale data, duplicate events, counter resets, invalid units, and tariff changes. The shared domain code validates measurement types, normalizes supported units, handles batch duplicate IDs, quarantines unproven cumulative-register resets, and rejects missing intervals instead of treating them as zero. A deterministic estimator supports illustrative flat and time-of-use tariffs with effective dates and timezone context. A workflow view shows event validation, a signal, a human review, and simulated verification.
 
-The repository includes a local CSV validation and estimate workflow with a synthetic sample file, PDF e-bill generator, a versioned energy-archive format with a browser validation/export workspace, focused automated tests, an additive Supabase schema, database tests, CI, and product/setup documentation. A clean local demo does not require a seller-owned Supabase project. Archive files are validated and exported locally; transactional import into the application database is not implemented.
+The repository includes a local CSV validation and estimate workflow with a synthetic sample file, source-row calculation detail and complete calculation CSV export, PDF e-bill generator, a versioned energy-archive format with a browser validation/export workspace, focused automated tests, an additive Supabase schema, database tests, CI, and product/setup documentation. A clean local demo does not require a seller-owned Supabase project. Archive files are validated and exported locally; transactional import into the application database is not implemented.
 
 This is a software codebase with synthetic demonstration content. It is not a deployed energy service, official billing system, payment processor, live meter integration, or AI product. No real savings or production outcomes are claimed.
 
@@ -73,7 +73,7 @@ npm run build
 npm run smoke:demo
 ```
 
-PRs #6 and #7 are merged. PR #7's default-branch CI run passed its Node 22/24 checks and disposable database job. PR #8 remains an open draft; its latest [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40499896507) passed Node 22/24, browser E2E, database migration/lint, and expanded pgTAP. Locally, 47 Node domain tests passed and measured coverage was 91.47% lines, 77.34% branches, and 98.90% functions across four JavaScript domain modules only. The CI browser tests cover accepted and rejected CSV rows, estimate calculation, same-period supplier comparison, variance, blocked generation for invalid data, PDF download, and reset of prior comparison state after CSV replacement. Database checks run against a disposable CI stack, not a hosted project.
+PRs #6 and #7 are merged. PR #7's default-branch CI run passed its Node 22/24 checks and disposable database job. PR #8 remains an open draft; its latest known [GitHub Actions run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40500322202) passed Node 22/24, browser E2E, database migration/lint, and expanded pgTAP before the current local changes. Locally, 49 Node tests passed and measured coverage is 91.80% lines, 77.45% branches, and 98.98% functions across four JavaScript domain modules only. The updated E2E assertions for source-row details and the full calculation CSV have not run because Playwright is missing from this workspace. Database checks run against a disposable CI stack, not a hosted project.
 
 See the [digital-twin demo guide](digital-twin-demo-guide.md), [e-bill workflow guide](ebill-generation.md), and [visual browser walkthrough](ebill-browser-walkthrough.md) for the steps and screenshots. The sample file is synthetic; uploaded files are handled locally in the browser. The Chromium walkthrough checks the downloaded PDF filename, header, estimate, supplier variance, and estimate-only disclosure. Domain tests separately check the PDF structure.
 
@@ -84,8 +84,8 @@ See the [digital-twin demo guide](digital-twin-demo-guide.md), [e-bill workflow 
 | Asset type | One software repository | Choose the codebase/repository asset type. Do not describe it as a dataset or taskset. |
 | Domain | Electricity/energy software and billing examples | Choose the closest available energy or software domain tags; avoid utility-grade or IoT claims. |
 | Asking price | No current seller price selected | Refresh the platform estimate after privacy changes, then choose a price and rights scope. A platform estimate is advisory, not a buyer offer. |
-| Tests and coverage | Local run: 47 Node domain tests; measured coverage across four domain modules | State the run and exact scope: 91.47% lines, 77.34% branches, 98.90% functions. Do not report this as whole-repository or UI/SQL coverage. |
-| Browser walkthrough | PR #8 run 40499896507 passed all three Chromium workflows, including PDF download and comparison reset | Describe the tested CSV, validation, estimate, comparison, variance, download, invalid-row, and source-change reset paths. |
+| Tests and coverage | Local run: 49 Node tests; measured coverage across four domain modules | State the run and exact scope: 91.80% lines, 77.45% branches, 98.98% functions. Do not report this as whole-repository or UI/SQL coverage. |
+| Browser walkthrough | Latest known PR #8 run 40500322202 passed the existing Chromium workflows, including PDF download and comparison reset; new calculation CSV assertions are local and unverified | Describe the earlier tested CSV, validation, estimate, comparison, variance, PDF, invalid-row, and source-change reset paths. Verify the calculation CSV workflow in CI before claiming it as browser-tested. |
 | CI on pull requests | PR #8 Node 22/24, browser, database migration/lint, and pgTAP jobs passed | CI is present; describe the tested checks and keep hosted security separate. |
 | Private code supply | GitHub currently reports this repository as public while improvements are in progress | Do not claim a private-supply quote or publish until the intended final snapshot is private and DataVendor re-scans it. |
 | Private/personal data | Targeted local/history scan found no configured-pattern secrets in the worktree and found a historical Supabase anonymous client key in 24 commits; external Supabase state is unreviewed | Keep this field unconfirmed until the hosted project, generated assets, and remaining data exposure are reviewed. An anonymous key is intended for client use but still relies on correct backend access policies. |

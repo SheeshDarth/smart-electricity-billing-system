@@ -3,7 +3,7 @@ import {
   AlertTriangle, CheckCircle2, Download, FileText, FileUp, Info, Receipt,
 } from "lucide-react";
 import {
-  createEnergyBill, inspectEnergyCsv, MAX_ENERGY_CSV_BYTES, parseEnergyCsv,
+  createEnergyBill, createEnergyCalculationCsv, inspectEnergyCsv, MAX_ENERGY_CSV_BYTES, parseEnergyCsv,
   suggestEnergyCsvMapping,
 } from "@/domain/billWorkflow.mjs";
 import { estimateEnergyCost } from "@/domain/energyModel.mjs";
@@ -134,6 +134,10 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
     () => (parsed?.readings ?? []).filter((reading) => reading.meterId === activeMeter),
     [parsed, activeMeter],
   );
+  const sourceRecordByEventId = useMemo(
+    () => new Map((parsed?.readings ?? []).map((reading) => [reading.eventId, reading.sourceRecordRef])),
+    [parsed],
+  );
   const estimateState = useMemo(() => {
     if (!parsed || parsed.summary.rejected > 0 || meterReadings.length === 0) {
       return { estimate: null, tariff: null, reason: parsed?.summary.rejected
@@ -157,6 +161,7 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
     const estimate = estimateEnergyCost(meterReadings, tariff);
     return { estimate, tariff, reason: estimate.status === "estimated" ? "" : estimate.reason };
   }, [parsed, meterReadings, currency, timezone, tariffVersion, ratePerKwh]);
+  const estimate = estimateState.estimate;
 
   const loadCsv = async (file: File, source: "synthetic-demo" | "user-uploaded-csv") => {
     setFileError("");
@@ -233,6 +238,27 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
     }
   };
 
+  const downloadCalculationCsv = () => {
+    if (estimate?.status !== "estimated") return;
+    try {
+      const content = createEnergyCalculationCsv(meterReadings, estimate, {
+        duplicatesIgnored: parsed?.rows.filter((row) => row.status === "duplicate" && row.reading?.meterId === activeMeter).length ?? estimate.duplicatesIgnored,
+      });
+      const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "wattwise-energy-calculation.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setActionMessage("Full calculation CSV downloaded with every validated interval and an estimate summary.");
+    } catch (error) {
+      setActionMessage(error instanceof Error ? error.message : "The calculation CSV could not be generated.");
+    }
+  };
+
   const generateBill = () => {
     if (!parsed || parsed.summary.rejected > 0 || !estimateState.tariff || estimateState.estimate?.status !== "estimated") return;
     try {
@@ -252,7 +278,6 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
     }
   };
 
-  const estimate = estimateState.estimate;
   const estimateReady = Boolean(
     parsed && parsed.summary.rejected === 0 && estimate?.status === "estimated" && estimateState.tariff && billSiteName.trim(),
   );
@@ -367,6 +392,34 @@ export default function EbillWorkspace({ siteId, siteName, defaultMeterId }: Pro
             <div className="mt-3 rounded-lg border border-white/[0.06] px-3 py-2.5 text-[11px] leading-relaxed text-slate-400">
               Coverage: {displayDate(estimate.breakdown[0].start, timezone)} to {displayDate(estimate.breakdown[estimate.breakdown.length - 1].end, timezone)} · {estimate.readingCount} interval(s) · {estimate.tariffVersion}
             </div>
+            <details className="mt-3 rounded-lg border border-cyan-300/10 bg-cyan-300/[0.03]">
+              <summary className="cursor-pointer px-3 py-2.5 text-xs font-medium text-cyan-100">
+                View calculation detail · {Math.min(estimate.breakdown.length, 12)} of {estimate.breakdown.length} intervals
+              </summary>
+              <div className="border-t border-white/[0.06] p-3">
+                <p className="mb-3 text-[10px] leading-relaxed text-slate-400">
+                  Each line links a validated CSV source record to normalized interval energy and the flat tariff calculation. Line charges show six decimal places; the estimate total is rounded to two decimal places.
+                </p>
+                <div className="max-h-64 overflow-auto rounded-lg border border-white/[0.06]">
+                  <table className="w-full min-w-[520px] text-left text-[10px]">
+                    <thead className="sticky top-0 bg-[#172228] text-slate-500"><tr>
+                      <th className="px-2 py-2">Source row</th><th className="px-2 py-2">Interval</th>
+                      <th className="px-2 py-2 text-right">Energy</th><th className="px-2 py-2 text-right">Rate / kWh ({estimate.currency})</th>
+                      <th className="px-2 py-2 text-right">Charge</th>
+                    </tr></thead>
+                    <tbody>{estimate.breakdown.slice(0, 12).map((item, index) => <tr key={`${item.eventId}-${item.start}-${index}`} className="border-t border-white/[0.05]">
+                      <td className="px-2 py-2 text-slate-300">{sourceRecordByEventId.get(item.eventId) ?? item.eventId}</td>
+                      <td className="px-2 py-2 text-slate-400">{displayDate(item.start, timezone)} – {displayDate(item.end, timezone)}</td>
+                      <td className="px-2 py-2 text-right text-slate-300">{item.energyKwh.toFixed(6)} kWh</td>
+                      <td className="px-2 py-2 text-right text-slate-300">{item.ratePerKwh.toFixed(6)}</td>
+                      <td className="px-2 py-2 text-right text-emerald-200">{estimate.currency} {item.cost.toFixed(6)}</td>
+                    </tr>)}</tbody>
+                  </table>
+                </div>
+                {estimate.breakdown.length > 12 && <p className="mt-2 text-[10px] text-slate-500">Showing the first 12 intervals. All validated intervals are included in the estimate.</p>}
+                <button onClick={downloadCalculationCsv} className="mt-3 inline-flex items-center gap-2 rounded-lg border border-cyan-200/20 px-3 py-2 text-[11px] font-medium text-cyan-100 hover:bg-cyan-300/[0.08]"><Download size={13} />Download full calculation CSV</button>
+              </div>
+            </details>
           </div> : <div className="mt-4 rounded-lg border border-amber-300/10 bg-amber-300/[0.04] px-3 py-3 text-xs leading-relaxed text-amber-100/80">{estimateState.reason || parsedState.error || "Estimate is withheld until the data and tariff are valid."}</div>}
 
           {csvText && <div className="mt-4 space-y-3">

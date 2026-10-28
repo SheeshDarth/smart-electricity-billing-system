@@ -13,7 +13,7 @@ The PDF is a Wattwise estimate, not an official utility bill, invoice, statement
 3. Map the interval end timestamp and energy value. Optionally map meter ID, unit, interval start, and event ID.
 4. Select one meter for the bill, choose a default unit and interval length where needed, and review row outcomes.
 5. Set currency, IANA timezone, tariff version, and a flat per-kWh rate.
-6. Review the coverage window, accepted intervals, total kWh, and calculated energy charge.
+6. Review the coverage window, accepted intervals, total kWh, and calculated energy charge. Expand calculation detail to inspect the first 12 lines, or download the complete calculation CSV for every interval and the final estimate summary.
 7. Optionally enter a supplier-stated total. The user must confirm it covers the same reading window before the estimate-minus-statement variance is included.
 8. Generate the e-bill and download the PDF.
 
@@ -42,6 +42,8 @@ Rows are parsed in the browser and are not posted to an application server. The 
 
 For this workflow, the amount is calculated by the existing deterministic energy-cost domain function using the validated interval energy, selected flat rate, currency, tariff timezone, tariff version, and a tariff window covering the imported readings. Gaps, overlaps, invalid rows, malformed intervals, invalid tariff details, and incompatible units withhold generation. A gap is never treated as zero energy.
 
+The estimate workspace also provides an expandable line-item view and a full calculation CSV. Each exported line links a calculated interval to its CSV source-record reference and retains the source value and unit alongside normalized energy, flat tariff rate, and interval charge. It states whether the unit came from a mapped CSV column or the user's configured default. The CSV includes every interval and a summary row with estimated energy, charge, tariff version, calculation version, duplicate count, and estimate-only status. Text cells are quoted and formula-like values are prefixed to reduce spreadsheet formula execution risk. The displayed and exported total is rounded to two decimal places; line-item precision does not imply that the supplier uses the same rounding method. The browser view shows only the first 12 intervals for large imports, while the download includes all validated intervals.
+
 The PDF includes:
 
 - bill reference, generation time, site and meter labels;
@@ -52,7 +54,7 @@ The PDF includes:
 - a supplier-stated total and variance only after same-period confirmation;
 - the excluded charge classes and an estimate-only disclosure.
 
-The Chromium walkthrough downloads the generated PDF and verifies its `.pdf` filename, header, expected estimate and variance, and official-invoice disclaimer. These browser assertions passed in [PR #8 CI](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40499896507). Replacing a CSV or changing its mapping, meter, or interval definition clears the previous supplier comparison. Domain tests separately verify cross-reference structure and additional required disclosures.
+The Chromium walkthrough downloads the generated PDF and verifies its `.pdf` filename, header, expected estimate and variance, and official-invoice disclaimer. These browser assertions passed in the latest known [PR #8 CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40500322202), which predates the calculation CSV E2E assertion. Replacing a CSV or changing its mapping, meter, or interval definition clears the previous supplier comparison. Domain tests separately verify cross-reference structure and additional required disclosures.
 
 The estimate excludes taxes, fixed charges, demand charges, arrears, export credits, corrections, meter multipliers, and jurisdiction-specific rules. No unsupported charge is silently added as zero or inferred from a supplier bill. Supplier amount is entered manually; the app does not upload or parse utility bill documents.
 

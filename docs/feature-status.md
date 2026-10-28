@@ -1,6 +1,6 @@
 # Feature and readiness matrix
 
-Status snapshot: 27 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. PR #8's latest [CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40499896507) passed Node 22/24, browser, migration, database lint, and pgTAP checks.
+Status snapshot: 28 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. PR #8's latest known [CI run](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40500322202) passed Node 22/24, browser, migration, database lint, and pgTAP checks before the current local calculation-detail and CSV-export changes; those changes are not included in that CI run.
 
 ## Product capability status
 
@@ -19,8 +19,9 @@ Status snapshot: 27 October 2026. “Implemented” means code exists in the rep
 | Energy archive v1 | Local export and validated summary | Browser exports synthetic linked records and validates a complete selected JSON archive. Reports all detected issues/counts and refuses partial import. No Supabase persistence, authentication, signature, full non-measurement schemas, or transactional production import. |
 | Supabase multi-tenant schema | Additive migration; expanded RLS suite passed in PR #8 CI | Role/table reads, representative writes, cross-organization denials, and membership changes pass against disposable tenants. Hosted project remains uninspected. |
 | Database lint and cleanup | Passed in PR #8 CI | Disposable migration, schema lint, pgTAP, and stack cleanup passed. Hosted projects are not involved. |
-| Demo packaging | HTTP smoke and browser E2E passed in PR #8 CI | HTTP smoke checks built assets. Three Chromium tests cover valid CSV/e-bill comparison and PDF download, invalid-row blocking, and resetting supplier confirmation after file replacement. |
-| Domain coverage | Measured on current branch | Node reports 91.47% lines, 77.34% branches, 98.90% functions across four domain modules only. No UI, SQL, or whole-repository coverage claim. |
+| Demo packaging | HTTP smoke and browser E2E passed on prior PR #8 head | HTTP smoke checks built assets. Three Chromium tests cover valid CSV/e-bill comparison and PDF download, invalid-row blocking, and resetting supplier confirmation after file replacement. Local E2E assertions now cover calculation-detail display and complete CSV export, but could not run because `@playwright/test` is missing from this workspace's installed dependencies. |
+| E-bill calculation trace | Implemented in current local changes | Expandable view maps up to 12 calculated flat-rate intervals back to their CSV source references; full calculation CSV records source value, unit origin, and every interval plus a summary. Domain tests and coverage pass locally; screenshots and remote CI predate the change. |
+| Domain coverage | Measured locally 28 October 2026 | Node reports 91.80% lines, 77.45% branches, 98.98% functions across four domain modules only. No UI, SQL, or whole-repository coverage claim. |
 | Authentication and authorization | Not production validated | RLS remains a draft schema. Tests are synthetic and not a full deployed security audit. Legacy routes retain old application assumptions. |
 | Live meter adapters | Not implemented | No DLMS/COSEM, OPC UA, MQTT, vendor API, gateway, or hardware-in-the-loop integration. |
 | AI, GPU, or LLM service | Not implemented | No model, inference provider, evaluation dataset, AI diagnosis, or GPU dependency. Monitoring and costs do not require AI. |

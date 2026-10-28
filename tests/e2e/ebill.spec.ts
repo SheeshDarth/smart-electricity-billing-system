@@ -22,6 +22,23 @@ test("CSV upload → validation → estimate → comparison → PDF download", a
   mkdirSync(dirname(resolve(screenshots, "01-csv-validation.png")), { recursive: true });
   await page.screenshot({ path: resolve(screenshots, "01-csv-validation.png"), fullPage: true });
 
+  await page.getByText(/View calculation detail/).click();
+  await expect(page.getByRole("columnheader", { name: /Rate \/ kWh \(INR\)/ })).toBeVisible();
+  await expect(page.getByText("csv-row:2")).toBeVisible();
+  await expect(page.getByText("0.280000 kWh")).toBeVisible();
+  await expect(page.getByText("INR 2.240000", { exact: true })).toBeVisible();
+
+  const [calculationDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Download full calculation CSV" }).click(),
+  ]);
+  expect(calculationDownload.suggestedFilename()).toBe("wattwise-energy-calculation.csv");
+  const calculationCsv = (await readFile(await calculationDownload.path(), "utf8")).replace(/^\uFEFF/, "");
+  expect(calculationCsv).toContain('"interval","csv-row:2","DEMO-0001"');
+  expect(calculationCsv).toContain('"0.28","kWh","configured-default","0.280000"');
+  expect(calculationCsv).toContain('"summary"');
+  expect(calculationCsv).toContain('"21.76","2.720","8","0"');
+
   const supplierTotal = page.getByLabel("Supplier-stated bill total (optional)");
   await supplierTotal.fill("25.00");
   await page.getByLabel("I confirmed that the supplier-stated amount covers the same period shown above.").check();

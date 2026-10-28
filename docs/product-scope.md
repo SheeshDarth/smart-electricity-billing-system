@@ -1,6 +1,6 @@
 # Product scope: electricity visibility and bill evidence
 
-Status: working recommendation, updated 27 October 2026. Buyer demand has not been validated through interviews or a live pilot. Implemented prototype behavior is separated from proposed scope.
+Status: working recommendation, updated 28 October 2026. Buyer demand has not been validated through interviews or a live pilot. Implemented prototype behavior is separated from proposed scope.
 
 ## Product decision
 
@@ -29,7 +29,7 @@ All demo records and outcomes are synthetic. Passing local tests does not establ
 | Reading import and source mapping | Preview CSV; map timestamp/value/unit/meter; validate before save; report accepted, duplicate, rejected, and missing rows; retain input reference. | Local CSV preview/estimate exists; it does not persist readings or retain cross-session records. |
 | Data quality and provenance | Show measured time, source, conversion, quality, freshness, and quarantine reason; keep missing data missing. | Domain checks and synthetic workflow; no live monitoring. |
 | Versioned tariff configuration | Store effective-dated tariff, currency, timezone, calculation version, and rounding with each estimate. | Flat and time-of-use logic exists; jurisdiction charges absent. |
-| Cost estimate drill-down | Trace reading IDs, coverage, gaps, conversions, tariff components, and totals. | The e-bill UI shows coverage, accepted interval count, energy total, flat rate, and calculated charge; per-row cost drill-down and persistence remain incomplete. |
+| Cost estimate drill-down | Trace reading IDs, coverage, gaps, conversions, tariff components, and totals. | The e-bill UI shows an expandable 12-interval preview and exports a full source-row calculation CSV with a summary. Full tariff-component history, persistent audit records, and broader missing-data reconciliation remain incomplete. |
 | Supplier bill comparison | Enter a supplier-stated amount and period; show usage and cost variance with coverage, without claiming diagnosis. | A local manual amount and estimate-minus-stated-total variance are included only after same-period confirmation. Document parsing and persistent reconciliation history are not implemented. |
 | Exception review and audit trail | Reviewer records status, note, actor, and timestamp for each data or bill exception. | Synthetic intervention story/schema only. |
 | Tenant and role boundaries | Test allowed and denied table access by role and tenant, including cross-organization writes and membership changes. | Expanded pgTAP matrix passed in PR #8 CI against disposable organizations. |

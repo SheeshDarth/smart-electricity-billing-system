@@ -182,6 +182,7 @@ export function parseEnergyCsv(text, options = {}) {
         measuredAt,
         kind: "interval_energy",
         unit,
+        sourceUnitOrigin: unitIndex >= 0 ? "csv-column" : "configured-default",
         value,
         quality: "valid",
         intervalStart,
@@ -248,6 +249,95 @@ export function parseEnergyCsv(text, options = {}) {
     rejected: rows.filter((row) => row.status === "rejected").length,
   };
   return { headers, rows, readings, summary };
+}
+
+function calculationCsvCell(value) {
+  let text = String(value ?? "");
+  // Spreadsheet applications may evaluate cells beginning with formula markers.
+  if (/^[\t\r ]*[=+\-@]/.test(text)) text = "'" + text;
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+
+export function createEnergyCalculationCsv(readings, estimate, options = {}) {
+  if (!Array.isArray(readings) || readings.length === 0
+    || !estimate || estimate.status !== "estimated" || !Array.isArray(estimate.breakdown)) {
+    throw new TypeError("A completed estimate and its validated readings are required");
+  }
+  const meterIds = new Set(readings.map((reading) => reading.meterId));
+  const siteIds = new Set(readings.map((reading) => reading.siteId));
+  if (meterIds.size !== 1 || siteIds.size !== 1) {
+    throw new TypeError("A calculation export can contain readings from one site and one meter only");
+  }
+  const duplicatesIgnored = Number(options.duplicatesIgnored ?? estimate.duplicatesIgnored);
+  if (!Number.isInteger(duplicatesIgnored) || duplicatesIgnored < estimate.duplicatesIgnored) {
+    throw new TypeError("Duplicate count must be a non-negative integer");
+  }
+
+  const sourceByEventId = new Map();
+  for (const reading of readings) {
+    if (!sourceByEventId.has(reading.eventId)) sourceByEventId.set(reading.eventId, reading);
+  }
+  const columns = [
+    "record_type", "source_record_ref", "event_id", "meter_id", "interval_start_utc", "interval_end_utc",
+    "source_value", "source_unit", "source_unit_origin", "energy_kwh", "rate_per_kwh", "interval_charge", "currency", "tariff_version", "calculation_version",
+    "estimate_total", "total_energy_kwh", "reading_count", "duplicates_ignored", "allocation_assumption", "estimated_only",
+  ];
+  const records = estimate.breakdown.map((item) => {
+    const source = sourceByEventId.get(item.eventId);
+    if (!source) throw new TypeError("Calculation detail is missing its source reading");
+    return {
+      record_type: "interval",
+      source_record_ref: source.sourceRecordRef ?? source.eventId,
+      event_id: item.eventId,
+      meter_id: source.meterId,
+      interval_start_utc: item.start,
+      interval_end_utc: item.end,
+      source_value: Number(source.sourceValue ?? source.value).toString(),
+      source_unit: source.sourceUnit ?? source.unit,
+      source_unit_origin: source.sourceUnitOrigin ?? "unknown",
+      energy_kwh: Number(item.energyKwh).toFixed(6),
+      rate_per_kwh: Number(item.ratePerKwh).toFixed(6),
+      interval_charge: Number(item.cost).toFixed(6),
+      currency: estimate.currency,
+      tariff_version: estimate.tariffVersion,
+      calculation_version: estimate.calculationVersion,
+      estimate_total: "",
+      total_energy_kwh: "",
+      reading_count: "",
+      duplicates_ignored: "",
+      allocation_assumption: estimate.allocationAssumption,
+      estimated_only: "true",
+    };
+  });
+  records.push({
+    record_type: "summary",
+    source_record_ref: "",
+    event_id: "",
+    meter_id: [...meterIds][0],
+    interval_start_utc: "",
+    interval_end_utc: "",
+    source_value: "",
+    source_unit: "",
+    source_unit_origin: "",
+    energy_kwh: "",
+    rate_per_kwh: "",
+    interval_charge: "",
+    currency: estimate.currency,
+    tariff_version: estimate.tariffVersion,
+    calculation_version: estimate.calculationVersion,
+    estimate_total: Number(estimate.total).toFixed(2),
+    total_energy_kwh: Number(estimate.energyKwh).toFixed(3),
+    reading_count: estimate.readingCount,
+    duplicates_ignored: duplicatesIgnored,
+    allocation_assumption: estimate.allocationAssumption,
+    estimated_only: "true",
+  });
+
+  const lines = [
+    columns.map(calculationCsvCell).join(","),
+    ...records.map((record) => columns.map((column) => calculationCsvCell(record[column])).join(",")),
+  ];
+  return "\uFEFF" + lines.join("\r\n") + "\r\n";
 }
 
 export function createEnergyBill(readings, tariff, details = {}) {
