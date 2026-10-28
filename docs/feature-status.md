@@ -1,6 +1,6 @@
 # Feature and readiness matrix
 
-Status snapshot: 28 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6, #7, and #8 are merged. Draft PR #9 adds the interactive workflow. Its [CI run 40653241434](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40653241434) passed Node 22/24 lint, typecheck, domain checks, build, smoke check, and all five Chromium tests.
+Status snapshot: 28 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6, #7, and #8 are merged. Draft PR #9 adds the interactive workflow. Its [CI run 40661228872](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40661228872) passed Node 22/24 lint, typecheck, domain checks, build, smoke check, and all five Chromium tests.
 
 ## Product capability status
 
@@ -18,7 +18,7 @@ Status snapshot: 28 October 2026. “Implemented” means code exists in the rep
 | Human review and outcome | Interactive local decision gate | Accept/Investigate/Defer choice gates the verification stage and is included in the synthetic evidence JSON. It exists in browser memory only; no account, persisted audit trail, physical action, or proven savings. |
 | Energy archive v1 | Local export and validated summary | Browser exports synthetic linked records and validates a complete selected JSON archive. Reports all detected issues/counts and refuses partial import. No backend persistence, authentication, signature, full non-measurement schemas, or transactional production import. |
 | Authentication, persistence, and tenant security | Not included | Legacy database-backed routes, client integration, schema, and migrations were removed. No application database is currently connected. |
-| Demo packaging | PR #9 CI run 40653241434 passed Node 22/24, smoke check, and all five Chromium workflows, including the review gate and reduced-motion case | [Five browser screenshots](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40653241434/artifacts/12800378284) are retained for 30 days. No backend or deployment behavior is verified. |
+| Demo packaging | PR #9 CI run 40661228872 passed Node 22/24, smoke check, and all five Chromium workflows, including the review gate and reduced-motion case | [Five browser screenshots](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40661228872/artifacts/12804370865) are retained for 30 days. No backend or deployment behavior is verified. |
 | E-bill calculation trace | Implemented | Expandable view maps up to 12 priced segments to source references; full CSV preserves source-interval bounds, segment bounds, tariff period/rate, source value/unit origin, and summary. PDF records a time-of-use schedule without a fabricated flat rate. |
 | Domain coverage | Measured locally 28 October 2026 | Node reports 91.79% lines, 77.43% branches, 99.05% functions across four domain modules only. No UI, SQL, or whole-repository coverage claim. |
 | Live meter adapters | Not implemented | No DLMS/COSEM, OPC UA, MQTT, vendor API, gateway, or hardware-in-the-loop integration. |
@@ -41,7 +41,7 @@ Do not claim production authorization, live interoperability, jurisdiction-ready
 ## Listing blockers
 
 1. The GitHub repository remains public. Keep it that way until external-project and rights reviews are complete; then change visibility and refresh DataVendor's estimate.
-2. The current application no longer includes the former database integration, but a historical anonymous client key remains in Git history. A local restored backup showed four `auth.users` rows and zero rows in the five former application tables; user fields and the separate Storage backup remain unreviewed, and the old project's key status/decommissioning remains unconfirmed.
+2. All nine branch heads were rewritten and a follow-up scan found no key-pattern matches in branch history. Closed PR refs #1–#8 may retain old views; the paused external project's key status is unconfirmed. The restored backup had four `auth.users` rows and zero rows in the five former application tables; individual user data and the separate Storage backup remain unreviewed.
 3. Ownership/contributor rights, project license, third-party asset rights, and full legal license compatibility review are incomplete.
 4. No operator interviews or customer pilot have validated the buyer hypothesis.
 5. The 27 October 2026 npm audit reports zero known vulnerabilities after the dependency updates; re-run the audit before listing because advisories change.

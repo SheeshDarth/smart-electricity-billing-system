@@ -82,7 +82,7 @@ Monitoring, historical calculations, exports, and cost estimates should remain u
 ## Security and operational limits
 
 - The browser demo has no backend credentials or connected production service.
-- A historical anonymous backend key remains in earlier public Git revisions; removing the integration from the current tree does not revoke that key or inspect/delete its hosted project. See [history scan](history-secret-scan.md).
+- The current branch histories were rewritten to remove the old anonymous client key, but closed PR refs may retain old views and the external project key has not been revoked. See the [history scan](history-secret-scan.md).
 - No physical control, payment processor, production invoice, or live adapter is connected.
 - Real readings or bills require access controls, retention/deletion rules, encryption, audit logs, incident response, and customer-approved hosting before a pilot.
 - The repository still needs history, checked-in-data, contributor ownership, dependency license, historical backend project, and transfer review before sale claims.

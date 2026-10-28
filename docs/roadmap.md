@@ -31,7 +31,7 @@ The application includes synthetic browser scenarios, measurement and tariff dom
 
 ### Exit gate
 
-Current status: PRs #6, #7, and #8 are merged; draft PR #9 adds the decision-gated workflow. PR #9's [CI run 40653241434](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40653241434) passed Node 22/24 and all five Chromium checks after database removal. The baseline previously measured 91.79% lines, 77.43% branches, and 99.05% functions across four domain modules. The [five-screenshot artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40653241434/artifacts/12800378284) includes the new interactive walkthrough. Repository history screening found a historical anonymous client key. Hosted project/key review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
+Current status: PRs #6, #7, and #8 are merged; draft PR #9 adds the decision-gated workflow. Branch history was rewritten to remove the historical `anon` client key, and a follow-up local scan found zero configured-pattern matches across 150 commits. Closed PR refs #1–#8 may still retain old views, and the paused Supabase project's key status is unconfirmed. PR #9's [CI run 40661228872](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40661228872) passed Node 22/24 and all five Chromium checks. The [five-screenshot artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40661228872/artifacts/12804370865) includes the interactive walkthrough. Ownership/license review and buyer validation remain open; there are no operator interviews or pilot evidence yet.
 
 ## P1 — Validate buyer, data access, and first scenario
 

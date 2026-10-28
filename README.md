@@ -44,7 +44,7 @@ npm run test:e2e:install -- chromium
 npm run test:e2e
 ```
 
-The demo smoke check verifies that the built HTML shell and JavaScript bundle respond. The Playwright suite exercises CSV upload, accepted/rejected-row validation, flat and time-of-use estimates, a local-hour tariff-boundary split, same-period supplier comparison, complete calculation CSV export, PDF generation, and the interactive workflow's review gate, replay, and reduced-motion controls. All five Chromium tests passed in [PR #9 CI run 40653241434](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40653241434). Its [five-image artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40653241434/artifacts/12800378284) is retained for 30 days. Node coverage reports line, branch, and function coverage for the exercised domain modules; it does not measure the React UI. CI does not verify a production backend or deployment.
+The demo smoke check verifies that the built HTML shell and JavaScript bundle respond. The Playwright suite exercises CSV upload, accepted/rejected-row validation, flat and time-of-use estimates, a local-hour tariff-boundary split, same-period supplier comparison, complete calculation CSV export, PDF generation, and the interactive workflow's review gate, replay, and reduced-motion controls. All five Chromium tests passed in [PR #9 CI run 40661228872](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40661228872). Its [five-image artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40661228872/artifacts/12804370865) is retained for 30 days. Node coverage reports line, branch, and function coverage for the exercised domain modules; it does not measure the React UI. CI does not verify a production backend or deployment.
 
 ## Backend boundary
 
@@ -67,7 +67,7 @@ The current product is a local browser prototype. It has no authentication, data
 - [Buyer due-diligence checklist](docs/buyer-readiness.md)
 - [Marketplace listing copy draft and readiness gates](docs/marketplace-listing-draft.md)
 
-The listing document is factual draft copy only. PRs #6, #7, and #8 are merged into `main`; the interactive workflow improvements are being prepared on a separate branch. The repository remains public while improvements and due diligence continue. A historical anonymous backend key and its external project, contributor/ownership evidence, dependency license rights, history scan results, and operator interview feedback must be resolved before a private listing snapshot or sale claims are prepared.
+The listing document is factual draft copy only. PRs #6, #7, and #8 are merged into `main`; PR #9 remains a draft. The repository remains public while due diligence continues. The nine branch histories have been rewritten to remove the historical anonymous client key, but GitHub's closed PR refs #1–#8 may retain old views and the paused project's key status is unconfirmed. Contributor/ownership evidence, dependency license rights, Auth/Storage review, and buyer validation remain open before a private listing snapshot or sale claims are prepared.
 
 Schneider Electric is included in the market landscape as an established competitor. A previously explored Schneider-linked concept was rejected and is not the product direction. The industrial site in the browser remains synthetic demonstration content only.
 
