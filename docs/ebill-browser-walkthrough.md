@@ -19,11 +19,11 @@ The Playwright end-to-end test creates these screenshots from the production bui
 1. [CSV upload and validation](assets/ebill-walkthrough/01-csv-validation.png)
 2. [Estimate and supplier comparison](assets/ebill-walkthrough/02-estimate-comparison.png)
 3. [Generated estimate and variance](assets/ebill-walkthrough/03-bill-variance.png)
-4. [Time-of-use boundary allocation in the current CI screenshot artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679)
+4. [Time-of-use boundary allocation](assets/ebill-walkthrough/04-time-of-use-breakdown.png)
 
-The checked-in first three PNGs predate the time-of-use calculation view. Download the linked four-image artifact to inspect the current screenshots from the passing production-build walkthrough.
+All four checked-in screenshots were refreshed from the passing production-build walkthrough in [CI run 40635600460](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40635600460). CI also retains the four-image artifact for 30 days.
 
-The Playwright walkthrough includes a 30-minute synthetic reading that crosses from off-peak into peak time in Asia/Kolkata. It checks the half-hour energy allocation, both per-band charges, the complete calculation CSV, and PDF schedule. All four browser tests passed in [CI run 40633652147](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147); the screenshots remain available as an artifact for 30 days. The workflow remains an estimate only; no payment is collected.
+The Playwright walkthrough includes a 30-minute synthetic reading that crosses from off-peak into peak time in Asia/Kolkata. It checks the half-hour energy allocation, both per-band charges, the complete calculation CSV, and PDF schedule. All four browser tests passed in [CI run 40635600460](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40635600460); the screenshots remain available as an artifact for 30 days. The workflow remains an estimate only; no payment is collected.
 
 ## Run it locally
 

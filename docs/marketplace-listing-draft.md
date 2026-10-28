@@ -72,7 +72,7 @@ npm run build
 npm run smoke:demo
 ```
 
-PRs #6 and #7 are merged. PR #8 remains an open draft. The prior baseline CI run passed Node 22/24 and browser E2E. The branch has 51 passing Node tests and measured coverage of 91.79% lines, 77.43% branches, and 99.05% functions across four JavaScript domain modules only. Four browser walkthrough screenshots are available in a [30-day artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679). The database integration and its local checks have since been removed; current CI must pass again after this change.
+PRs #6 and #7 are merged. PR #8 remains an open draft. PR-head run 40635600460 passed Node 22/24 and browser E2E after the database integration was removed. The branch has 51 passing Node tests and measured coverage of 91.79% lines, 77.43% branches, and 99.05% functions across four JavaScript domain modules only. The four current screenshots are checked in and available in a [30-day artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40635600460/artifacts/12792514571).
 
 See the [digital-twin demo guide](digital-twin-demo-guide.md), [e-bill workflow guide](ebill-generation.md), and [visual browser walkthrough](ebill-browser-walkthrough.md) for the steps and screenshots. The sample file is synthetic; uploaded files are handled locally in the browser. The Chromium walkthrough checks the downloaded PDF filename, header, estimate, supplier variance, and estimate-only disclosure. Domain tests separately check the PDF structure.
 
@@ -84,8 +84,8 @@ See the [digital-twin demo guide](digital-twin-demo-guide.md), [e-bill workflow 
 | Domain | Electricity/energy software and billing examples | Choose the closest available energy or software domain tags; avoid utility-grade or IoT claims. |
 | Asking price | No current seller price selected | Refresh the platform estimate after privacy changes, then choose a price and rights scope. A platform estimate is advisory, not a buyer offer. |
 | Tests and coverage | Local run: 51 Node tests; measured coverage across four domain modules | State the run and exact scope: 91.79% lines, 77.43% branches, 99.05% functions. Do not report this as whole-repository or UI/SQL coverage. |
-| Browser walkthrough | Run 40633652147 passed four Chromium workflows, including tariff-boundary allocation, full calculation CSV, PDF schedule, and comparison reset | The four updated PNGs are available in the linked CI artifact. Hosted product behavior remains unverified. |
-| CI on pull requests | Previous run 40633652147 passed Node 22/24 and browser workflows; this change removes the database job | Refresh this evidence from the next branch CI run. |
+| Browser walkthrough | Run 40635600460 passed four Chromium workflows, including tariff-boundary allocation, full calculation CSV, PDF schedule, and comparison reset | Four refreshed PNGs are checked in and available in the linked CI artifact. Hosted product behavior remains unverified. |
+| CI on pull requests | Run 40635600460 passed Node 22/24, browser walkthrough, and smoke checks; no database job remains | Describe only these current checks; no backend security coverage is claimed. |
 | Private code supply | GitHub currently reports this repository as public while improvements are in progress | Do not claim a private-supply quote or publish until the intended final snapshot is private and DataVendor re-scans it. |
 | Private/personal data | The active application has no backend or customer data. A historical anonymous client key remains in 24 earlier commits; its external project is unreviewed | Keep this field unconfirmed until the old hosted project and key are reviewed, the project is safely decommissioned or retained under owner control, and remaining data exposure is reviewed. Removing source integration does not revoke the historical key. |
 
