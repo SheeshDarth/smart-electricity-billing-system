@@ -1,6 +1,6 @@
 # Feature and readiness matrix
 
-Status snapshot: 28 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. PR #8's [CI run 40631754083](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40631754083) passed Node 22/24, Chromium, migration, database lint, and pgTAP checks on the current branch head.
+Status snapshot: 28 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6 and #7 are merged. Current code commit `ab6da4a` passed Node 22/24, four Chromium workflows, migration, database lint, and pgTAP in [CI run 40633652147](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147).
 
 ## Product capability status
 
@@ -19,7 +19,7 @@ Status snapshot: 28 October 2026. “Implemented” means code exists in the rep
 | Energy archive v1 | Local export and validated summary | Browser exports synthetic linked records and validates a complete selected JSON archive. Reports all detected issues/counts and refuses partial import. No Supabase persistence, authentication, signature, full non-measurement schemas, or transactional production import. |
 | Supabase multi-tenant schema | Additive migration; expanded RLS suite passed in PR #8 CI | Role/table reads, representative writes, cross-organization denials, and membership changes pass against disposable tenants. Hosted project remains uninspected. |
 | Database lint and cleanup | Passed in PR #8 CI | Disposable migration, schema lint, pgTAP, and stack cleanup passed. Hosted projects are not involved. |
-| Demo packaging | HTTP smoke and Chromium walkthrough | E2E covers flat and time-of-use estimates, local-hour boundary allocation, calculation CSV, PDF disclosure, invalid-row blocking, and comparison reset. CI saves walkthrough screenshots as a 30-day artifact. |
+| Demo packaging | HTTP smoke and Chromium walkthrough passed in CI run 40633652147 | Four E2E tests cover flat and time-of-use estimates, local-hour boundary allocation, calculation CSV, PDF disclosure, invalid-row blocking, and comparison reset. [Current screenshot artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40633652147/artifacts/12792527679) is retained for 30 days. |
 | E-bill calculation trace | Implemented | Expandable view maps up to 12 priced segments to source references; full CSV preserves source-interval bounds, segment bounds, tariff period/rate, source value/unit origin, and summary. PDF records a time-of-use schedule without a fabricated flat rate. |
 | Domain coverage | Measured locally 28 October 2026 | Node reports 91.79% lines, 77.43% branches, 99.05% functions across four domain modules only. No UI, SQL, or whole-repository coverage claim. |
 | Authentication and authorization | Not production validated | RLS remains a draft schema. Tests are synthetic and not a full deployed security audit. Legacy routes retain old application assumptions. |
