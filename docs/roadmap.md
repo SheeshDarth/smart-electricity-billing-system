@@ -31,7 +31,7 @@ The application includes synthetic browser scenarios, measurement and tariff dom
 
 ### Exit gate
 
-Current status: PRs #6, #7, and #8 are merged; draft PR #9 adds the decision-gated workflow. PR #9's [CI run 40652826749](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40652826749) passed Node 22/24 and all five Chromium checks after database removal. The baseline previously measured 91.79% lines, 77.43% branches, and 99.05% functions across four domain modules. The [five-screenshot artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40652826749/artifacts/12800032751) includes the new interactive walkthrough. Repository history screening found a historical anonymous client key. Hosted project/key review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
+Current status: PRs #6, #7, and #8 are merged; draft PR #9 adds the decision-gated workflow. PR #9's [CI run 40653241434](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40653241434) passed Node 22/24 and all five Chromium checks after database removal. The baseline previously measured 91.79% lines, 77.43% branches, and 99.05% functions across four domain modules. The [five-screenshot artifact](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40653241434/artifacts/12800378284) includes the new interactive walkthrough. Repository history screening found a historical anonymous client key. Hosted project/key review, ownership/license review, and buyer validation remain open; there are no operator interviews or pilot evidence yet.
 
 ## P1 — Validate buyer, data access, and first scenario
 
