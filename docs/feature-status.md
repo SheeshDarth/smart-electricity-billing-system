@@ -1,6 +1,6 @@
 # Feature and readiness matrix
 
-Status snapshot: 28 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6, #7, and #8 are merged. Draft PR #9 adds the interactive workflow. Its [CI run 40652238258](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40652238258) passed Node 22/24 lint, typecheck, domain checks, build, smoke check, and all five Chromium tests.
+Status snapshot: 28 October 2026. “Implemented” means code exists in the repository; it does not mean deployed, certified, validated with live equipment, or ready for customer data. PRs #6, #7, and #8 are merged. Draft PR #9 adds the interactive workflow. Its [CI run 40652826749](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40652826749) passed Node 22/24 lint, typecheck, domain checks, build, smoke check, and all five Chromium tests.
 
 ## Product capability status
 
@@ -18,7 +18,7 @@ Status snapshot: 28 October 2026. “Implemented” means code exists in the rep
 | Human review and outcome | Interactive local decision gate | Accept/Investigate/Defer choice gates the verification stage and is included in the synthetic evidence JSON. It exists in browser memory only; no account, persisted audit trail, physical action, or proven savings. |
 | Energy archive v1 | Local export and validated summary | Browser exports synthetic linked records and validates a complete selected JSON archive. Reports all detected issues/counts and refuses partial import. No backend persistence, authentication, signature, full non-measurement schemas, or transactional production import. |
 | Authentication, persistence, and tenant security | Not included | Legacy database-backed routes, client integration, schema, and migrations were removed. No application database is currently connected. |
-| Demo packaging | PR #9 CI run 40652238258 passed Node 22/24, smoke check, and all five Chromium workflows, including the review gate and reduced-motion case | [Five browser screenshots](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40652238258/artifacts/12800421573) are retained for 30 days. No backend or deployment behavior is verified. |
+| Demo packaging | PR #9 CI run 40652826749 passed Node 22/24, smoke check, and all five Chromium workflows, including the review gate and reduced-motion case | [Five browser screenshots](https://github.com/SheeshDarth/smart-electricity-billing-system/actions/runs/40652826749/artifacts/12800032751) are retained for 30 days. No backend or deployment behavior is verified. |
 | E-bill calculation trace | Implemented | Expandable view maps up to 12 priced segments to source references; full CSV preserves source-interval bounds, segment bounds, tariff period/rate, source value/unit origin, and summary. PDF records a time-of-use schedule without a fabricated flat rate. |
 | Domain coverage | Measured locally 28 October 2026 | Node reports 91.79% lines, 77.43% branches, 99.05% functions across four domain modules only. No UI, SQL, or whole-repository coverage claim. |
 | Live meter adapters | Not implemented | No DLMS/COSEM, OPC UA, MQTT, vendor API, gateway, or hardware-in-the-loop integration. |
