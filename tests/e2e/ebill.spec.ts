@@ -81,8 +81,8 @@ test("time-of-use e-bill splits an interval at a local tariff boundary", async (
   });
 
   await page.getByLabel("Tariff structure").selectOption("time-of-use");
-  await page.getByLabel("Peak rate per kWh (illustrative)").fill("10");
-  await page.getByLabel("Off-peak rate per kWh (illustrative)").fill("5");
+  await page.getByLabel("Peak rate per kWh (illustrative)", { exact: true }).fill("10");
+  await page.getByLabel("Off-peak rate per kWh (illustrative)", { exact: true }).fill("5");
   await expect(page.getByText(/₹\s?4\.50/)).toBeVisible();
   await page.getByText(/View calculation detail/).click();
   await expect(page.getByText("Off-peak", { exact: true })).toBeVisible();
